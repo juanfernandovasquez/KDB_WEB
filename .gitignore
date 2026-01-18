@@ -12,6 +12,8 @@ backend/venv/
 # Env / secrets
 .env
 .env.*
+!.env.example
+!backend/.env.example
 
 # Editor / OS
 .vscode/
