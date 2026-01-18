@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publicaciones | KDB Legal & Tributario</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/header.css" />
+  <link rel="stylesheet" href="./css/hero.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+</head>
+<body data-page="publicaciones">
+  <div id="site-header"></div>
+
+  <main>
+    <div id="site-hero"></div>
+
+    <section class="publications-section">
+      <div class="publications-controls">
+        <div class="filters-left">
+          <div class="filter-block">
+            <h4>Categorias</h4>
+            <div class="category-row">
+              <div id="publications-category-chips" class="category-chips" role="tablist" aria-label="Categorias"></div>
+            </div>
+            <!-- Hidden select kept for accessibility and form semantics -->
+            <label class="sr-only" for="publications-category">Categoria</label>
+            <select id="publications-category" class="sr-only"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div class="filters-right">
+          <!-- actions (clear button moved next to chips) -->
+          <div class="filter-actions"></div>
+        </div>
+      </div>
+
+              
+            </div>
+            <!-- Hidden select kept for accessibility and form semantics -->
+            <label class="sr-only" for="publications-Categoría">Categoríaa</label>
+            <select id="publications-Categoría" class="sr-only"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div class="filters-right">
+          <!-- actions (clear button moved next to chips) -->
+          <div class="filter-actions"></div>
+        </div>
+      </div>
+      <div id="publications-list" class="publications-list"></div>
+      <div class="load-more-wrapper">
+        <button type="button" id="load-more-pubs" class="btn load-more-btn">Ver más publicaciones</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="./js/config.js"></script>
+  <!-- Ajv opcional eliminado; validate.js se degrada si no está presente -->
+  <script src="./js/validate.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/content.js"></script>
+  <script src="./js/header.js"></script>
+  <script src="./js/hero.js"></script>
+  <script src="./js/publicaciones-page.js"></script>
+  <script src="./js/footer.js"></script>
+</body>
+</html>
+
+
+
+
+
+

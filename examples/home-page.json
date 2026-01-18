@@ -1,0 +1,21 @@
+{
+  "hero": [
+    {
+      "page": "home",
+      "position": 0,
+      "title": "Estrategia legal que impulsa tu negocio",
+      "description": "Alineamos tributación y corporativo...",
+      "primary_label": "Conoce más",
+      "primary_href": "#",
+      "image_url": "https://images.unsplash.com/..."
+    }
+  ],
+  "about": {
+    "page": "home",
+    "title": "Quiénes somos",
+    "content": "Texto descriptivo...",
+    "image_url": "https://images.unsplash.com/...",
+    "primary_label": "Contacta",
+    "primary_href": "#contacto"
+  }
+}

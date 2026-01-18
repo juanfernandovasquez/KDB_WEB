@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Panel de contenido{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  {% block head_extras %}{% endblock %}
+</head>
+<body>
+  {% block body %}{% endblock %}
+  <script type="module" src="{{ url_for('static', filename='admin/main.js') }}?v=4"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

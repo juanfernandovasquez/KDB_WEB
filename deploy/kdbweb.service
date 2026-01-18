@@ -1,0 +1,15 @@
+[Unit]
+Description=KDBWEB backend (gunicorn)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/kdbweb/backend
+EnvironmentFile=/var/www/kdbweb/backend/.env
+ExecStart=/var/www/kdbweb/venv/bin/gunicorn -c /var/www/kdbweb/deploy/gunicorn.conf.py wsgi:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

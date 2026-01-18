@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contáctanos | KDB Legal & Tributario</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/header.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+</head>
+<body data-page="contacto">
+  <div id="site-header"></div>
+
+  <main class="contact-main">
+    <section class="contact-hero">
+      <div class="contact-hero-inner">
+        <h1>Contáctanos</h1>
+        <p>Cuéntanos tu consulta y te responderemos lo antes posible.</p>
+      </div>
+    </section>
+
+    <section class="contact-section">
+      <div class="contact-grid">
+        <div class="contact-card">
+          <h2>Envíanos un mensaje</h2>
+          <form id="contact-form" class="contact-form">
+            <label>
+              Nombre completo
+              <input type="text" name="name" id="contact-name" required />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" id="contact-email" required />
+            </label>
+            <label>
+              Teléfono
+              <input type="tel" name="phone" id="contact-phone" />
+            </label>
+            <label>
+              Asunto
+              <input type="text" name="subject" id="contact-subject" />
+            </label>
+            <label>
+              Mensaje
+              <textarea name="message" id="contact-message" rows="6" required></textarea>
+            </label>
+            <button class="btn contact-submit" type="submit">Enviar mensaje</button>
+            <p class="contact-status" id="contact-status" role="status"></p>
+          </form>
+        </div>
+
+        <aside class="contact-info">
+          <h3>Datos de contacto</h3>
+          <p id="contact-address"></p>
+          <p id="contact-phone-text"></p>
+          <p id="contact-email-text"></p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/header.js"></script>
+  <script src="./js/footer.js"></script>
+  <script src="./js/contacto-page.js"></script>
+</body>
+</html>

@@ -1,0 +1,727 @@
+﻿{% extends "admin_base.html" %}
+
+{% block body %}
+  <header>
+    <h1>Panel de contenido</h1>
+    <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Paginas</h3>
+      <ul id="page-list">
+        <li><button type="button" data-page="company" class="active">Empresa</button></li>
+        <li><button type="button" data-page="home">Inicio</button></li>
+        <li><button type="button" data-page="nosotros">Nosotros</button></li>
+        <li><button type="button" data-page="servicios">Servicios</button></li>
+        <li><button type="button" data-page="publicaciones">Publicaciones</button></li>
+        <li><button type="button" data-page="kdbweb">KDBWEB</button></li>
+        <li><button type="button" data-page="subs">Suscriptores</button></li>
+        <li><button type="button" data-page="legales">Legales</button></li>
+      </ul>
+    </aside>
+    <main>
+      <section id="company-section">
+        <h2>Datos de la empresa</h2>
+        <div class="grid-2">
+          <div><label>Nombre</label><input id="c-name" type="text"></div>
+          <div><label>Tagline</label><input id="c-tagline" type="text"></div>
+          <div><label>Telefono</label><input id="c-phone" type="text"></div>
+          <div><label>Email</label><input id="c-email" type="email"></div>
+          <div class="full"><label>Direccion</label><input id="c-address" type="text"></div>
+          <div><label>LinkedIn</label><input id="c-linkedin" type="text"></div>
+          <div><label>Facebook</label><input id="c-facebook" type="text"></div>
+          <div><label>Instagram</label><input id="c-instagram" type="text"></div>
+        </div>
+        <div class="row row-space-top">
+          <button class="cta" id="save-company">Guardar datos</button>
+          <span class="status" id="status-company"></span>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Visibilidad de paginas</h3>
+              <p class="small">Activa o desactiva secciones del sitio.</p>
+            </div>
+            <button class="collapse-btn" data-collapse-target="page-visibility-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="page-visibility-body">
+            <div class="page-toggle-grid" id="page-visibility-grid"></div>
+            <div class="row row-space-top">
+              <button class="cta" id="save-page-visibility">Guardar cambios</button>
+              <span class="status" id="status-page-visibility"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2 id="page-title">Contenido: Home</h2>
+            <!-- <p class="small">Hero, historia y equipo segun la pagina seleccionada.</p> -->
+          </div>
+          <div class="row">
+            <button class="secondary" id="cancel-page">Cancelar cambios</button>
+            <button class="cta" id="save-page">Guardar pagina</button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Banner</h3>
+              <!-- <p class="small">Slides principales de la portada (Home).</p> -->
+            </div>
+            <button class="collapse-btn" data-collapse-target="page-hero-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="page-hero-body">
+            <div class="row" style="justify-content:flex-end;">
+              <button class="secondary" id="add-hero">Agregar slide</button>
+            </div>
+            <div id="hero-slides" class="grid-2 card-grid"></div>
+          </div>
+        </div>
+
+        <div id="about-section" class="section-card hidden">
+          <div class="section-head spaced">
+            <div>
+              <h3>Seccion sobre la empresa</h3>
+              <!-- <p class="small">Contenido destacado en Home.</p> -->
+            </div>
+            <button class="collapse-btn" data-collapse-target="about-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="about-body">
+            <div class="grid-2">
+              <div><label>Titulo</label><input id="about-title" type="text"></div>
+              <div>
+                <label>Imagen (URL)</label>
+                <div class="row media-input-row">
+                  <input id="about-image" type="text">
+                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                </div>
+              </div>
+            </div>
+            <div class="stack">
+              <label>Contenido</label>
+              <div class="rich-editor">
+                <div class="editor-toolbar" id="about-toolbar">
+                  <button type="button" data-cmd="bold"><strong>B</strong></button>
+                  <button type="button" data-cmd="italic"><em>I</em></button>
+                  <button type="button" data-cmd="underline"><u>U</u></button>
+                  <button type="button" data-cmd="insertUnorderedList">Lista</button>
+                  <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                  <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
+                  <button type="button" data-cmd="unlink">Quitar enlace</button>
+                  <button type="button" data-cmd="removeFormat">Limpiar</button>
+                </div>
+                <div id="about-content-editor" class="editor-surface" contenteditable="true"></div>
+                <textarea id="about-content" class="hidden"></textarea>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div><label>Boton primario (texto)</label><input id="about-primary-label" type="text"></div>
+              <div><label>Boton primario (enlace)</label><input id="about-primary-href" type="text"></div>
+              <div><label>Boton secundario (texto)</label><input id="about-secondary-label" type="text"></div>
+              <div><label>Boton secundario (enlace)</label><input id="about-secondary-href" type="text"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="story-section" class="section-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Historia</h3>
+              <!-- <p class="small">Solo visible en paginas con historia.</p> -->
+            </div>
+            <button class="collapse-btn" data-collapse-target="story-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="story-body">
+            <label>Titulo</label>
+            <input id="story-title" type="text">
+            <label>Contenido</label>
+            <div class="rich-editor">
+              <div class="editor-toolbar" id="story-toolbar">
+                <button type="button" data-cmd="bold"><strong>B</strong></button>
+                <button type="button" data-cmd="italic"><em>I</em></button>
+                <button type="button" data-cmd="underline"><u>U</u></button>
+                <button type="button" data-cmd="insertUnorderedList">Lista</button>
+                <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
+                <button type="button" data-cmd="unlink">Quitar enlace</button>
+                <button type="button" data-cmd="removeFormat">Limpiar</button>
+              </div>
+              <div id="story-content-editor" class="editor-surface" contenteditable="true"></div>
+              <textarea id="story-paragraphs" class="hidden"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="services-section" class="section-card hidden">
+          <div class="section-head spaced">
+            <div>
+              <h3>Servicios</h3>
+              <!-- <p class="small">Listado de ofertas para la pagina de servicios.</p> -->
+            </div>
+            <button class="collapse-btn" data-collapse-target="services-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="services-body">
+            <div class="row" style="justify-content:flex-end;">
+              <button class="secondary" id="add-service">Agregar servicio</button>
+            </div>
+            <div class="grid-2" style="margin-bottom:0.75rem;">
+              <div><label>Titulo principal</label><input id="services-title" type="text"></div>
+              <div><label>Subtitulo</label><input id="services-subtitle" type="text"></div>
+            </div>
+            <div id="services-cards" class="grid-2 card-grid"></div>
+          </div>
+        </div>
+
+        <div id="team-wrapper" class="section-card team-panel">
+          <div class="section-head spaced">
+            <div>
+              <h3>Equipo</h3>
+              <!-- <p class="small">Titulo, descripcion y miembros para la pagina Nosotros.</p> -->
+            </div>
+            <button class="collapse-btn" data-collapse-target="team-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="team-body">
+            <div class="grid-2 team-meta">
+              <div><label>Titulo</label><input id="team-title" type="text"></div>
+              <div><label>Descripcion</label><input id="team-subtitle" type="text"></div>
+            </div>
+            <div class="section-head spaced" style="margin-top:1rem;">
+              <div>
+                <h4>Miembros</h4>
+                <p class="small">Arrastra para reordenar o elimina los que no necesites.</p>
+              </div>
+            </div>
+            <div class="row" style="justify-content:flex-end;">
+              <button class="secondary" id="add-team">Agregar miembro</button>
+            </div>
+            <div id="team-cards" class="team-grid"></div>
+          </div>
+        </div>
+
+        <div class="status" id="status-page"></div>
+      </section>
+
+      <section id="legales-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>Legales</h2>
+            <p class="small">Edita las politicas legales del sitio.</p>
+          </div>
+          <div class="row">
+            <button class="secondary" id="legal-cancel">Cancelar</button>
+            <button class="cta" id="legal-save">Guardar legal</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="grid-2">
+            <div>
+              <label>Pagina</label>
+              <select id="legal-page-select" class="form-select">
+                <option value="cookies">Politica de cookies</option>
+                <option value="terminos">Terminos y condiciones</option>
+                <option value="privacidad">Politica de privacidad</option>
+              </select>
+            </div>
+            <div><label>Titulo</label><input type="text" id="legal-title"></div>
+          </div>
+          <label>Contenido (HTML permitido)</label>
+          <div class="rich-editor">
+            <div class="editor-toolbar" id="legal-content-toolbar">
+              <button type="button" data-cmd="bold"><strong>B</strong></button>
+              <button type="button" data-cmd="italic"><em>I</em></button>
+              <button type="button" data-cmd="underline"><u>U</u></button>
+              <button type="button" data-cmd="insertUnorderedList">Lista</button>
+              <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+              <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
+              <button type="button" data-cmd="unlink">Quitar enlace</button>
+              <button type="button" data-cmd="insertImage">Imagen</button>
+              <button type="button" data-cmd="textAlignLeft">Alinea izq</button>
+              <button type="button" data-cmd="textAlignCenter">Alinea centro</button>
+              <button type="button" data-cmd="textAlignRight">Alinea der</button>
+              <button type="button" data-cmd="wrapSquare">Ajuste cuadrado</button>
+              <button type="button" data-cmd="wrapBlock">Ajuste arriba/abajo</button>
+              <button type="button" data-cmd="removeFormat">Limpiar</button>
+            </div>
+            <div id="legal-content-editor" class="editor-surface" contenteditable="true"></div>
+            <textarea id="legal-content" class="hidden"></textarea>
+          </div>
+          <div class="row row-space-top">
+            <button class="cta" id="legal-save-bottom">Guardar</button>
+            <span class="status" id="status-legales"></span>
+          </div>
+        </div>
+      </section>
+      <section id="subs-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>Suscriptores del boletin</h2>
+            <p class="small">Correos registrados via formulario de suscripcion.</p>
+          </div>
+          <div class="row">
+            <button class="secondary" id="refresh-subs">Refrescar</button>
+            <button class="secondary" id="export-subs">Exportar CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="filter-row">
+            <div>
+              <label class="small">Email</label>
+              <input type="text" id="subs-filter-email" placeholder="Filtrar por email" />
+            </div>
+            <div>
+              <label class="small">Desde</label>
+              <input type="date" id="subs-filter-start" />
+            </div>
+            <div>
+              <label class="small">Hasta</label>
+              <input type="date" id="subs-filter-end" />
+            </div>
+            <div class="filter-actions">
+              <button class="secondary small-btn" id="subs-filter-clear">Limpiar filtros</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="subs-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="subs-body"></tbody>
+            </table>
+          </div>
+          <div class="subs-pagination">
+            <button class="secondary small-btn" id="subs-prev">Anterior</button>
+            <span id="subs-page-info" class="small"></span>
+            <button class="secondary small-btn" id="subs-next">Siguiente</button>
+          </div>
+          <div class="status" id="status-subs"></div>
+        </div>
+      </section>
+
+      <section id="contact-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>Mensajes de contacto</h2>
+            <p class="small">Mensajes enviados desde la página Contáctanos.</p>
+          </div>
+          <div class="row">
+            <button class="secondary" id="refresh-contact">Refrescar</button>
+            <button class="secondary" id="export-contact">Exportar CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="filter-row">
+            <div>
+              <label class="small">Nombre</label>
+              <input type="text" id="contact-filter-name" placeholder="Filtrar por nombre" />
+            </div>
+            <div>
+              <label class="small">Email</label>
+              <input type="text" id="contact-filter-email" placeholder="Filtrar por email" />
+            </div>
+            <div>
+              <label class="small">Asunto</label>
+              <input type="text" id="contact-filter-subject" placeholder="Filtrar por asunto" />
+            </div>
+            <div>
+              <label class="small">Desde</label>
+              <input type="date" id="contact-filter-start" />
+            </div>
+            <div>
+              <label class="small">Hasta</label>
+              <input type="date" id="contact-filter-end" />
+            </div>
+            <div class="filter-actions">
+              <button class="secondary small-btn" id="contact-filter-clear">Limpiar filtros</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="subs-table contact-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Asunto</th>
+                  <th>Mensaje</th>
+                  <th>Fecha</th>
+                  <th>Ver</th>
+                  <th>Eliminar</th>
+                </tr>
+              </thead>
+              <tbody id="contact-body"></tbody>
+            </table>
+          </div>
+          <div class="subs-pagination">
+            <button class="secondary small-btn" id="contact-prev">Anterior</button>
+            <span id="contact-page-info" class="small"></span>
+            <button class="secondary small-btn" id="contact-next">Siguiente</button>
+          </div>
+          <div class="status" id="status-contact"></div>
+        </div>
+      </section>
+
+      <div class="modal hidden" id="contact-modal" aria-hidden="true">
+        <div class="modal-backdrop" id="contact-modal-backdrop"></div>
+        <div class="modal-content" role="dialog" aria-modal="true" aria-label="Mensaje de contacto">
+          <div class="modal-head">
+            <h3 id="contact-modal-title">Mensaje</h3>
+            <button type="button" class="secondary small-btn" id="contact-modal-close">Cerrar</button>
+          </div>
+          <div class="modal-body">
+            <p class="small" id="contact-modal-meta"></p>
+            <div class="modal-message" id="contact-modal-message"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal hidden" id="media-modal" aria-hidden="true">
+        <div class="modal-backdrop" id="media-modal-backdrop"></div>
+        <div class="modal-content media-modal" role="dialog" aria-modal="true" aria-label="Seleccionar imagen">
+          <div class="modal-head">
+            <h3>Seleccionar imagen</h3>
+            <button type="button" class="secondary small-btn" id="media-modal-close">Cerrar</button>
+          </div>
+          <div class="modal-body">
+            <div class="media-controls">
+              <input type="text" id="media-search" placeholder="Buscar por nombre">
+              <button type="button" class="secondary small-btn" id="media-refresh">Refrescar</button>
+            </div>
+            <div class="media-folder">
+              <input type="text" id="media-prefix" placeholder="Carpeta (ej: publicaciones/)">
+              <button type="button" class="secondary small-btn" id="media-open-prefix">Abrir</button>
+              <button type="button" class="secondary small-btn" id="media-clear-prefix">Raiz</button>
+              <button type="button" class="secondary small-btn" id="media-create-folder">Nueva carpeta</button>
+            </div>
+            <div class="media-status small" id="media-status"></div>
+            <div class="media-grid" id="media-grid"></div>
+            <div class="media-upload">
+              <label>Subir imagen</label>
+              <div class="row">
+                <input type="file" id="media-upload-input" accept="image/*">
+                <button type="button" class="cta small-btn" id="media-upload-btn">Subir</button>
+              </div>
+            </div>
+            <div class="media-manual">
+              <label>URL manual</label>
+              <div class="row">
+                <input type="url" id="media-url-input" placeholder="https://...">
+                <button type="button" class="cta small-btn" id="media-insert-url">Insertar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="kdbweb-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>KDBWEB</h2>
+            <p class="small">Configura el banner y las subpaginas de KDBWEB.</p>
+          </div>
+        </div>
+
+        <div class="card" id="kdbweb-hero-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Banner</h3>
+            </div>
+            <button class="collapse-btn" data-collapse-target="kdbweb-hero-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="kdbweb-hero-body">
+            <div class="row" style="justify-content:flex-end;">
+              <button class="secondary small-btn" id="add-kdbweb-hero">Agregar slide</button>
+              <button class="secondary small-btn" id="reload-kdbweb-hero">Revertir</button>
+              <button class="cta small-btn" id="save-kdbweb-hero">Guardar banner</button>
+            </div>
+            <div id="kdbweb-hero-slides" class="grid-2 card-grid"></div>
+            <div class="status" id="status-kdbweb-hero"></div>
+          </div>
+        </div>
+
+        <div class="card" id="kdbweb-list-card">
+          <div class="card-head between">
+            <h3>Subpaginas</h3>
+            <button type="button" class="collapse-btn" data-collapse-target="kdbweb-list-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="kdbweb-list-body">
+            <div class="kdbweb-tree-wrap">
+              <div class="kdbweb-tree" id="kdbweb-tree" data-kdbweb-children="true" data-parent=""></div>
+            </div>
+            <p class="small kdbweb-help">Arrastra para ordenar dentro del mismo nivel.</p>
+            <div class="status" id="status-kdbweb-list"></div>
+          </div>
+        </div>
+
+        <div id="kdbweb-edit-panel" class="section-card hidden">
+          <div class="section-head spaced">
+            <div>
+              <h3 id="kdbweb-edit-title">Editar subpagina</h3>
+              <p class="small">Actualiza el contenido de esta subpagina.</p>
+            </div>
+            <button class="collapse-btn" data-collapse-target="kdbweb-edit-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="kdbweb-edit-body">
+            <div class="grid-2">
+              <div><label>Titulo pagina</label><input type="text" id="kdbweb-form-title"></div>
+              <div><label>Slug</label><input type="text" id="kdbweb-form-slug" readonly></div>
+              <div class="full"><label>Resumen (tarjeta)</label><textarea id="kdbweb-form-summary"></textarea></div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Imagen hero (URL)</label>
+                <div class="row media-input-row">
+                  <input type="text" id="kdbweb-form-hero-image">
+                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                </div>
+              </div>
+            </div>
+            <label>Contenido (HTML permitido)</label>
+            <div class="rich-editor">
+              <div class="editor-toolbar" id="kdbweb-content-toolbar">
+                <button type="button" data-cmd="bold"><strong>B</strong></button>
+                <button type="button" data-cmd="italic"><em>I</em></button>
+                <button type="button" data-cmd="underline"><u>U</u></button>
+                <button type="button" data-cmd="insertUnorderedList">Lista</button>
+                <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
+                <button type="button" data-cmd="unlink">Quitar enlace</button>
+                <button type="button" data-cmd="insertImage">Imagen</button>
+                <button type="button" data-cmd="textAlignLeft">Alinea izq</button>
+                <button type="button" data-cmd="textAlignCenter">Alinea centro</button>
+                <button type="button" data-cmd="textAlignRight">Alinea der</button>
+                <button type="button" data-cmd="wrapSquare">Ajuste cuadrado</button>
+                <button type="button" data-cmd="wrapBlock">Ajuste arriba/abajo</button>
+                <button type="button" data-cmd="removeFormat">Limpiar</button>
+              </div>
+              <div id="kdbweb-content-editor" class="editor-surface" contenteditable="true"></div>
+              <textarea id="kdbweb-form-content" class="hidden"></textarea>
+            </div>
+            <div class="row">
+              <button class="secondary" id="kdbweb-cancel-edit">Cancelar</button>
+              <button class="cta" id="kdbweb-save-edit">Guardar cambios</button>
+            </div>
+            <div class="status" id="status-kdbweb-edit"></div>
+          </div>
+        </div>
+
+        <div class="row row-space-top">
+          <button class="cta" id="kdbweb-save-all">Guardar KDBWEB</button>
+          <button class="secondary" id="kdbweb-reload-all">Revertir cambios</button>
+          <span class="status" id="status-kdbweb"></span>
+        </div>
+      </section>
+
+      <section id="publications-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>Publicaciones</h2>
+            <p class="small">Gestiona publicaciones y categorias.</p>
+          </div>
+        </div>
+
+
+
+        <div class="card" id="pub-hero-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Banner</h3>
+            </div>
+            <button class="collapse-btn" data-collapse-target="pub-hero-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="pub-hero-body">
+            <div class="row" style="justify-content:flex-end;">
+              <button class="secondary small-btn" id="add-pub-hero">Agregar slide</button>
+              <button class="secondary small-btn" id="reload-pub-hero">Revertir</button>
+              <button class="cta small-btn" id="save-pub-hero">Guardar hero</button>
+            </div>
+            <div id="pub-hero-slides" class="grid-2 card-grid"></div>
+            <div class="status" id="status-pub-hero"></div>
+          </div>
+        </div>
+
+        <div class="card" id="categories-card">
+          <div class="card-head between">
+            <h3>Categorias</h3>
+            <button type="button" class="collapse-btn" data-collapse-target="categories-card-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="categories-card-body">
+            <div class="grid-2" style="margin-bottom:0.75rem;">
+              <div><label>Nueva categoria</label><input type="text" id="new-category-name" placeholder="Nombre de categoria"></div>
+              <div class="row" style="align-items:flex-end;"><button class="cta small-btn" id="add-category-btn" type="button">Agregar</button></div>
+            </div>
+            <div class="table-responsive">
+              <table class="subs-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Posts</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="categories-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="pub-table-card">
+          <div class="card-head between">
+            <h3>Publicaciones</h3>
+            <button type="button" class="collapse-btn" data-collapse-target="pub-table-wrap">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="pub-table-wrap">
+            <div class="filter-row">
+              <div>
+                <label class="small">Titulo</label>
+                <input type="text" id="pub-filter-title" placeholder="Filtrar por titulo" />
+              </div>
+              <div>
+                <label class="small">Categoria</label>
+                <select id="pub-filter-category">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+              <div>
+                <label class="small">Estado</label>
+                <select id="pub-filter-active">
+                  <option value="">Todos</option>
+                  <option value="1">Activa</option>
+                  <option value="0">Inactiva</option>
+                </select>
+              </div>
+              <div>
+                <label class="small">Desde</label>
+                <input type="date" id="pub-filter-start" />
+              </div>
+              <div>
+                <label class="small">Hasta</label>
+                <input type="date" id="pub-filter-end" />
+              </div>
+              <div class="filter-actions">
+                <button class="cta small-btn" id="pub-add-new">Nueva publicacion</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="subs-table">
+                <thead>
+                  <tr>
+                    <th>Titulo</th>
+                    <th>Categoria</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="pub-table-body"></tbody>
+              </table>
+            </div>
+            <div class="subs-pagination">
+              <button class="secondary small-btn" id="pub-prev">Anterior</button>
+              <span id="pub-page-info" class="small"></span>
+              <button class="secondary small-btn" id="pub-next">Siguiente</button>
+            </div>
+            <div class="status" id="status-publications"></div>
+          </div>
+        </div>
+
+        <div id="pub-edit-panel" class="section-card hidden">
+          <div class="section-head spaced">
+            <div>
+              <h3 id="pub-edit-title">Editar publicacion</h3>
+              <p class="small">Actualiza solo esta publicacion.</p>
+            </div>
+            <button class="collapse-btn" data-collapse-target="pub-edit-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="pub-edit-body">
+            <div class="grid-2">
+              <div><label>Titulo</label><input type="text" id="pub-form-title"></div>
+              <div><label>Slug</label><input type="text" id="pub-form-slug"></div>
+              <div>
+                <label>Categoria</label>
+                <select id="pub-form-category" class="form-select"></select>
+              </div>
+              <div>
+                <label>Estado</label>
+                <select id="pub-form-active" class="form-select">
+                  <option value="1">Activa</option>
+                  <option value="0">Inactiva</option>
+                </select>
+              </div>
+              <div>
+                <label>Fecha de publicacion</label>
+                <input type="date" id="pub-form-date">
+              </div>
+              <div><label>Autor</label><input type="text" id="pub-form-author"></div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Imagen hero (URL)</label>
+                <div class="row media-input-row">
+                  <input type="text" id="pub-hero-image">
+                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                </div>
+              </div>
+            </div>
+            <label>Contenido (HTML permitido)</label>
+            <div class="rich-editor">
+              <div class="editor-toolbar" id="pub-content-toolbar">
+                <button type="button" data-cmd="bold"><strong>B</strong></button>
+                <button type="button" data-cmd="italic"><em>I</em></button>
+                <button type="button" data-cmd="underline"><u>U</u></button>
+                <button type="button" data-cmd="styleTitle">Titulo</button>
+                <button type="button" data-cmd="styleSubtitle">Subtitulo</button>
+                <select class="font-size-select" data-cmd="fontSizePx">
+                  <option value="">Tamano</option>
+                  <option value="10">10 px</option>
+                  <option value="11">11 px</option>
+                  <option value="12">12 px</option>
+                  <option value="14">14 px</option>
+                  <option value="16">16 px</option>
+                  <option value="18">18 px</option>
+                  <option value="20">20 px</option>
+                  <option value="24">24 px</option>
+                  <option value="28">28 px</option>
+                  <option value="32">32 px</option>
+                </select>
+                <button type="button" data-cmd="insertUnorderedList">Lista</button>
+                <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
+                <button type="button" data-cmd="unlink">Quitar enlace</button>
+                <button type="button" data-cmd="insertImage">Imagen</button>
+                <button type="button" data-cmd="textAlignLeft">Alinea izq</button>
+                <button type="button" data-cmd="textAlignCenter">Alinea centro</button>
+                <button type="button" data-cmd="textAlignRight">Alinea der</button>
+                <button type="button" data-cmd="wrapSquare">Ajuste cuadrado</button>
+                <button type="button" data-cmd="wrapBlock">Ajuste arriba/abajo</button>
+                <button type="button" data-cmd="removeFormat">Limpiar</button>
+              </div>
+              <div id="pub-content-editor" class="editor-surface" contenteditable="true"></div>
+              <textarea id="pub-form-content" class="hidden"></textarea>
+            </div>
+            <div class="row">
+              <button class="secondary" id="pub-cancel-edit">Cancelar</button>
+              <button class="cta" id="pub-save-edit">Guardar</button>
+            </div>
+            <div class="status" id="status-pub-edit"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    console.log("admin template loaded");
+  </script>
+{% endblock %}

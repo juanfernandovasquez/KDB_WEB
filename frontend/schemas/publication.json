@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Publication",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "title": { "type": "string" },
+    "slug": { "type": "string" },
+    "excerpt": { "type": "string" },
+    "content_html": { "type": "string" },
+    "category_id": { "type": ["integer", "null"] },
+    "category": { "type": "string" },
+    "published_at": { "type": "string", "description": "Fecha de publicación en formato YYYY-MM-DD. Opcional en el payload de entrada; el servidor asigna la fecha actual si se omite." }
+  },
+  "required": ["title", "slug"],
+  "additionalProperties": false
+}

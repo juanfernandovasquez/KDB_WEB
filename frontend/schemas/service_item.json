@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ServiceItem",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "page": { "type": "string" },
+    "position": { "type": "integer" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "bullets": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

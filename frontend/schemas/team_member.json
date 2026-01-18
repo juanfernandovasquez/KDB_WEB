@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TeamMember",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "page": { "type": "string" },
+    "position": { "type": "integer" },
+    "name": { "type": "string" },
+    "role": { "type": "string" },
+    "image_url": { "type": "string", "format": "uri" },
+    "linkedin": { "type": "string" },
+    "more_url": { "type": "string" }
+  },
+  "additionalProperties": false
+}

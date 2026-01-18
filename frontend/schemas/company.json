@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Company",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "tagline": { "type": "string" },
+    "phone": { "type": "string" },
+    "email": { "type": "string", "format": "email" },
+    "address": { "type": "string" },
+    "linkedin": { "type": "string" },
+    "facebook": { "type": "string" },
+    "instagram": { "type": "string" }
+  },
+  "additionalProperties": false
+}
