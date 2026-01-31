@@ -1,14 +1,22 @@
 async function loadHeader() {
   const target = document.getElementById('site-header');
   if (!target) return;
+  target.style.visibility = 'hidden';
+  const pages = await fetchPageVisibility();
   const resp = await fetch('./partials/header.html');
   const html = await resp.text();
-  target.outerHTML = html;
+  target.innerHTML = html;
   initHeaderEvents();
-  await applyPageVisibility();
+  if (pages) {
+    window.pageVisibility = pages;
+    applyPageVisibility(pages);
+  } else {
+    await applyPageVisibility();
+  }
   initCookieBanner();
   await updateKdbwebMenu();
   initSearch();
+  target.style.visibility = '';
 }
 
 function initHeaderEvents() {
@@ -87,25 +95,28 @@ async function updateKdbwebMenu() {
   }
 }
 
-async function applyPageVisibility() {
+async function fetchPageVisibility() {
   try {
     const base = window.API_BASE || '';
     const res = await fetch(`${base}/api/pages`);
     if (!res.ok) return;
     const data = await res.json();
-    const pages = data.pages || {};
-    window.pageVisibility = pages;
-    document.querySelectorAll('[data-page-key]').forEach((el) => {
-      const key = el.dataset.pageKey;
-      if (!key) return;
-      if (pages[key] === false) {
-        el.style.display = 'none';
-        el.setAttribute('aria-hidden', 'true');
-      }
-    });
+    return data.pages || {};
   } catch (_) {
     // ignore visibility failures
   }
+}
+
+function applyPageVisibility(pagesOverride) {
+  const pages = pagesOverride || window.pageVisibility || {};
+  document.querySelectorAll('[data-page-key]').forEach((el) => {
+    const key = el.dataset.pageKey;
+    if (!key) return;
+    if (pages[key] === false) {
+      el.style.display = 'none';
+      el.setAttribute('aria-hidden', 'true');
+    }
+  });
 }
 
 const COOKIE_CONSENT_NAME = 'kdb_cookie_consent';
