@@ -9,13 +9,10 @@
   console.log("admin.js bootstrap");
 
   const API_BASE = window.API_BASE || "";
-  const getAuthToken = () => window.localStorage.getItem("admin_token") || "";
+  let adminToken = "";
+  const getAuthToken = () => adminToken || "";
   const setAuthToken = (token) => {
-    if (token) {
-      window.localStorage.setItem("admin_token", token);
-    } else {
-      window.localStorage.removeItem("admin_token");
-    }
+    adminToken = token || "";
   };
   const apiFetch = (path, options = {}) => {
     const token = getAuthToken();

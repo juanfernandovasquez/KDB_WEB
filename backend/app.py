@@ -9,6 +9,8 @@ from pathlib import Path
 from flask import Flask, jsonify, request, g
 from flask_cors import CORS
 import logging
+import threading
+import time
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from db import ensure_db, init_db
@@ -155,8 +157,15 @@ def _get_bearer_token():
     return ""
 
 
-def _is_admin_request():
+def _get_auth_token():
     token = _get_bearer_token()
+    if token:
+        return token
+    return (request.cookies.get("admin_token") or "").strip()
+
+
+def _is_admin_request():
+    token = _get_auth_token()
     if not token:
         return False
     return bool(get_admin_by_token(token))
@@ -172,7 +181,7 @@ def require_admin(roles=None):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            token = _get_bearer_token()
+            token = _get_auth_token()
             admin = get_admin_by_token(token)
             if not admin:
                 return jsonify(error="No autorizado"), 401
@@ -182,6 +191,58 @@ def require_admin(roles=None):
             return fn(*args, **kwargs)
         return wrapper
     return decorator
+
+
+_RATE_BUCKETS = {}
+_RATE_LOCK = threading.Lock()
+
+
+def _rate_limit_check(key, limit, window_sec):
+    now = time.monotonic()
+    with _RATE_LOCK:
+        bucket = _RATE_BUCKETS.get(key)
+        if not bucket:
+            bucket = []
+            _RATE_BUCKETS[key] = bucket
+        cutoff = now - window_sec
+        # prune old entries
+        while bucket and bucket[0] < cutoff:
+            bucket.pop(0)
+        if len(bucket) >= limit:
+            return False
+        bucket.append(now)
+    return True
+
+
+def _get_rate_config():
+    # format: "limit,window_seconds"
+    def parse(value, default):
+        raw = (value or "").strip()
+        if not raw:
+            return default
+        try:
+            limit_str, window_str = [p.strip() for p in raw.split(",", 1)]
+            return int(limit_str), int(window_str)
+        except Exception:
+            return default
+
+    return {
+        "auth": parse(os.environ.get("RATE_LIMIT_AUTH"), (10, 300)),
+        "subscribe": parse(os.environ.get("RATE_LIMIT_SUBSCRIBE"), (20, 3600)),
+        "contact": parse(os.environ.get("RATE_LIMIT_CONTACT"), (20, 3600)),
+    }
+
+
+RATE_CONFIG = _get_rate_config()
+
+
+def _is_rate_limited(scope):
+    limit, window = RATE_CONFIG.get(scope, (0, 0))
+    if not limit or not window:
+        return False
+    ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
+    key = f"{scope}:{ip}"
+    return not _rate_limit_check(key, limit, window)
 
 
 @app.route("/health", methods=["GET"])
@@ -201,8 +262,20 @@ def _admin_payload(admin):
 @app.route("/auth/bootstrap", methods=["POST"])
 def auth_bootstrap():
     ensure_db()
+    if _is_rate_limited("auth"):
+        return jsonify(error="Demasiados intentos, intenta luego"), 429
     if admins_exist():
         return jsonify(error="Bootstrap ya realizado"), 400
+    bootstrap_token = (os.environ.get("ADMIN_BOOTSTRAP_TOKEN") or "").strip()
+    if APP_ENV == "production":
+        if not bootstrap_token:
+            return jsonify(error="Bootstrap deshabilitado en produccion"), 403
+        provided = (request.headers.get("X-Bootstrap-Token") or "").strip()
+        if not provided:
+            payload = request.get_json(silent=True) or {}
+            provided = (payload.get("token") or "").strip()
+        if not provided or provided != bootstrap_token:
+            return jsonify(error="Token invalido"), 403
     payload = request.get_json(silent=True) or {}
     username = (payload.get("username") or "").strip()
     password = (payload.get("password") or "").strip()
@@ -215,6 +288,8 @@ def auth_bootstrap():
 @app.route("/auth/login", methods=["POST"])
 def auth_login():
     ensure_db()
+    if _is_rate_limited("auth"):
+        return jsonify(error="Demasiados intentos, intenta luego"), 429
     payload = request.get_json(silent=True) or {}
     username = (payload.get("username") or "").strip()
     password = (payload.get("password") or "").strip()
@@ -224,7 +299,20 @@ def auth_login():
     if not admin:
         return jsonify(error="Credenciales invalidas"), 401
     token, expires_at = create_admin_session(admin["id"], ttl_hours=app.config["ADMIN_SESSION_HOURS"])
-    return jsonify(token=token, expires_at=expires_at, admin=_admin_payload(admin)), 200
+    response = jsonify(token=token, expires_at=expires_at, admin=_admin_payload(admin))
+    cookie_secure = (os.environ.get("ADMIN_TOKEN_SECURE") or ("1" if APP_ENV == "production" else "0")).lower() in ("1", "true", "yes", "on")
+    cookie_samesite = os.environ.get("ADMIN_TOKEN_SAMESITE", "Strict")
+    max_age = int(app.config["ADMIN_SESSION_HOURS"]) * 3600
+    response.set_cookie(
+        "admin_token",
+        token,
+        max_age=max_age,
+        httponly=True,
+        secure=cookie_secure,
+        samesite=cookie_samesite,
+        path="/",
+    )
+    return response, 200
 
 
 @app.route("/auth/me", methods=["GET"])
@@ -236,9 +324,11 @@ def auth_me():
 @app.route("/auth/logout", methods=["POST"])
 @require_admin()
 def auth_logout():
-    token = _get_bearer_token()
+    token = _get_auth_token()
     revoke_admin_session(token)
-    return jsonify(message="Sesion cerrada"), 200
+    response = jsonify(message="Sesion cerrada")
+    response.delete_cookie("admin_token", path="/")
+    return response, 200
 
 
 @app.route("/auth/admins", methods=["GET", "POST"])
@@ -286,6 +376,8 @@ def auth_admin_modify(admin_id):
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
     ensure_db()
+    if _is_rate_limited("subscribe"):
+        return jsonify(error="Demasiados intentos, intenta luego"), 429
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
     accepted_terms = str(data.get("accepted_terms") or "").strip().lower()
@@ -510,7 +602,7 @@ def api_categories():
     if request.method == "GET" and not _page_enabled_for_request("publicaciones"):
         return jsonify(error="Pagina no disponible"), 404
     if request.method == "POST":
-        if not get_admin_by_token(_get_bearer_token()):
+        if not get_admin_by_token(_get_auth_token()):
             return jsonify(error="No autorizado"), 401
         payload = request.get_json(silent=True) or {}
         save_category(payload)
@@ -675,7 +767,7 @@ def api_contact():
     if not _page_enabled_for_request("contacto"):
         return jsonify(error="Pagina no disponible"), 404
     if request.method == "GET":
-        admin = get_admin_by_token(_get_bearer_token())
+        admin = get_admin_by_token(_get_auth_token())
         if not admin:
             return jsonify(error="No autorizado"), 401
         limit = request.args.get("limit") or 200
@@ -686,6 +778,8 @@ def api_contact():
         limit = max(1, min(limit, 500))
         return jsonify(fetch_contact_messages(limit=limit))
 
+    if _is_rate_limited("contact"):
+        return jsonify(error="Demasiados intentos, intenta luego"), 429
     payload = request.get_json(silent=True) or {}
     name = (payload.get("name") or "").strip()
     email = (payload.get("email") or "").strip().lower()
