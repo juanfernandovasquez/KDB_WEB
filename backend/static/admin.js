@@ -1562,6 +1562,9 @@ let pageVisibility = {};
     currentPubEditing = pub && pub.id ? pub.id : null;
     setText("pub-edit-title", pub?.id ? "Editar publicación" : "Nueva publicación");
     q("pub-table-card")?.classList.add("hidden");
+    const panel = q("pub-edit-panel");
+    const body = q("pub-edit-body");
+    const collapseBtn = panel?.querySelector(".collapse-btn");
     const setValSafe = (id, v) => {
       const el = q(id);
       if (el) el.value = v || "";
@@ -1591,7 +1594,9 @@ let pageVisibility = {};
     if (activeSel) activeSel.value = pub?.active ? "1" : "0";
     // init rich editor for publication content
     setupRichEditor("pub-content-toolbar", "pub-content-editor");
-    q("pub-edit-panel")?.classList.remove("hidden");
+    if (panel) panel.classList.remove("hidden");
+    if (body) body.classList.remove("collapsed");
+    if (collapseBtn) collapseBtn.textContent = "-";
   }
 
   function closePublicationForm() {
@@ -2130,8 +2135,8 @@ let pageVisibility = {};
 
   async function switchToPublications() {
     currentPage = null;
-    currentSection = "publications";
-    setActive("publications");
+    currentSection = "publicaciones";
+    setActive("publicaciones");
     hideAllSections();
     q("publications-section").classList.remove("hidden");
     await loadPublicationsAdmin();
