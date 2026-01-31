@@ -79,6 +79,15 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+### Nota importante sobre HTTPS (Certbot)
+- Certbot modifica `/etc/nginx/sites-available/kdbweb` para agregar el bloque SSL.
+- Despues de activar HTTPS, **no sobrescribas** ese archivo con `deploy/nginx.conf`.
+- Si necesitas cambios, copia manualmente las secciones necesarias al archivo real y luego:
+  ```bash
+  sudo nginx -t
+  sudo systemctl reload nginx
+  ```
+
 ## 8) HTTPS (Let’s Encrypt)
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
