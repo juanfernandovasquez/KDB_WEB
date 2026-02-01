@@ -1,6 +1,6 @@
 :root {
   --hero-min-height: 70vh;
-  --hero-margin-top: 4rem;
+  --hero-margin-top: var(--header-height, 4rem);
   --hero-bg: #000;
   --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.55));
   --hero-track-width: 200%;
@@ -224,20 +224,18 @@
 
 @media (max-width: 768px) {
   :root {
-    --hero-min-height: 60vh;
+    --hero-min-height: 55vh;
     --hero-content-left: 50%;
     --hero-content-bottom: 10%;
     --hero-content-width: 90%;
     --hero-content-max-width: 90%;
     --hero-content-transform: translate(-50%, 20px);
     --hero-content-transform-active: translate(-50%, 0);
-    --hero-title-size: 2rem;
-    --hero-text-size: 1.6rem;
-    --hero-btn-font: 1.2rem;
+    --hero-title-size: 1.6rem;
+    --hero-text-size: 1.1rem;
+    --hero-btn-font: 1rem;
   }
-  .hero {
-    height: 55vh;
-  }
+  .hero { height: 52vh; }
   .hero-slide img {
     height: 100%;
   }
