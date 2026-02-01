@@ -22,10 +22,14 @@ async function populateFooter() {
     if (el && href) el.href = href;
   };
   const setLogo = (url) => {
-    if (!url) return;
     footer.querySelectorAll('[data-logo-role]').forEach((img) => {
-      if (img && img.tagName === 'IMG') {
+      if (!img || img.tagName !== 'IMG') return;
+      if (url) {
         img.src = url;
+        img.style.display = '';
+      } else {
+        img.removeAttribute('src');
+        img.style.display = 'none';
       }
     });
   };

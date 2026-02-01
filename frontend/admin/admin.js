@@ -900,8 +900,8 @@ let currentAdminUserId = null;
       img.src = url;
       img.style.opacity = "1";
     } else {
-      img.src = "/assets/LOGO-BLANCO.png";
-      img.style.opacity = "0.6";
+      img.removeAttribute("src");
+      img.style.opacity = "0.4";
     }
     const label = q("c-logo-url-display");
     if (label) label.textContent = url ? url : "Sin seleccionar";

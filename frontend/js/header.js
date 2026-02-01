@@ -26,11 +26,13 @@ function initHeaderEvents() {
   menuBtn?.addEventListener('click', () => {
     sidePanel?.classList.add('show');
     closeBtn?.classList.add('show');
+    menuBtn.classList.add('open');
   });
 
   closeBtn?.addEventListener('click', () => {
     sidePanel?.classList.remove('show');
     closeBtn?.classList.remove('show');
+    menuBtn?.classList.remove('open');
   });
 
   sidePanel?.addEventListener('click', (ev) => {
@@ -50,6 +52,7 @@ function initHeaderEvents() {
     if (ev.target.closest('a')) {
       sidePanel?.classList.remove('show');
       closeBtn?.classList.remove('show');
+      menuBtn?.classList.remove('open');
     }
   });
 }
@@ -117,6 +120,14 @@ async function applyHeaderLogo() {
     document.querySelectorAll('[data-logo-role]').forEach((img) => {
       if (img && img.tagName === 'IMG') {
         img.src = logoUrl;
+        img.style.display = '';
+      }
+    });
+  } else {
+    document.querySelectorAll('[data-logo-role]').forEach((img) => {
+      if (img && img.tagName === 'IMG') {
+        img.removeAttribute('src');
+        img.style.display = 'none';
       }
     });
   }
