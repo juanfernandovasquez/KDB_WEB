@@ -64,6 +64,7 @@ from s3_service import (
     create_media_folder,
     create_presigned_post,
     delete_media_object,
+    delete_media_folder,
     list_media_objects,
     rename_media_object,
 )
@@ -730,6 +731,23 @@ def api_media_folder():
         app.logger.exception("Error creating media folder in S3")
         return jsonify(error="No se pudo crear la carpeta"), 500
     return jsonify(prefix=key), 200
+
+
+@app.route("/api/media/folder/delete", methods=["POST"])
+@require_admin()
+def api_media_folder_delete():
+    payload = request.get_json(silent=True) or {}
+    prefix = (payload.get("prefix") or "").strip()
+    if not prefix:
+        return jsonify(error="prefix es obligatorio"), 400
+    try:
+        delete_media_folder(prefix)
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception:
+        app.logger.exception("Error deleting media folder in S3")
+        return jsonify(error="No se pudo eliminar la carpeta"), 500
+    return jsonify(message="Eliminada"), 200
 
 
 @app.route("/api/categories/<int:cat_id>", methods=["DELETE"])

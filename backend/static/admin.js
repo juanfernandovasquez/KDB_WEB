@@ -238,6 +238,8 @@
       if (prefixInput) prefixInput.value = currentMediaPrefix;
       const prefixLabel = currentMediaPrefix ? `Carpeta: ${currentMediaPrefix}` : "Carpeta: raiz";
       setMediaStatus(mediaCache.length ? `${prefixLabel} · ${mediaCache.length} imagenes` : `${prefixLabel} · Sin imagenes`);
+      const delBtn = q("media-delete-folder");
+      if (delBtn) delBtn.disabled = !currentMediaPrefix;
       renderMediaFolders();
       renderMediaGrid();
     } catch (err) {
@@ -2957,6 +2959,32 @@ let currentAdminUserId = null;
           loadMediaLibrary();
         })
         .catch(() => setMediaStatus("No se pudo crear la carpeta"));
+    });
+    bind("media-delete-folder", () => {
+      if (!currentMediaPrefix) {
+        setMediaStatus("No hay carpeta seleccionada");
+        return;
+      }
+      if (!confirm("¿Eliminar esta carpeta? Debe estar vacía.")) return;
+      setMediaStatus("Eliminando carpeta...");
+      apiFetch("/api/media/folder/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prefix: currentMediaPrefix }),
+      })
+        .then((res) => res.json().catch(() => ({})).then((data) => ({ res, data })))
+        .then(({ res, data }) => {
+          if (!res.ok) {
+            setMediaStatus(data.error || "No se pudo eliminar la carpeta");
+            return;
+          }
+          currentMediaPrefix = getParentPrefix(currentMediaPrefix);
+          const input = q("media-prefix");
+          if (input) input.value = currentMediaPrefix;
+          setMediaStatus("Carpeta eliminada");
+          loadMediaLibrary();
+        })
+        .catch(() => setMediaStatus("No se pudo eliminar la carpeta"));
     });
     bind("media-upload-btn", () => {
       const input = q("media-upload-input");
