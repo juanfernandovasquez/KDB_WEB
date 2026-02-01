@@ -1,5 +1,5 @@
 footer {
-  background: #001848;
+  background: var(--brand-blue);
   color: white;
   padding: 3rem 2rem;
 }
@@ -75,7 +75,7 @@ footer {
   border-radius: 4px;
   border: 1px solid #fff;
   background: #fff;
-  color: #002060;
+  color: var(--brand-blue);
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
@@ -114,12 +114,12 @@ footer {
 
 .footer-grid p,
 .footer-grid li {
-  color: #ccc;
+  color: var(--text-light);
   line-height: 1.6;
 }
 
 .footer-grid a {
-  color: #ccc;
+  color: var(--text-light);
   text-decoration: none;
   transition: 0.3s;
 }
@@ -129,7 +129,7 @@ footer {
 }
 
 .footer-bottom {
-  border-top: 1px solid #444;
+  border-top: 1px solid var(--border-muted);
   text-align: center;
   margin-top: 2rem;
   padding-top: 1rem;

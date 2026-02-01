@@ -15,7 +15,7 @@
   --hero-text-size: 1.2rem;
   --hero-text-line: 1.6;
   --hero-text-color: #e6e6e6;
-  --hero-kicker-bg: #002060;
+  --hero-kicker-bg: var(--brand-blue);
   --hero-kicker-color: #fff;
   --hero-kicker-radius: 6px;
   --hero-actions-gap: 0.8rem;
@@ -140,7 +140,7 @@
 
 .hero-btn-primary {
   background: #fff;
-  color: #002060;
+  color: var(--brand-blue);
 }
 
 .hero-btn-primary:hover {
