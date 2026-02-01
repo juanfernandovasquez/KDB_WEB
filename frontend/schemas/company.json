@@ -10,6 +10,7 @@
     "email": { "type": "string", "format": "email" },
     "address": { "type": "string" },
     "logo_url": { "type": "string" },
+    "favicon_url": { "type": "string" },
     "linkedin": { "type": "string" },
     "facebook": { "type": "string" },
     "instagram": { "type": "string" }

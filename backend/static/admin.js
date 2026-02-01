@@ -103,6 +103,7 @@
   let mediaFolders = [];
   let currentMediaPrefix = "";
   let logoGalleryPrefix = "logos/";
+  let faviconGalleryPrefix = "favicons/";
   const isHttpUrl = (value) => {
     const clean = (value || "").trim().toLowerCase();
     return clean.startsWith("http://") || clean.startsWith("https://");
@@ -152,6 +153,9 @@
       mediaTargetInput.dispatchEvent(new Event("input", { bubbles: true }));
       if (mediaTargetInput.id === "c-logo-url") {
         setLogoPreview(cleanUrl);
+      }
+      if (mediaTargetInput.id === "c-favicon-url") {
+        setFaviconPreview(cleanUrl);
       }
       return;
     }
@@ -885,6 +889,8 @@ let currentAdminUserId = null;
     setVal("c-instagram", data.instagram);
     setVal("c-logo-url", data.logo_url);
     setLogoPreview(data.logo_url);
+    setVal("c-favicon-url", data.favicon_url);
+    setFaviconPreview(data.favicon_url);
   }
 
   const setLogoPreview = (url) => {
@@ -900,10 +906,33 @@ let currentAdminUserId = null;
     const label = q("c-logo-url-display");
     if (label) label.textContent = url ? url : "Sin seleccionar";
   };
+
+  const setFaviconPreview = (url) => {
+    const img = q("c-favicon-preview");
+    if (!img) return;
+    if (url) {
+      img.src = url;
+      img.style.opacity = "1";
+    } else {
+      img.removeAttribute("src");
+      img.style.opacity = "0.4";
+    }
+    const label = q("c-favicon-display");
+    if (label) label.textContent = url ? url : "Sin seleccionar";
+  };
   const openLogoPicker = () => {
     const input = q("c-logo-url");
     if (!input) return;
     currentMediaPrefix = normalizePrefix(logoGalleryPrefix || "logos/");
+    const prefixInput = q("media-prefix");
+    if (prefixInput) prefixInput.value = currentMediaPrefix;
+    openMediaModalForInput(input);
+  };
+
+  const openFaviconPicker = () => {
+    const input = q("c-favicon-url");
+    if (!input) return;
+    currentMediaPrefix = normalizePrefix(faviconGalleryPrefix || "favicons/");
     const prefixInput = q("media-prefix");
     if (prefixInput) prefixInput.value = currentMediaPrefix;
     openMediaModalForInput(input);
@@ -917,6 +946,7 @@ let currentAdminUserId = null;
       email: getVal("c-email"),
       address: getVal("c-address"),
       logo_url: getVal("c-logo-url"),
+      favicon_url: getVal("c-favicon-url"),
       linkedin: getVal("c-linkedin"),
       facebook: getVal("c-facebook"),
       instagram: getVal("c-instagram"),
@@ -2835,6 +2865,11 @@ let currentAdminUserId = null;
     bind("logo-clear", () => {
       setVal("c-logo-url", "");
       setLogoPreview("");
+    });
+    bind("favicon-open", openFaviconPicker);
+    bind("favicon-clear", () => {
+      setVal("c-favicon-url", "");
+      setFaviconPreview("");
     });
     bind("save-page-visibility", savePageVisibility);
     bind("save-page", savePage);

@@ -113,12 +113,30 @@ async function fetchCompanyData() {
 async function applyHeaderLogo() {
   const info = await fetchCompanyData();
   const logoUrl = (info && info.logo_url) || '';
-  if (!logoUrl) return;
-  document.querySelectorAll('[data-logo-role]').forEach((img) => {
-    if (img && img.tagName === 'IMG') {
-      img.src = logoUrl;
-    }
-  });
+  if (logoUrl) {
+    document.querySelectorAll('[data-logo-role]').forEach((img) => {
+      if (img && img.tagName === 'IMG') {
+        img.src = logoUrl;
+      }
+    });
+  }
+  const faviconUrl = (info && info.favicon_url) || '';
+  if (faviconUrl) {
+    setFavicon(faviconUrl);
+  }
+}
+
+function setFavicon(url) {
+  if (!url) return;
+  const head = document.head || document.getElementsByTagName('head')[0];
+  if (!head) return;
+  let link = head.querySelector('link[rel="icon"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    head.appendChild(link);
+  }
+  link.href = url;
 }
 
 async function fetchPageVisibility() {
