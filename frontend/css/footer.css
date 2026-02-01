@@ -25,8 +25,9 @@ footer {
 }
 
 .footer-logo {
-  width: 180px;
-  max-width: 60%;
+  height: var(--brand-logo-height, 25px);
+  width: auto;
+  max-width: 100%;
 }
 
 .footer-newsletter .newsletter-form {
