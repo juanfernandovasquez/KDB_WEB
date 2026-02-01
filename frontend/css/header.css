@@ -1,6 +1,5 @@
 .header-container {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto; /* menú | logo/nav | contacto | buscar */
+  display: block;
   align-items: center;
   justify-items: center;
   padding: 1rem 1.5rem;
@@ -13,6 +12,17 @@
   height: 4rem;
   z-index: 100;
   box-sizing: border-box;
+}
+
+.header-inner {
+  width: 100%;
+  max-width: 90vw;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto; /* menú | logo/nav | contacto | buscar */
+  align-items: center;
+  justify-items: center;
+  column-gap: 1.5rem;
 }
 
 .logo {
@@ -315,7 +325,7 @@
 @media (max-width: 768px) {
   .btn-outline { display: none; }
   .main-nav { display: none; }
-  .header-container { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .header-inner { grid-template-columns: auto minmax(0, 1fr) auto; }
 
   .search-panel {
     left: 1rem;
@@ -334,7 +344,7 @@
 
   .logo { justify-self: start; }
 
-  .header-container {
+  .header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto auto; /* logo | nav | contacto | lupa */
     column-gap: 1.5rem;
   }
