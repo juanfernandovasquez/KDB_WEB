@@ -26,12 +26,13 @@ function initHeaderEvents() {
   const closeMenu = () => {
     sidePanel?.classList.remove('show');
     closeBtn?.classList.remove('show');
-    menuBtn?.classList.remove('open');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
   };
 
   const openMenu = () => {
     sidePanel?.classList.add('show');
-    menuBtn?.classList.add('open');
+    closeBtn?.classList.add('show');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
   };
 
   menuBtn?.addEventListener('click', () => {

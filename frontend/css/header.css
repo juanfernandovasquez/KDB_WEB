@@ -55,17 +55,6 @@
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.hamburger.open span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.hamburger.open span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.open span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
 
 .btn-outline {
   border: 1px solid white;
@@ -165,13 +154,33 @@
   position: fixed;
   top: 1.5rem;
   right: 1.5rem;
-  font-size: 1.6rem;
-  color: white;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
   cursor: pointer;
   z-index: 300;
   opacity: 0;
   visibility: hidden;
   transition: opacity 1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn span {
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+}
+
+.close-btn span:nth-child(1) {
+  transform: rotate(45deg);
+}
+
+.close-btn span:nth-child(2) {
+  transform: rotate(-45deg);
 }
 
 .close-btn.show {
