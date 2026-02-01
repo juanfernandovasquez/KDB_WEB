@@ -21,6 +21,14 @@ async function populateFooter() {
     const el = document.getElementById(id);
     if (el && href) el.href = href;
   };
+  const setLogo = (url) => {
+    if (!url) return;
+    footer.querySelectorAll('[data-logo-role]').forEach((img) => {
+      if (img && img.tagName === 'IMG') {
+        img.src = url;
+      }
+    });
+  };
 
   setText('footer-tagline', info.tagline);
   setText('footer-address', info.address);
@@ -30,6 +38,7 @@ async function populateFooter() {
   setLink('footer-linkedin', info.linkedin);
   setLink('footer-facebook', info.facebook);
   setLink('footer-instagram', info.instagram);
+  setLogo(info.logo_url);
 }
 
 async function fetchCompanyData() {

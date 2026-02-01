@@ -168,7 +168,7 @@ def create_media_folder(folder_name, prefix_override=None):
     return key
 
 
-def list_media_objects(limit=200, prefix_override=None, continuation=None):
+def list_media_objects(limit=200, prefix_override=None, continuation=None, delimiter=None):
     bucket, region, prefix, public_base = _get_bucket_config()
     if prefix_override is not None:
         prefix = prefix_override.lstrip("/")
@@ -180,11 +180,18 @@ def list_media_objects(limit=200, prefix_override=None, continuation=None):
         params["Prefix"] = prefix
     if continuation:
         params["ContinuationToken"] = continuation
+    if delimiter:
+        params["Delimiter"] = delimiter
     try:
         resp = client.list_objects_v2(**params)
     except (BotoCoreError, ClientError) as exc:
         raise RuntimeError("No se pudo listar el bucket S3") from exc
     items = []
+    folders = []
+    for entry in resp.get("CommonPrefixes", []) or []:
+        pref = entry.get("Prefix")
+        if pref:
+            folders.append(pref)
     for obj in resp.get("Contents", []) or []:
         key = obj.get("Key") or ""
         if not key or key.endswith("/"):
@@ -198,4 +205,4 @@ def list_media_objects(limit=200, prefix_override=None, continuation=None):
             }
         )
     next_token = resp.get("NextContinuationToken") if resp.get("IsTruncated") else None
-    return items, next_token, prefix
+    return items, next_token, prefix, folders

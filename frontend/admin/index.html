@@ -57,6 +57,30 @@
         <div class="section-card">
           <div class="section-head spaced">
             <div>
+              <h3>Logo del sitio</h3>
+              <p class="small">Selecciona el logo que se mostrará en navegación y footer.</p>
+            </div>
+          </div>
+          <div class="logo-picker">
+            <div class="logo-preview">
+              <img id="c-logo-preview" src="" alt="Logo seleccionado">
+            </div>
+            <div class="logo-actions">
+              <label>Logo actual (URL)</label>
+              <input id="c-logo-url" type="text" readonly>
+              <div class="row row-space-top">
+                <button class="secondary small-btn" id="logo-refresh">Refrescar galería</button>
+                <button class="secondary small-btn" id="logo-clear">Quitar logo</button>
+              </div>
+            </div>
+          </div>
+          <div class="logo-folders" id="logo-folders"></div>
+          <div class="logo-gallery" id="logo-gallery"></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head spaced">
+            <div>
               <h3>Visibilidad de paginas</h3>
               <p class="small">Activa o desactiva secciones del sitio.</p>
             </div>
@@ -418,6 +442,7 @@
               <button type="button" class="secondary small-btn" id="media-create-folder">Nueva carpeta</button>
             </div>
             <div class="media-status small" id="media-status"></div>
+            <div class="media-folders" id="media-folders"></div>
             <div class="media-grid" id="media-grid"></div>
             <div class="media-upload">
               <label>Subir imagen</label>

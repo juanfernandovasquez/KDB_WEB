@@ -1,11 +1,10 @@
 async function loadHeader() {
   const target = document.getElementById('site-header');
   if (!target) return;
-  target.style.visibility = 'hidden';
   const pages = await fetchPageVisibility();
   const resp = await fetch('./partials/header.html');
   const html = await resp.text();
-  target.innerHTML = html;
+  target.outerHTML = html;
   initHeaderEvents();
   if (pages) {
     window.pageVisibility = pages;
@@ -13,10 +12,10 @@ async function loadHeader() {
   } else {
     await applyPageVisibility();
   }
+  await applyHeaderLogo();
   initCookieBanner();
   await updateKdbwebMenu();
   initSearch();
-  target.style.visibility = '';
 }
 
 function initHeaderEvents() {
@@ -93,6 +92,33 @@ async function updateKdbwebMenu() {
   } catch (_) {
     // keep static menu if API fails
   }
+}
+
+async function fetchCompanyData() {
+  try {
+    if (window.apiClient?.getCompany) {
+      return await window.apiClient.getCompany();
+    }
+    const base = window.API_BASE || '';
+    const res = await fetch(`${base}/api/company`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (_) {
+    // ignore
+  }
+  return window.companyInfo || {};
+}
+
+async function applyHeaderLogo() {
+  const info = await fetchCompanyData();
+  const logoUrl = (info && info.logo_url) || '';
+  if (!logoUrl) return;
+  document.querySelectorAll('[data-logo-role]').forEach((img) => {
+    if (img && img.tagName === 'IMG') {
+      img.src = logoUrl;
+    }
+  });
 }
 
 async function fetchPageVisibility() {

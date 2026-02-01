@@ -616,21 +616,25 @@ def api_media_list():
     limit = request.args.get("limit") or "200"
     prefix = request.args.get("prefix")
     token = request.args.get("token")
+    delimiter = request.args.get("delimiter")
     try:
         limit = int(limit)
     except ValueError:
         limit = 200
     limit = max(1, min(limit, 500))
     try:
-        items, next_token, resolved_prefix = list_media_objects(
-            limit=limit, prefix_override=prefix, continuation=token
+        items, next_token, resolved_prefix, folders = list_media_objects(
+            limit=limit,
+            prefix_override=prefix,
+            continuation=token,
+            delimiter="/" if delimiter else None,
         )
     except ValueError as exc:
         return jsonify(error=str(exc)), 400
     except Exception:
         app.logger.exception("Error listing media from S3")
         return jsonify(error="No se pudo listar el repositorio de imagenes"), 500
-    return jsonify(items=items, next_token=next_token, prefix=resolved_prefix), 200
+    return jsonify(items=items, folders=folders, next_token=next_token, prefix=resolved_prefix), 200
 
 
 @app.route("/api/media/presign", methods=["POST"])

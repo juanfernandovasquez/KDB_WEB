@@ -8,6 +8,19 @@
   window.__KDB_ADMIN_BOOTED__ = true;
   console.log("admin.js bootstrap");
 
+  const API_BASE = window.API_BASE || "";
+  let adminToken = "";
+  const getAuthToken = () => adminToken || "";
+  const setAuthToken = (token) => {
+    adminToken = token || "";
+  };
+  const apiFetch = (path, options = {}) => {
+    const token = getAuthToken();
+    const headers = new Headers(options.headers || {});
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return window.fetch(`${API_BASE}${path}`, { ...options, headers });
+  };
+
   window.addEventListener("error", (ev) => {
     console.error("Global error:", ev.message, ev.error);
   });
@@ -25,6 +38,18 @@
   const setText = (id, val) => {
     const el = q(id);
     if (el) el.textContent = val || "";
+  };
+
+  const showAuthOverlay = (show) => {
+    const overlay = q("admin-auth");
+    if (!overlay) return;
+    overlay.classList.toggle("show", !!show);
+    overlay.setAttribute("aria-hidden", show ? "false" : "true");
+  };
+
+  const setCurrentAdminLabel = (label) => {
+    const el = q("admin-user-label");
+    if (el) el.textContent = label || "";
   };
 
   const safe = (str) => {
@@ -75,7 +100,9 @@
   let mediaTargetEditor = null;
   let mediaTargetInput = null;
   let mediaCache = [];
+  let mediaFolders = [];
   let currentMediaPrefix = "";
+  let logoGalleryPrefix = "logos/";
   const isHttpUrl = (value) => {
     const clean = (value || "").trim().toLowerCase();
     return clean.startsWith("http://") || clean.startsWith("https://");
@@ -160,6 +187,25 @@
       )
       .join("");
   };
+  const renderMediaFolders = () => {
+    const wrap = q("media-folders");
+    if (!wrap) return;
+    const folders = Array.isArray(mediaFolders) ? mediaFolders : [];
+    const backPrefix = getParentPrefix(currentMediaPrefix);
+    const buttons = [];
+    if (currentMediaPrefix) {
+      buttons.push(`<button type="button" class="media-folder-item back" data-prefix="${safe(backPrefix)}">⬅ Atrás</button>`);
+    }
+    folders.forEach((pref) => {
+      if (!pref) return;
+      const label = pref.startsWith(currentMediaPrefix)
+        ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "")
+        : pref.replace(/\/$/, "");
+      if (!label) return;
+      buttons.push(`<button type="button" class="media-folder-item" data-prefix="${safe(pref)}">${safe(label)}</button>`);
+    });
+    wrap.innerHTML = buttons.length ? buttons.join("") : "";
+  };
   const loadMediaLibrary = async () => {
     setMediaStatus("Cargando imagenes...");
     const grid = q("media-grid");
@@ -167,6 +213,7 @@
     try {
       const params = new URLSearchParams();
       if (currentMediaPrefix) params.set("prefix", currentMediaPrefix);
+      params.set("delimiter", "1");
       const url = params.toString() ? `/api/media?${params.toString()}` : "/api/media";
       const res = await apiFetch(url);
       const data = await res.json().catch(() => ({}));
@@ -174,10 +221,13 @@
         const err = data.error || "No se pudo cargar el repositorio";
         setMediaStatus(err);
         mediaCache = [];
+        mediaFolders = [];
         renderMediaGrid();
+        renderMediaFolders();
         return;
       }
       mediaCache = Array.isArray(data.items) ? data.items : [];
+      mediaFolders = Array.isArray(data.folders) ? data.folders : [];
       if (typeof data.prefix === "string") {
         currentMediaPrefix = normalizePrefix(data.prefix);
       }
@@ -185,6 +235,7 @@
       if (prefixInput) prefixInput.value = currentMediaPrefix;
       const prefixLabel = currentMediaPrefix ? `Carpeta: ${currentMediaPrefix}` : "Carpeta: raiz";
       setMediaStatus(mediaCache.length ? `${prefixLabel} · ${mediaCache.length} imagenes` : `${prefixLabel} · Sin imagenes`);
+      renderMediaFolders();
       renderMediaGrid();
     } catch (err) {
       console.error("Error loading media", err);
@@ -223,6 +274,13 @@
     let prefix = (value || "").trim().replace(/^\/+/, "");
     if (prefix && !prefix.endsWith("/")) prefix += "/";
     return prefix;
+  };
+  const getParentPrefix = (value) => {
+    const clean = normalizePrefix(value).replace(/\/$/, "");
+    if (!clean) return "";
+    const idx = clean.lastIndexOf("/");
+    if (idx === -1) return "";
+    return clean.slice(0, idx + 1);
   };
   const uploadMediaFile = async (file) => {
     if (!file) return;
@@ -667,18 +725,28 @@
     "subs",
     "contacto",
     "legales",
+    "usuarios",
   ]);
   const getSectionFromPath = () => {
-    const parts = window.location.pathname.split("/").filter(Boolean);
-    if (parts[0] !== "admin") return "company";
-    const section = parts[1] || "company";
-    if (LEGAL_PAGE_SET.has(section)) {
-      currentLegalPage = section;
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get("section");
+    if (fromQuery && LEGAL_PAGE_SET.has(fromQuery)) {
+      currentLegalPage = fromQuery;
       return "legales";
     }
-    return adminSections.has(section) ? section : "company";
+    if (fromQuery && adminSections.has(fromQuery)) return fromQuery;
+    const hash = (window.location.hash || "").replace(/^#/, "");
+    if (hash && LEGAL_PAGE_SET.has(hash)) {
+      currentLegalPage = hash;
+      return "legales";
+    }
+    if (hash && adminSections.has(hash)) return hash;
+    return "company";
   };
-  const buildAdminUrl = (section) => (section === "company" ? "/admin" : `/admin/${section}`);
+  const buildAdminUrl = (section) => {
+    const base = window.location.pathname;
+    return section === "company" ? base : `${base}?section=${encodeURIComponent(section)}`;
+  };
   const pushAdminState = (section, replace = false) => {
     const url = buildAdminUrl(section);
     const state = { section };
@@ -707,10 +775,13 @@ let publicationsHeroSlides = [];
 let kdbwebEntries = [];
 let kdbwebEditingSlug = null;
 let kdbwebPageData = null;
-let kdbwebHeroSlides = [];
-let currentLegalPage = "cookies";
+  let kdbwebHeroSlides = [];
+  let currentLegalPage = "cookies";
 const kdbwebCollapsed = new Set();
 let pageVisibility = {};
+let adminUsers = [];
+let currentAdminUserId = null;
+  let adminInitialized = false;
 
   const heroCard = (slide = {}, idx = 0) => {
     const val = (field) => safe(slide[field]);
@@ -797,7 +868,7 @@ let pageVisibility = {};
   }
 
   async function loadCompany() {
-    const res = await fetch("/config/company");
+    const res = await apiFetch("/config/company");
     const data = await res.json();
     setVal("c-name", data.name);
     setVal("c-tagline", data.tagline);
@@ -807,7 +878,79 @@ let pageVisibility = {};
     setVal("c-linkedin", data.linkedin);
     setVal("c-facebook", data.facebook);
     setVal("c-instagram", data.instagram);
+    setVal("c-logo-url", data.logo_url);
+    setLogoPreview(data.logo_url);
+    await loadLogoGallery();
   }
+
+  const setLogoPreview = (url) => {
+    const img = q("c-logo-preview");
+    if (!img) return;
+    if (url) {
+      img.src = url;
+      img.style.opacity = "1";
+    } else {
+      img.src = "/assets/LOGO-BLANCO.png";
+      img.style.opacity = "0.6";
+    }
+  };
+
+  const renderLogoGallery = (items, folders) => {
+    const gallery = q("logo-gallery");
+    const folderWrap = q("logo-folders");
+    if (!gallery || !folderWrap) return;
+    const backPrefix = getParentPrefix(logoGalleryPrefix);
+    const folderButtons = [];
+    if (logoGalleryPrefix && logoGalleryPrefix !== "logos/") {
+      folderButtons.push(`<button type="button" class="logo-folder-item back" data-prefix="${safe(backPrefix)}">⬅ Atrás</button>`);
+    }
+    (folders || []).forEach((pref) => {
+      if (!pref) return;
+      const label = pref.startsWith(logoGalleryPrefix)
+        ? pref.slice(logoGalleryPrefix.length).replace(/\/$/, "")
+        : pref.replace(/\/$/, "");
+      if (!label) return;
+      folderButtons.push(`<button type="button" class="logo-folder-item" data-prefix="${safe(pref)}">${safe(label)}</button>`);
+    });
+    folderWrap.innerHTML = folderButtons.join("");
+    if (!items || !items.length) {
+      gallery.innerHTML = '<div class="media-empty">Sin logos</div>';
+      return;
+    }
+    gallery.innerHTML = items
+      .map(
+        (item) => `
+        <div class="logo-card" data-url="${safe(item.url || "")}">
+          <img src="${safe(item.url || "")}" alt="logo" loading="lazy">
+          <button type="button" class="secondary small-btn">Usar este logo</button>
+        </div>
+      `
+      )
+      .join("");
+  };
+
+  const loadLogoGallery = async (prefixOverride) => {
+    const desired = normalizePrefix(prefixOverride || logoGalleryPrefix || "logos/");
+    logoGalleryPrefix = desired || "logos/";
+    const gallery = q("logo-gallery");
+    if (gallery) gallery.innerHTML = '<div class="media-empty">Cargando...</div>';
+    try {
+      const params = new URLSearchParams();
+      params.set("prefix", logoGalleryPrefix);
+      params.set("delimiter", "1");
+      const res = await apiFetch(`/api/media?${params.toString()}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (gallery) gallery.innerHTML = '<div class="media-empty">No se pudo cargar</div>';
+        return;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      const folders = Array.isArray(data.folders) ? data.folders : [];
+      renderLogoGallery(items, folders);
+    } catch (err) {
+      if (gallery) gallery.innerHTML = '<div class="media-empty">Error al cargar</div>';
+    }
+  };
 
   async function saveCompany() {
     const payload = {
@@ -816,13 +959,14 @@ let pageVisibility = {};
       phone: getVal("c-phone"),
       email: getVal("c-email"),
       address: getVal("c-address"),
+      logo_url: getVal("c-logo-url"),
       linkedin: getVal("c-linkedin"),
       facebook: getVal("c-facebook"),
       instagram: getVal("c-instagram"),
     };
     const status = q("status-company");
     status.textContent = "Guardando...";
-    const res = await fetch("/config/company", {
+    const res = await apiFetch("/config/company", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -869,7 +1013,7 @@ let pageVisibility = {};
     const status = q("status-page-visibility");
     if (status) status.textContent = "Cargando...";
     try {
-      const res = await fetch("/config/pages");
+      const res = await apiFetch("/config/pages");
       if (!res.ok) throw new Error("pages");
       const data = await res.json();
       pageVisibility = data.pages || {};
@@ -891,7 +1035,7 @@ let pageVisibility = {};
       pages[input.dataset.page] = input.checked;
     });
     try {
-      const res = await fetch("/config/pages", {
+      const res = await apiFetch("/config/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pages }),
@@ -1036,7 +1180,7 @@ let pageVisibility = {};
     const status = q("status-legales");
     if (status) status.textContent = "Cargando...";
     try {
-      const res = await fetch("/config/page/" + page);
+      const res = await apiFetch("/config/page/" + page);
       if (!res.ok) {
         if (status) status.textContent = "Error al cargar";
         return;
@@ -1064,7 +1208,7 @@ let pageVisibility = {};
       services_meta: {},
     };
     try {
-      const res = await fetch("/config/page/" + currentLegalPage, {
+      const res = await apiFetch("/config/page/" + currentLegalPage, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1084,7 +1228,7 @@ let pageVisibility = {};
 
     let data = {};
     try {
-      const res = await fetch("/config/page/" + page);
+      const res = await apiFetch("/config/page/" + page);
       if (!res.ok) {
         const text = await res.text();
         console.error("Fetch page failed", page, res.status, text);
@@ -1164,7 +1308,7 @@ let pageVisibility = {};
         };
     const status = q("status-page");
     status.textContent = "Guardando...";
-    const res = await fetch("/config/page/" + currentPage, {
+    const res = await apiFetch("/config/page/" + currentPage, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ hero, story, team, about, team_meta, services, services_meta }),
@@ -1176,7 +1320,7 @@ let pageVisibility = {};
     const status = q("status-subs");
     status.textContent = "Cargando...";
     try {
-      const res = await fetch("/subscriptions");
+      const res = await apiFetch("/subscriptions");
       if (!res.ok) {
         status.textContent = "Error al cargar suscriptores";
         return;
@@ -1403,13 +1547,13 @@ let pageVisibility = {};
     const status = q("status-kdbweb-list");
     if (status) status.textContent = "Cargando subpaginas...";
     try {
-      const res = await fetch("/api/kdbweb");
+      const res = await apiFetch("/api/kdbweb");
       if (!res.ok) throw new Error("kdbweb list");
       const list = await res.json();
       const details = await Promise.all(
         (list || []).map(async (entry) => {
           try {
-            const detailRes = await fetch(`/api/kdbweb/${encodeURIComponent(entry.slug)}`);
+            const detailRes = await apiFetch(`/api/kdbweb/${encodeURIComponent(entry.slug)}`);
             if (!detailRes.ok) throw new Error("detail");
             return await detailRes.json();
           } catch (err) {
@@ -1438,7 +1582,7 @@ let pageVisibility = {};
     const status = q("status-kdbweb");
     if (status) status.textContent = "Guardando...";
     try {
-      const res = await fetch("/api/kdbweb", {
+      const res = await apiFetch("/api/kdbweb", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entries: kdbwebEntries }),
@@ -1455,7 +1599,7 @@ let pageVisibility = {};
     const status = q("status-kdbweb-hero");
     if (status) status.textContent = "Cargando banner...";
     try {
-      const res = await fetch("/config/page/kdbweb");
+      const res = await apiFetch("/config/page/kdbweb");
       if (!res.ok) throw new Error("hero");
       kdbwebPageData = await res.json();
       kdbwebHeroSlides = (kdbwebPageData && kdbwebPageData.hero) || [];
@@ -1488,7 +1632,7 @@ let pageVisibility = {};
       services_meta: kdbwebPageData?.services_meta || {},
     };
     try {
-      const res = await fetch("/config/page/kdbweb", {
+      const res = await apiFetch("/config/page/kdbweb", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1510,7 +1654,7 @@ let pageVisibility = {};
     const status = q("status-publications");
     if (status) status.textContent = "Cargando publicaciones...";
     try {
-      const [catsRes, pubsRes, heroRes] = await Promise.all([fetch("/api/categories"), fetch("/api/publications?all=1"), fetch("/config/page/publicaciones")]);
+      const [catsRes, pubsRes, heroRes] = await Promise.all([apiFetch("/api/categories"), apiFetch("/api/publications?all=1"), apiFetch("/config/page/publicaciones")]);
       const cats = catsRes.ok ? await catsRes.json() : [];
       const pubs = pubsRes.ok ? await pubsRes.json() : [];
       const heroData = heroRes.ok ? await heroRes.json() : {};
@@ -1533,30 +1677,6 @@ let pageVisibility = {};
       if (status) status.textContent = "Error al cargar publicaciones";
     }
   }
-
-  // eventos de tabla de publicaciones
-  document.addEventListener("click", (ev) => {
-    const action = ev.target.dataset.action;
-    if (!action) return;
-    if (action === "pub-edit") {
-      const id = Number(ev.target.dataset.id);
-      const pub = pubsCache.find((p) => Number(p.id) === id);
-      openPublicationForm(pub || {});
-    }
-    if (action === "pub-delete") {
-      const id = Number(ev.target.dataset.id);
-      if (!confirm("Eliminar publicación?")) return;
-      fetch(`/api/publications/${id}`, { method: "DELETE" })
-        .then((res) => {
-          if (!res.ok) throw new Error("Error al eliminar");
-          return loadPublicationsAdmin();
-        })
-        .catch((err) => {
-          console.error("Error deleting publication", err);
-          alert("Error al eliminar");
-        });
-    }
-  });
 
   function openPublicationForm(pub) {
     currentPubEditing = pub && pub.id ? pub.id : null;
@@ -1638,7 +1758,7 @@ let pageVisibility = {};
     }
     try {
       if (currentPubEditing) {
-        const res = await fetch(`/api/publications/${currentPubEditing}`, {
+        const res = await apiFetch(`/api/publications/${currentPubEditing}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -1648,7 +1768,7 @@ let pageVisibility = {};
           throw new Error(err.error || "Error al actualizar");
         }
       } else {
-        const res = await fetch("/api/publications", {
+        const res = await apiFetch("/api/publications", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -1671,7 +1791,7 @@ let pageVisibility = {};
   q('add-category-btn')?.addEventListener('click', async () => {
     const name = getVal('new-category-name');
     if (!name) return;
-    const res = await fetch('/api/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+    const res = await apiFetch('/api/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     if (!res.ok) return alert('Error creando categoría');
     q('new-category-name').value = '';
       await loadPublicationsAdmin();
@@ -1726,7 +1846,7 @@ let pageVisibility = {};
       services_meta: publicationsHeroData?.services_meta || {},
     };
     try {
-      const res = await fetch("/config/page/publicaciones", {
+      const res = await apiFetch("/config/page/publicaciones", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -1803,7 +1923,7 @@ let pageVisibility = {};
   async function deleteSubscription(id) {
     const status = q("status-subs");
     status.textContent = "Eliminando...";
-    const res = await fetch(`/subscriptions/${id}`, { method: "DELETE" });
+    const res = await apiFetch(`/subscriptions/${id}`, { method: "DELETE" });
     if (!res.ok) {
       status.textContent = "Error al eliminar";
       return;
@@ -1844,7 +1964,7 @@ let pageVisibility = {};
       const status = q("status-contact");
       if (status) status.textContent = "Cargando...";
       try {
-        const res = await fetch("/api/contact?limit=500");
+        const res = await apiFetch("/api/contact?limit=500");
         if (!res.ok) {
           if (status) status.textContent = "Error al cargar mensajes";
           return;
@@ -1953,6 +2073,125 @@ let pageVisibility = {};
         if (status) status.textContent = "Error al exportar";
       }
     }
+
+  function resetAdminForm() {
+    currentAdminUserId = null;
+    const username = q("admin-user-username");
+    const password = q("admin-user-password");
+    if (username) {
+      username.value = "";
+      username.readOnly = false;
+    }
+    if (password) password.value = "";
+    const role = q("admin-user-role");
+    if (role) role.value = "editor";
+    const active = q("admin-user-active");
+    if (active) active.value = "1";
+  }
+
+  function renderAdminUsers() {
+    const body = q("admin-user-table");
+    if (!body) return;
+    body.innerHTML = adminUsers
+      .map((u) => {
+        const active = Number(u.active) === 1 ? "Si" : "No";
+        return `
+          <tr>
+            <td>${safe(u.username)}</td>
+            <td>${safe(u.role)}</td>
+            <td>${active}</td>
+            <td>
+              <button type="button" class="secondary small-btn" data-action="admin-edit" data-id="${safe(u.id)}">Editar</button>
+              <button type="button" class="danger small-btn" data-action="admin-delete" data-id="${safe(u.id)}">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  async function loadAdminUsers() {
+    const status = q("admin-user-status");
+    if (status) status.textContent = "Cargando usuarios...";
+    try {
+      const res = await apiFetch("/auth/admins");
+      const data = await res.json().catch(() => []);
+      if (!res.ok) {
+        if (status) status.textContent = data.error || "No autorizado";
+        adminUsers = [];
+        renderAdminUsers();
+        return;
+      }
+      adminUsers = Array.isArray(data) ? data : [];
+      renderAdminUsers();
+      if (status) status.textContent = adminUsers.length ? `${adminUsers.length} usuarios` : "Sin usuarios";
+    } catch (err) {
+      console.error("Error cargando usuarios admin", err);
+      if (status) status.textContent = "Error al cargar usuarios";
+    }
+  }
+
+  function openAdminUserForm(user) {
+    const username = q("admin-user-username");
+    const password = q("admin-user-password");
+    const role = q("admin-user-role");
+    const active = q("admin-user-active");
+    currentAdminUserId = user?.id || null;
+    if (username) {
+      username.value = user?.username || "";
+      username.readOnly = false;
+    }
+    if (password) password.value = "";
+    if (role) role.value = user?.role || "editor";
+    if (active) active.value = user?.active ? "1" : "0";
+  }
+
+  async function saveAdminUser() {
+    const status = q("admin-user-status");
+    if (status) status.textContent = "Guardando...";
+    const username = getVal("admin-user-username");
+    const password = getVal("admin-user-password");
+    const role = (q("admin-user-role")?.value || "editor").trim();
+    const active = (q("admin-user-active")?.value || "1") === "1";
+    try {
+      if (currentAdminUserId) {
+        const payload = { role, active, username };
+        if (password) payload.password = password;
+        const res = await apiFetch(`/auth/admins/${currentAdminUserId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (status) status.textContent = data.error || "No autorizado";
+          return;
+        }
+        if (status) status.textContent = "Actualizado";
+      } else {
+        if (!username || !password) {
+          if (status) status.textContent = "Usuario y password son obligatorios";
+          return;
+        }
+        const res = await apiFetch("/auth/admins", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, role, active }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (status) status.textContent = data.error || "No autorizado";
+          return;
+        }
+        if (status) status.textContent = "Usuario creado";
+      }
+      resetAdminForm();
+      await loadAdminUsers();
+    } catch (err) {
+      console.error("Error guardando admin", err);
+      if (status) status.textContent = "Error al guardar";
+    }
+  }
 
   function setActive(page) {
     document.querySelectorAll(".sidebar button").forEach((btn) => btn.classList.toggle("active", btn.dataset.page === page));
@@ -2085,6 +2324,7 @@ let pageVisibility = {};
     q("contact-section")?.classList.add("hidden");
     q("publications-section")?.classList.add("hidden");
     q("kdbweb-section")?.classList.add("hidden");
+    q("users-section")?.classList.add("hidden");
     q("legales-section")?.classList.add("hidden");
   }
 
@@ -2151,6 +2391,16 @@ let pageVisibility = {};
     await loadKdbwebAdmin();
   }
 
+  async function switchToUsers() {
+    currentPage = null;
+    currentSection = "usuarios";
+    setActive("usuarios");
+    hideAllSections();
+    q("users-section").classList.remove("hidden");
+    resetAdminForm();
+    await loadAdminUsers();
+  }
+
   const applySection = async (section) => {
     if (LEGAL_PAGE_SET.has(section)) return switchToLegales(section);
     const normalized = adminSections.has(section) ? section : "company";
@@ -2160,6 +2410,7 @@ let pageVisibility = {};
     if (normalized === "publicaciones" || normalized === "publications") return switchToPublications();
     if (normalized === "kdbweb") return switchToKdbweb();
     if (normalized === "legales") return switchToLegales();
+    if (normalized === "usuarios") return switchToUsers();
     return switchToPage(normalized);
   };
 
@@ -2398,7 +2649,7 @@ let pageVisibility = {};
       if (!confirm('Eliminar este mensaje?')) return;
       const status = q("status-contact");
       if (status) status.textContent = "Eliminando...";
-      fetch(`/api/contact/${id}`, { method: "DELETE" })
+      apiFetch(`/api/contact/${id}`, { method: "DELETE" })
         .then((res) => {
           if (!res.ok) throw new Error("Error");
           contactCache = contactCache.filter((m) => Number(m.id) !== id);
@@ -2436,7 +2687,26 @@ let pageVisibility = {};
     if (action === 'pub-delete') {
       const id = Number(actionTarget.dataset.id);
       if (!confirm('Eliminar publicación?')) return;
-      fetch(`/api/publications/${id}`, { method: 'DELETE' }).then(() => loadPublicationsAdmin()).catch(() => alert('Error al eliminar'));
+      apiFetch(`/api/publications/${id}`, { method: 'DELETE' }).then(() => loadPublicationsAdmin()).catch(() => alert('Error al eliminar'));
+      return;
+    }
+    if (action === 'admin-edit') {
+      const id = Number(actionTarget.dataset.id);
+      const user = adminUsers.find((u) => Number(u.id) === id);
+      if (user) openAdminUserForm(user);
+      return;
+    }
+    if (action === 'admin-delete') {
+      const id = Number(actionTarget.dataset.id);
+      if (!id) return;
+      if (!confirm('Eliminar usuario admin?')) return;
+      apiFetch(`/auth/admins/${id}`, { method: 'DELETE' })
+        .then((res) => {
+          if (!res.ok) throw new Error("Error");
+          adminUsers = adminUsers.filter((u) => Number(u.id) !== id);
+          renderAdminUsers();
+        })
+        .catch(() => alert('Error al eliminar'));
       return;
     }
     if (action === 'delete-category') {
@@ -2447,10 +2717,111 @@ let pageVisibility = {};
         return;
       }
       if (!confirm('Eliminar categoria?')) return;
-      fetch(`/api/categories/${id}`, { method: 'DELETE' }).then(() => loadPublicationsAdmin());
+      apiFetch(`/api/categories/${id}`, { method: 'DELETE' }).then(() => loadPublicationsAdmin());
       return;
     }
   });
+
+  const startAdmin = () => {
+    if (adminInitialized) return;
+    adminInitialized = true;
+    init();
+  };
+
+  const checkAuth = async () => {
+    try {
+      const res = await apiFetch("/auth/me");
+      if (!res.ok) return false;
+      const data = await res.json();
+      setCurrentAdminLabel(data.username ? `Usuario: ${data.username}` : "");
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const bindAuthHandlers = () => {
+    const loginForm = q("admin-login-form");
+    const status = q("admin-login-status");
+    const bootstrapBtn = q("admin-bootstrap-btn");
+    const bootstrapWrap = q("admin-bootstrap");
+    if (loginForm && loginForm.dataset.bound !== "1") {
+      loginForm.dataset.bound = "1";
+      loginForm.addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        if (status) status.textContent = "Ingresando...";
+        const username = getVal("admin-login-username");
+        const password = getVal("admin-login-password");
+        try {
+          const res = await apiFetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            if (status) status.textContent = data.error || "Credenciales invalidas";
+            return;
+          }
+          setAuthToken(data.token || "");
+          setCurrentAdminLabel(data?.admin?.username ? `Usuario: ${data.admin.username}` : "");
+          showAuthOverlay(false);
+          startAdmin();
+        } catch (err) {
+          if (status) status.textContent = "Error al ingresar";
+        }
+      });
+    }
+    if (bootstrapBtn && bootstrapBtn.dataset.bound !== "1") {
+      bootstrapBtn.dataset.bound = "1";
+      bootstrapBtn.addEventListener("click", async () => {
+        if (status) status.textContent = "Creando admin...";
+        const username = getVal("admin-login-username");
+        const password = getVal("admin-login-password");
+        try {
+          const res = await apiFetch("/auth/bootstrap", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            if (status) status.textContent = data.error || "No se pudo crear";
+            return;
+          }
+          if (status) status.textContent = "Admin creado, ingresando...";
+          const loginRes = await apiFetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const loginData = await loginRes.json().catch(() => ({}));
+          if (!loginRes.ok) {
+            if (status) status.textContent = loginData.error || "No se pudo ingresar";
+            return;
+          }
+          setAuthToken(loginData.token || "");
+          setCurrentAdminLabel(loginData?.admin?.username ? `Usuario: ${loginData.admin.username}` : "");
+          showAuthOverlay(false);
+          startAdmin();
+        } catch (_) {
+          if (status) status.textContent = "Error al crear admin";
+        }
+      });
+    }
+    if (bootstrapWrap) bootstrapWrap.classList.remove("hidden");
+  };
+
+  const bootstrapAuth = async () => {
+    const ok = await checkAuth();
+    if (ok) {
+      showAuthOverlay(false);
+      startAdmin();
+      return;
+    }
+    showAuthOverlay(true);
+    bindAuthHandlers();
+  };
 
   function init() {
     try {
@@ -2489,7 +2860,25 @@ let pageVisibility = {};
       el.addEventListener("click", handler);
     };
 
+    bind("admin-logout", async () => {
+      try {
+        await apiFetch("/auth/logout", { method: "POST" });
+      } catch (_) {}
+      setAuthToken("");
+      setCurrentAdminLabel("");
+      showAuthOverlay(true);
+      bindAuthHandlers();
+    });
+
+    bind("admin-user-save", saveAdminUser);
+    bind("admin-user-cancel", resetAdminForm);
+
     bind("save-company", saveCompany);
+    bind("logo-refresh", () => loadLogoGallery());
+    bind("logo-clear", () => {
+      setVal("c-logo-url", "");
+      setLogoPreview("");
+    });
     bind("save-page-visibility", savePageVisibility);
     bind("save-page", savePage);
     bind("legal-save", saveLegalPage);
@@ -2699,6 +3088,38 @@ let pageVisibility = {};
         }
         applyMediaSelection(url);
         closeMediaModal();
+      });
+    }
+    const mediaFoldersWrap = q("media-folders");
+    if (mediaFoldersWrap) {
+      mediaFoldersWrap.addEventListener("click", (ev) => {
+        const btn = ev.target.closest(".media-folder-item");
+        if (!btn) return;
+        const pref = btn.dataset.prefix || "";
+        currentMediaPrefix = normalizePrefix(pref);
+        const input = q("media-prefix");
+        if (input) input.value = currentMediaPrefix;
+        loadMediaLibrary();
+      });
+    }
+    const logoFoldersWrap = q("logo-folders");
+    if (logoFoldersWrap) {
+      logoFoldersWrap.addEventListener("click", (ev) => {
+        const btn = ev.target.closest(".logo-folder-item");
+        if (!btn) return;
+        const pref = btn.dataset.prefix || "";
+        loadLogoGallery(pref);
+      });
+    }
+    const logoGallery = q("logo-gallery");
+    if (logoGallery) {
+      logoGallery.addEventListener("click", (ev) => {
+        const card = ev.target.closest(".logo-card");
+        if (!card) return;
+        const url = card.dataset.url || "";
+        if (!url) return;
+        setVal("c-logo-url", url);
+        setLogoPreview(url);
       });
     }
     if (!document.body.dataset.mediaPickerBound) {
@@ -3002,7 +3423,7 @@ let pageVisibility = {};
     }
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", bootstrapAuth);
   window.addEventListener("popstate", (ev) => {
     const section = ev.state?.section || getSectionFromPath();
     applySection(section);
@@ -3072,4 +3493,8 @@ document.addEventListener("click", (ev) => {
   body.classList.toggle("collapsed");
   btn.textContent = body.classList.contains("collapsed") ? "+" : "-";
 });
+
+
+
+
 

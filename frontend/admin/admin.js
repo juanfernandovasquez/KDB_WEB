@@ -100,7 +100,9 @@
   let mediaTargetEditor = null;
   let mediaTargetInput = null;
   let mediaCache = [];
+  let mediaFolders = [];
   let currentMediaPrefix = "";
+  let logoGalleryPrefix = "logos/";
   const isHttpUrl = (value) => {
     const clean = (value || "").trim().toLowerCase();
     return clean.startsWith("http://") || clean.startsWith("https://");
@@ -185,6 +187,25 @@
       )
       .join("");
   };
+  const renderMediaFolders = () => {
+    const wrap = q("media-folders");
+    if (!wrap) return;
+    const folders = Array.isArray(mediaFolders) ? mediaFolders : [];
+    const backPrefix = getParentPrefix(currentMediaPrefix);
+    const buttons = [];
+    if (currentMediaPrefix) {
+      buttons.push(`<button type="button" class="media-folder-item back" data-prefix="${safe(backPrefix)}">⬅ Atrás</button>`);
+    }
+    folders.forEach((pref) => {
+      if (!pref) return;
+      const label = pref.startsWith(currentMediaPrefix)
+        ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "")
+        : pref.replace(/\/$/, "");
+      if (!label) return;
+      buttons.push(`<button type="button" class="media-folder-item" data-prefix="${safe(pref)}">${safe(label)}</button>`);
+    });
+    wrap.innerHTML = buttons.length ? buttons.join("") : "";
+  };
   const loadMediaLibrary = async () => {
     setMediaStatus("Cargando imagenes...");
     const grid = q("media-grid");
@@ -192,6 +213,7 @@
     try {
       const params = new URLSearchParams();
       if (currentMediaPrefix) params.set("prefix", currentMediaPrefix);
+      params.set("delimiter", "1");
       const url = params.toString() ? `/api/media?${params.toString()}` : "/api/media";
       const res = await apiFetch(url);
       const data = await res.json().catch(() => ({}));
@@ -199,10 +221,13 @@
         const err = data.error || "No se pudo cargar el repositorio";
         setMediaStatus(err);
         mediaCache = [];
+        mediaFolders = [];
         renderMediaGrid();
+        renderMediaFolders();
         return;
       }
       mediaCache = Array.isArray(data.items) ? data.items : [];
+      mediaFolders = Array.isArray(data.folders) ? data.folders : [];
       if (typeof data.prefix === "string") {
         currentMediaPrefix = normalizePrefix(data.prefix);
       }
@@ -210,6 +235,7 @@
       if (prefixInput) prefixInput.value = currentMediaPrefix;
       const prefixLabel = currentMediaPrefix ? `Carpeta: ${currentMediaPrefix}` : "Carpeta: raiz";
       setMediaStatus(mediaCache.length ? `${prefixLabel} · ${mediaCache.length} imagenes` : `${prefixLabel} · Sin imagenes`);
+      renderMediaFolders();
       renderMediaGrid();
     } catch (err) {
       console.error("Error loading media", err);
@@ -248,6 +274,13 @@
     let prefix = (value || "").trim().replace(/^\/+/, "");
     if (prefix && !prefix.endsWith("/")) prefix += "/";
     return prefix;
+  };
+  const getParentPrefix = (value) => {
+    const clean = normalizePrefix(value).replace(/\/$/, "");
+    if (!clean) return "";
+    const idx = clean.lastIndexOf("/");
+    if (idx === -1) return "";
+    return clean.slice(0, idx + 1);
   };
   const uploadMediaFile = async (file) => {
     if (!file) return;
@@ -845,7 +878,79 @@ let currentAdminUserId = null;
     setVal("c-linkedin", data.linkedin);
     setVal("c-facebook", data.facebook);
     setVal("c-instagram", data.instagram);
+    setVal("c-logo-url", data.logo_url);
+    setLogoPreview(data.logo_url);
+    await loadLogoGallery();
   }
+
+  const setLogoPreview = (url) => {
+    const img = q("c-logo-preview");
+    if (!img) return;
+    if (url) {
+      img.src = url;
+      img.style.opacity = "1";
+    } else {
+      img.src = "/assets/LOGO-BLANCO.png";
+      img.style.opacity = "0.6";
+    }
+  };
+
+  const renderLogoGallery = (items, folders) => {
+    const gallery = q("logo-gallery");
+    const folderWrap = q("logo-folders");
+    if (!gallery || !folderWrap) return;
+    const backPrefix = getParentPrefix(logoGalleryPrefix);
+    const folderButtons = [];
+    if (logoGalleryPrefix && logoGalleryPrefix !== "logos/") {
+      folderButtons.push(`<button type="button" class="logo-folder-item back" data-prefix="${safe(backPrefix)}">⬅ Atrás</button>`);
+    }
+    (folders || []).forEach((pref) => {
+      if (!pref) return;
+      const label = pref.startsWith(logoGalleryPrefix)
+        ? pref.slice(logoGalleryPrefix.length).replace(/\/$/, "")
+        : pref.replace(/\/$/, "");
+      if (!label) return;
+      folderButtons.push(`<button type="button" class="logo-folder-item" data-prefix="${safe(pref)}">${safe(label)}</button>`);
+    });
+    folderWrap.innerHTML = folderButtons.join("");
+    if (!items || !items.length) {
+      gallery.innerHTML = '<div class="media-empty">Sin logos</div>';
+      return;
+    }
+    gallery.innerHTML = items
+      .map(
+        (item) => `
+        <div class="logo-card" data-url="${safe(item.url || "")}">
+          <img src="${safe(item.url || "")}" alt="logo" loading="lazy">
+          <button type="button" class="secondary small-btn">Usar este logo</button>
+        </div>
+      `
+      )
+      .join("");
+  };
+
+  const loadLogoGallery = async (prefixOverride) => {
+    const desired = normalizePrefix(prefixOverride || logoGalleryPrefix || "logos/");
+    logoGalleryPrefix = desired || "logos/";
+    const gallery = q("logo-gallery");
+    if (gallery) gallery.innerHTML = '<div class="media-empty">Cargando...</div>';
+    try {
+      const params = new URLSearchParams();
+      params.set("prefix", logoGalleryPrefix);
+      params.set("delimiter", "1");
+      const res = await apiFetch(`/api/media?${params.toString()}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (gallery) gallery.innerHTML = '<div class="media-empty">No se pudo cargar</div>';
+        return;
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      const folders = Array.isArray(data.folders) ? data.folders : [];
+      renderLogoGallery(items, folders);
+    } catch (err) {
+      if (gallery) gallery.innerHTML = '<div class="media-empty">Error al cargar</div>';
+    }
+  };
 
   async function saveCompany() {
     const payload = {
@@ -854,6 +959,7 @@ let currentAdminUserId = null;
       phone: getVal("c-phone"),
       email: getVal("c-email"),
       address: getVal("c-address"),
+      logo_url: getVal("c-logo-url"),
       linkedin: getVal("c-linkedin"),
       facebook: getVal("c-facebook"),
       instagram: getVal("c-instagram"),
@@ -2768,6 +2874,11 @@ let currentAdminUserId = null;
     bind("admin-user-cancel", resetAdminForm);
 
     bind("save-company", saveCompany);
+    bind("logo-refresh", () => loadLogoGallery());
+    bind("logo-clear", () => {
+      setVal("c-logo-url", "");
+      setLogoPreview("");
+    });
     bind("save-page-visibility", savePageVisibility);
     bind("save-page", savePage);
     bind("legal-save", saveLegalPage);
@@ -2977,6 +3088,38 @@ let currentAdminUserId = null;
         }
         applyMediaSelection(url);
         closeMediaModal();
+      });
+    }
+    const mediaFoldersWrap = q("media-folders");
+    if (mediaFoldersWrap) {
+      mediaFoldersWrap.addEventListener("click", (ev) => {
+        const btn = ev.target.closest(".media-folder-item");
+        if (!btn) return;
+        const pref = btn.dataset.prefix || "";
+        currentMediaPrefix = normalizePrefix(pref);
+        const input = q("media-prefix");
+        if (input) input.value = currentMediaPrefix;
+        loadMediaLibrary();
+      });
+    }
+    const logoFoldersWrap = q("logo-folders");
+    if (logoFoldersWrap) {
+      logoFoldersWrap.addEventListener("click", (ev) => {
+        const btn = ev.target.closest(".logo-folder-item");
+        if (!btn) return;
+        const pref = btn.dataset.prefix || "";
+        loadLogoGallery(pref);
+      });
+    }
+    const logoGallery = q("logo-gallery");
+    if (logoGallery) {
+      logoGallery.addEventListener("click", (ev) => {
+        const card = ev.target.closest(".logo-card");
+        if (!card) return;
+        const url = card.dataset.url || "";
+        if (!url) return;
+        setVal("c-logo-url", url);
+        setLogoPreview(url);
       });
     }
     if (!document.body.dataset.mediaPickerBound) {

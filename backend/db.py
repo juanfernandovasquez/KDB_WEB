@@ -61,6 +61,7 @@ def init_db():
               phone TEXT,
               email TEXT,
               address TEXT,
+              logo_url TEXT,
               linkedin TEXT,
               facebook TEXT,
               instagram TEXT
@@ -176,8 +177,8 @@ def init_db():
         if exists == 0:
             conn.execute(
                 """
-                INSERT INTO company_info (id, name, tagline, phone, email, address, linkedin, facebook, instagram)
-                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO company_info (id, name, tagline, phone, email, address, logo_url, linkedin, facebook, instagram)
+                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     "KDB Legal & Tributario",
@@ -185,6 +186,7 @@ def init_db():
                     "+51 999 888 777",
                     "contacto@kdblegal.pe",
                     "Av. Los Abogados 123, Lima, Perú",
+                    "",
                     "#",
                     "#",
                     "#",
@@ -363,6 +365,11 @@ def init_db():
         # Legacy DBs: ensure column active exists
         try:
             conn.execute("ALTER TABLE publications ADD COLUMN active INTEGER NOT NULL DEFAULT 1")
+        except Exception:
+            pass
+        # Legacy DBs: add logo_url to company info
+        try:
+            conn.execute("ALTER TABLE company_info ADD COLUMN logo_url TEXT")
         except Exception:
             pass
         # Legacy DBs: add new content fields
