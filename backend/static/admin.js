@@ -150,6 +150,9 @@
       }
       mediaTargetInput.value = cleanUrl;
       mediaTargetInput.dispatchEvent(new Event("input", { bubbles: true }));
+      if (mediaTargetInput.id === "c-logo-url") {
+        setLogoPreview(cleanUrl);
+      }
       return;
     }
     if (mediaTargetEditor) {
@@ -880,7 +883,6 @@ let currentAdminUserId = null;
     setVal("c-instagram", data.instagram);
     setVal("c-logo-url", data.logo_url);
     setLogoPreview(data.logo_url);
-    await loadLogoGallery();
   }
 
   const setLogoPreview = (url) => {
@@ -893,63 +895,16 @@ let currentAdminUserId = null;
       img.src = "/assets/LOGO-BLANCO.png";
       img.style.opacity = "0.6";
     }
+    const label = q("c-logo-url-display");
+    if (label) label.textContent = url ? url : "Sin seleccionar";
   };
-
-  const renderLogoGallery = (items, folders) => {
-    const gallery = q("logo-gallery");
-    const folderWrap = q("logo-folders");
-    if (!gallery || !folderWrap) return;
-    const backPrefix = getParentPrefix(logoGalleryPrefix);
-    const folderButtons = [];
-    if (logoGalleryPrefix && logoGalleryPrefix !== "logos/") {
-      folderButtons.push(`<button type="button" class="logo-folder-item back" data-prefix="${safe(backPrefix)}">⬅ Atrás</button>`);
-    }
-    (folders || []).forEach((pref) => {
-      if (!pref) return;
-      const label = pref.startsWith(logoGalleryPrefix)
-        ? pref.slice(logoGalleryPrefix.length).replace(/\/$/, "")
-        : pref.replace(/\/$/, "");
-      if (!label) return;
-      folderButtons.push(`<button type="button" class="logo-folder-item" data-prefix="${safe(pref)}">${safe(label)}</button>`);
-    });
-    folderWrap.innerHTML = folderButtons.join("");
-    if (!items || !items.length) {
-      gallery.innerHTML = '<div class="media-empty">Sin logos</div>';
-      return;
-    }
-    gallery.innerHTML = items
-      .map(
-        (item) => `
-        <div class="logo-card" data-url="${safe(item.url || "")}">
-          <img src="${safe(item.url || "")}" alt="logo" loading="lazy">
-          <button type="button" class="secondary small-btn">Usar este logo</button>
-        </div>
-      `
-      )
-      .join("");
-  };
-
-  const loadLogoGallery = async (prefixOverride) => {
-    const desired = normalizePrefix(prefixOverride || logoGalleryPrefix || "logos/");
-    logoGalleryPrefix = desired || "logos/";
-    const gallery = q("logo-gallery");
-    if (gallery) gallery.innerHTML = '<div class="media-empty">Cargando...</div>';
-    try {
-      const params = new URLSearchParams();
-      params.set("prefix", logoGalleryPrefix);
-      params.set("delimiter", "1");
-      const res = await apiFetch(`/api/media?${params.toString()}`);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        if (gallery) gallery.innerHTML = '<div class="media-empty">No se pudo cargar</div>';
-        return;
-      }
-      const items = Array.isArray(data.items) ? data.items : [];
-      const folders = Array.isArray(data.folders) ? data.folders : [];
-      renderLogoGallery(items, folders);
-    } catch (err) {
-      if (gallery) gallery.innerHTML = '<div class="media-empty">Error al cargar</div>';
-    }
+  const openLogoPicker = () => {
+    const input = q("c-logo-url");
+    if (!input) return;
+    currentMediaPrefix = normalizePrefix(logoGalleryPrefix || "logos/");
+    const prefixInput = q("media-prefix");
+    if (prefixInput) prefixInput.value = currentMediaPrefix;
+    openMediaModalForInput(input);
   };
 
   async function saveCompany() {
@@ -2874,7 +2829,7 @@ let currentAdminUserId = null;
     bind("admin-user-cancel", resetAdminForm);
 
     bind("save-company", saveCompany);
-    bind("logo-refresh", () => loadLogoGallery());
+    bind("logo-open", openLogoPicker);
     bind("logo-clear", () => {
       setVal("c-logo-url", "");
       setLogoPreview("");
@@ -3102,26 +3057,7 @@ let currentAdminUserId = null;
         loadMediaLibrary();
       });
     }
-    const logoFoldersWrap = q("logo-folders");
-    if (logoFoldersWrap) {
-      logoFoldersWrap.addEventListener("click", (ev) => {
-        const btn = ev.target.closest(".logo-folder-item");
-        if (!btn) return;
-        const pref = btn.dataset.prefix || "";
-        loadLogoGallery(pref);
-      });
-    }
-    const logoGallery = q("logo-gallery");
-    if (logoGallery) {
-      logoGallery.addEventListener("click", (ev) => {
-        const card = ev.target.closest(".logo-card");
-        if (!card) return;
-        const url = card.dataset.url || "";
-        if (!url) return;
-        setVal("c-logo-url", url);
-        setLogoPreview(url);
-      });
-    }
+    // logo picker uses the shared media modal
     if (!document.body.dataset.mediaPickerBound) {
       document.body.dataset.mediaPickerBound = "1";
       document.body.addEventListener("click", (ev) => {
