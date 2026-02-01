@@ -413,6 +413,6 @@
   .btn-outline { display: inline-block; justify-self: end; }
   .search-btn { justify-self: end; }
 }
-.header-container {
+:root {
   --brand-logo-height: 25px;
 }
