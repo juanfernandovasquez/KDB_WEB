@@ -102,7 +102,8 @@ def init_db():
               page TEXT PRIMARY KEY,
               title TEXT,
               paragraphs TEXT,
-              content_html TEXT
+              content_html TEXT,
+              image_url TEXT
             )
             """
         )
@@ -377,6 +378,11 @@ def init_db():
         # Legacy DBs: add favicon_url to company info
         try:
             conn.execute("ALTER TABLE company_info ADD COLUMN favicon_url TEXT")
+        except Exception:
+            pass
+        # Legacy DBs: add image_url to page_story
+        try:
+            conn.execute("ALTER TABLE page_story ADD COLUMN image_url TEXT")
         except Exception:
             pass
         # Legacy DBs: add new content fields

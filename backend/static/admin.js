@@ -1072,6 +1072,7 @@ let currentAdminUserId = null;
       title: getVal("story-title"),
       html,
       paragraphs,
+      image_url: getVal("story-image"),
     };
   }
 
@@ -1094,6 +1095,7 @@ let currentAdminUserId = null;
 
   function setStoryForm(story = {}) {
     setVal("story-title", story.title || "");
+    setVal("story-image", story.image_url || "");
     const editor = q("story-content-editor");
     const html = story.html || "";
     const paragraphs = story.paragraphs || [];
@@ -1244,6 +1246,7 @@ let currentAdminUserId = null;
     teamCont.innerHTML = "";
     const teamWrapper = q("team-wrapper");
     const storySection = q("story-section");
+    const storyImageRow = q("story-image-row");
     const aboutSectionEl = q("about-section");
     const servicesSection = q("services-section");
     const heroSection = q("page-hero-body")?.closest(".section-card");
@@ -1257,6 +1260,7 @@ let currentAdminUserId = null;
       const storyTitle = storySection.querySelector("h3");
       if (storyTitle) storyTitle.textContent = isLegal ? "Contenido" : "Historia";
     }
+    if (storyImageRow) storyImageRow.classList.toggle("hidden", isLegal);
     if (servicesSection) servicesSection.classList.toggle("hidden", !isServicios);
     if (heroSection) heroSection.classList.toggle("hidden", isLegal);
     if (teamWrapper) {

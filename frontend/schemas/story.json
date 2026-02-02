@@ -5,6 +5,7 @@
   "properties": {
     "page": { "type": "string" },
     "title": { "type": "string" },
+    "image_url": { "type": "string" },
     "paragraphs": { "type": "array", "items": { "type": "string" } },
     "html": { "type": "string" },
     "content_html": { "type": "string" }

@@ -136,7 +136,7 @@ def replace_hero(page, slides):
 def fetch_story(page):
     conn = get_conn()
     row = conn.execute(
-        "SELECT page, title, paragraphs, content_html FROM page_story WHERE page = ?",
+        "SELECT page, title, paragraphs, content_html, image_url FROM page_story WHERE page = ?",
         (page,),
     ).fetchone()
     conn.close()
@@ -151,6 +151,7 @@ def fetch_story(page):
         "title": data.get("title"),
         "paragraphs": data.get("paragraphs", []),
         "html": data.get("content_html"),
+        "image_url": data.get("image_url"),
     }
 
 
@@ -158,18 +159,20 @@ def save_story(page, story):
     title = story.get("title")
     paragraphs = story.get("paragraphs") or []
     html = story.get("html") or story.get("content_html")
+    image_url = story.get("image_url")
     conn = get_conn()
     with conn:
         conn.execute(
             """
-            INSERT INTO page_story (page, title, paragraphs, content_html)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO page_story (page, title, paragraphs, content_html, image_url)
+            VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(page) DO UPDATE SET
               title=excluded.title,
               paragraphs=excluded.paragraphs,
-              content_html=excluded.content_html
+              content_html=excluded.content_html,
+              image_url=excluded.image_url
             """,
-            (page, title, json.dumps(paragraphs), html),
+            (page, title, json.dumps(paragraphs), html, image_url),
         )
     conn.close()
 

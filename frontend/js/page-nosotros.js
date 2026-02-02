@@ -27,12 +27,26 @@ async function fetchPageData(page) {
 function renderStory(story) {
   const container = document.querySelector('.story-text');
   if (!container) return;
+  const imageWrap = document.querySelector('.story-image');
+  const imageEl = imageWrap ? imageWrap.querySelector('img') : null;
   const title = story.title || 'Nuestra historia';
+  const imageUrl = story.image_url || story.image || '';
   const paragraphs = story.paragraphs || [];
   container.innerHTML = '';
   const h2 = document.createElement('h2');
   h2.textContent = title;
   container.appendChild(h2);
+  if (imageWrap) {
+    if (imageUrl) {
+      if (imageEl) {
+        imageEl.src = imageUrl;
+        imageEl.alt = title || 'Nuestra historia';
+      }
+      imageWrap.style.display = '';
+    } else {
+      imageWrap.style.display = 'none';
+    }
+  }
   if (story.html) {
     const body = document.createElement('div');
     body.innerHTML = story.html;
