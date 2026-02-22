@@ -963,6 +963,79 @@ p, .p  { font-size: var(--p);  line-height: var(--line-height-base); margin: 0 0
   padding: 2rem 0 4rem;
 }
 
+.post-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.post-main {
+  min-width: 0;
+}
+
+.post-sidebar {
+  min-width: 0;
+}
+
+.founder-card {
+  background: #fff;
+  border: 1px solid #e6ebf4;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.founder-photo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.founder-kicker {
+  margin: 0;
+  color: var(--brand-gold);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.founder-name {
+  margin: 0;
+  color: var(--brand-blue);
+  font-size: 1.2rem;
+}
+
+.founder-role {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.founder-link {
+  color: var(--brand-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.founder-link:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 1024px) {
+  .post-layout {
+    grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
+    align-items: start;
+    gap: 2rem;
+  }
+
+  .post-sidebar {
+    position: sticky;
+    top: calc(var(--header-height, 4rem) + 1rem);
+  }
+}
 .related-publications {
   max-width: 90vw;
   margin: 0 auto 4rem;
