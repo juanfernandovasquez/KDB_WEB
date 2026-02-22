@@ -1,7 +1,10 @@
 import os
 import re
 import mimetypes
+import smtplib
+import ssl
 from functools import wraps
+from email.message import EmailMessage
 
 from datetime import datetime
 from pathlib import Path
@@ -235,6 +238,83 @@ def _get_rate_config():
 
 
 RATE_CONFIG = _get_rate_config()
+
+
+def _env_bool(name, default=False):
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return str(raw).strip().lower() in ("1", "true", "yes", "on")
+
+
+def _mail_config():
+    return {
+        "enabled": _env_bool("MAIL_ENABLED", False),
+        "host": (os.environ.get("SMTP_HOST") or "").strip(),
+        "port": int((os.environ.get("SMTP_PORT") or "587").strip()),
+        "user": (os.environ.get("SMTP_USER") or "").strip(),
+        "password": (os.environ.get("SMTP_PASS") or "").strip(),
+        "from": (os.environ.get("MAIL_FROM") or os.environ.get("SMTP_USER") or "").strip(),
+        "to": (os.environ.get("CONTACT_TO") or "formulario.pagina@katarzyna.pe").strip(),
+        "use_tls": _env_bool("SMTP_USE_TLS", True),
+        "use_ssl": _env_bool("SMTP_USE_SSL", False),
+        "required": _env_bool("MAIL_REQUIRED", False),
+    }
+
+
+def _send_contact_email(payload):
+    cfg = _mail_config()
+    if not cfg["enabled"]:
+        return True, "disabled"
+    required_fields = ("host", "from", "to")
+    missing = [field for field in required_fields if not cfg[field]]
+    if missing:
+        return False, f"Config de correo incompleta: {', '.join(missing)}"
+
+    name = (payload.get("name") or "").strip()
+    email = (payload.get("email") or "").strip().lower()
+    phone = (payload.get("phone") or "").strip()
+    subject = (payload.get("subject") or "").strip() or "Nuevo mensaje de contacto"
+    message = (payload.get("message") or "").strip()
+
+    msg = EmailMessage()
+    msg["Subject"] = f"[Web] {subject}"
+    msg["From"] = cfg["from"]
+    msg["To"] = cfg["to"]
+    if email:
+        msg["Reply-To"] = email
+    msg.set_content(
+        "\n".join(
+            [
+                "Nuevo mensaje desde el formulario web",
+                "",
+                f"Nombre: {name}",
+                f"Email: {email}",
+                f"Telefono: {phone or '-'}",
+                f"Asunto: {subject}",
+                "",
+                "Mensaje:",
+                message,
+            ]
+        )
+    )
+
+    try:
+        if cfg["use_ssl"]:
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15) as server:
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
+                if cfg["use_tls"]:
+                    server.starttls(context=ssl.create_default_context())
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+    except Exception as exc:  # pylint: disable=broad-except
+        return False, str(exc)
+    return True, "sent"
 
 
 def _is_rate_limited(scope):
@@ -813,6 +893,11 @@ def api_contact():
     if len(message) > 4000:
         return jsonify(error="El mensaje es demasiado largo"), 400
     save_contact_message(payload, request.remote_addr, request.headers.get("User-Agent"))
+    sent, detail = _send_contact_email(payload)
+    if not sent:
+        app.logger.exception("No se pudo enviar correo de contacto: %s", detail)
+        if _mail_config()["required"]:
+            return jsonify(error="Mensaje recibido, pero no se pudo notificar por correo"), 502
     return jsonify(message="Mensaje recibido"), 201
 
 
