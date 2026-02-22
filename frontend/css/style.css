@@ -1167,6 +1167,39 @@ p, .p  { font-size: var(--p);  line-height: var(--line-height-base); margin: 0 0
 .post-content [style*="text-align:left"] img:not(.img-wrap-square):not(.img-align-left):not(.img-align-right),
 .post-content [style*="text-align: left"] img:not(.img-wrap-square):not(.img-align-left):not(.img-align-right),
 .post-content [align="left"] img:not(.img-wrap-square):not(.img-align-left):not(.img-align-right) { float: none !important; display: block !important; margin: 0 auto 16px 0 !important; }
+@media (max-width: 768px) {
+  /* In mobile, force proportional rendering for editor images and wrappers. */
+  .post-content .img-resizable {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto 12px auto !important;
+  }
+
+  .post-content img,
+  .post-content .img-resizable img {
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain;
+  }
+
+  .post-content img.img-align-left,
+  .post-content img.img-align-right,
+  .post-content .img-align-left,
+  .post-content .img-align-right,
+  .post-content .img-wrap-square,
+  .post-content .img-wrap-square.img-align-left,
+  .post-content .img-wrap-square.img-align-right,
+  .post-content .img-resizable.img-wrap-square.img-align-left,
+  .post-content .img-resizable.img-wrap-square.img-align-right {
+    float: none !important;
+    display: block !important;
+    margin: 0 auto 12px auto !important;
+  }
+}
 .post-content h2, .post-content h3 {
   color: var(--brand-blue);
 }
