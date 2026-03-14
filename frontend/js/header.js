@@ -17,6 +17,7 @@ async function loadHeader() {
   initCookieBanner();
   await updateKdbwebMenu();
   initSearch();
+  initHeaderScrollState();
 }
 
 function initHeaderEvents() {
@@ -194,6 +195,16 @@ function applyActiveNavState() {
   document.querySelectorAll('.nav-dropdown[data-page-key], .side-parent[data-page-key]').forEach((el) => {
     el.classList.toggle('is-active', el.dataset.pageKey === page);
   });
+}
+
+function initHeaderScrollState() {
+  const header = document.querySelector('.header-container');
+  if (!header) return;
+  const syncState = () => {
+    header.classList.toggle('is-scrolled', window.scrollY > 20);
+  };
+  syncState();
+  window.addEventListener('scroll', syncState, { passive: true });
 }
 
 const COOKIE_CONSENT_NAME = 'kdb_cookie_consent';

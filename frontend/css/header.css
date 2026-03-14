@@ -1,6 +1,6 @@
 :root {
   --header-height: 88px;
-  --header-shell-width: min(100% - 56px, 1820px);
+  --header-shell-width: min(100% - 56px, 1240px);
   --header-link-size: 0.78rem;
   --brand-logo-height: 46px;
 }
@@ -9,11 +9,12 @@
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 100;
-  padding: 1.9rem 0 0;
+  padding: 0;
   color: #fff;
   background: transparent !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, padding 0.25s ease;
 }
 
 .header-inner {
@@ -29,6 +30,15 @@
   border: 0 !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+}
+
+.header-container.is-scrolled {
+  background: var(--brand-blue) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16) !important;
+}
+
+.header-container.is-scrolled .header-inner {
+  min-height: 76px;
 }
 
 .logo,
@@ -417,7 +427,11 @@
   }
 
   .header-container {
-    padding: 0.95rem 0 0;
+    padding: 0;
+  }
+
+  .header-container.is-scrolled {
+    padding-top: 0;
   }
 
   .header-inner {
