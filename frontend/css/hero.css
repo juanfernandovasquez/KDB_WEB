@@ -1,5 +1,5 @@
 :root {
-  --hero-min-height: 100vh;
+  --hero-min-height: 100dvh;
   --hero-margin-top: 0px;
   --hero-overlay: linear-gradient(90deg, rgba(5, 14, 37, 0.78) 0%, rgba(5, 14, 37, 0.48) 38%, rgba(5, 14, 37, 0.16) 70%, rgba(5, 14, 37, 0.36) 100%);
   --hero-content-width: min(100% - 48px, 720px);
@@ -12,6 +12,7 @@
   position: relative;
   width: 100%;
   min-height: var(--hero-min-height);
+  height: var(--hero-min-height);
   margin-top: var(--hero-margin-top);
   overflow: hidden;
   display: flex;
@@ -33,6 +34,7 @@
   display: flex;
   width: var(--hero-track-width, 100%);
   min-height: var(--hero-min-height);
+  height: 100%;
   transition: transform 1.2s ease-in-out;
 }
 
@@ -40,6 +42,7 @@
   position: relative;
   flex: 1 0 100%;
   min-height: var(--hero-min-height);
+  height: 100%;
 }
 
 .hero-slide img {
@@ -179,6 +182,10 @@
   :root {
     --hero-min-height: 760px;
     --hero-title-size: clamp(2.6rem, 7vw, 3.8rem);
+  }
+
+  .hero {
+    height: var(--hero-min-height);
   }
 }
 
