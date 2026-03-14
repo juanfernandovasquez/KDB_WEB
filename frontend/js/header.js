@@ -12,6 +12,7 @@ async function loadHeader() {
   } else {
     await applyPageVisibility();
   }
+  applyActiveNavState();
   await applyHeaderLogo();
   initCookieBanner();
   await updateKdbwebMenu();
@@ -181,6 +182,17 @@ function applyPageVisibility(pagesOverride) {
       el.style.display = 'none';
       el.setAttribute('aria-hidden', 'true');
     }
+  });
+}
+
+function applyActiveNavState() {
+  const page = document.body?.dataset?.page;
+  if (!page) return;
+  document.querySelectorAll('.main-nav a[data-page-key], .side-panel a[data-page-key]').forEach((el) => {
+    el.classList.toggle('is-active', el.dataset.pageKey === page);
+  });
+  document.querySelectorAll('.nav-dropdown[data-page-key], .side-parent[data-page-key]').forEach((el) => {
+    el.classList.toggle('is-active', el.dataset.pageKey === page);
   });
 }
 

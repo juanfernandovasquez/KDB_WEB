@@ -1,40 +1,23 @@
 :root {
-  --hero-min-height: 70vh;
-  --hero-margin-top: var(--header-height, 4rem);
-  --hero-bg: #000;
-  --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.55));
-  --hero-track-width: 200%;
-  --hero-content-left: 6%;
-  --hero-content-bottom: 18%;
-  --hero-content-width: min(90vw, 640px);
-  --hero-content-max-width: 640px;
-  --hero-content-gap: 1rem;
-  --hero-content-transform: translateY(20px);
-  --hero-content-transform-active: translateY(0);
-  --hero-title-size: 2rem;
-  --hero-text-size: 1.2rem;
-  --hero-text-line: 1.6;
-  --hero-text-color: #e6e6e6;
-  --hero-kicker-bg: var(--brand-blue);
-  --hero-kicker-color: #fff;
-  --hero-kicker-radius: 6px;
-  --hero-actions-gap: 0.8rem;
-  --hero-actions-margin-top: 2rem;
-  --hero-btn-radius: 6px;
-  --hero-btn-font: 1.2rem;
-  --hero-dot-size: 10px;
-  --hero-dot-gap: 0.6rem;
+  --hero-min-height: 960px;
+  --hero-margin-top: 0px;
+  --hero-overlay: linear-gradient(90deg, rgba(5, 14, 37, 0.78) 0%, rgba(5, 14, 37, 0.48) 38%, rgba(5, 14, 37, 0.16) 70%, rgba(5, 14, 37, 0.36) 100%);
+  --hero-content-width: min(100% - 48px, 720px);
+  --hero-title-size: clamp(3.2rem, 5vw, 4.7rem);
+  --hero-text-size: clamp(1rem, 1.4vw, 1.2rem);
+  --hero-btn-font: 0.72rem;
 }
 
 .hero {
   position: relative;
-  overflow: hidden;
   width: 100%;
   min-height: var(--hero-min-height);
   margin-top: var(--hero-margin-top);
-  background: var(--hero-bg);
+  overflow: hidden;
   display: flex;
+  align-items: stretch;
   justify-content: center;
+  background: #071331;
 }
 
 .hero::after {
@@ -48,99 +31,94 @@
 
 .hero-track {
   display: flex;
-  width: var(--hero-track-width);
-  transition: transform 1.5s ease-in-out;
-  align-items: center;
-  height: 100%;
-  position: relative;
-  z-index: 0;
+  width: var(--hero-track-width, 100%);
+  min-height: var(--hero-min-height);
+  transition: transform 1.2s ease-in-out;
 }
 
 .hero-slide {
-  flex: 1 0 100%;
   position: relative;
-  height: 100%;
+  flex: 1 0 100%;
+  min-height: var(--hero-min-height);
 }
 
 .hero-slide img {
   width: 100%;
   height: 100%;
+  min-height: var(--hero-min-height);
   object-fit: cover;
-  max-height: 90vh;
   display: block;
-  position: relative;
-  z-index: 0;
 }
 
 .hero-content {
   position: absolute;
-  left: var(--hero-content-left);
-  bottom: var(--hero-content-bottom);
+  inset: 50% auto auto 50%;
+  z-index: 5;
   width: var(--hero-content-width);
-  max-width: var(--hero-content-max-width);
-  color: white;
   display: flex;
   flex-direction: column;
-  gap: var(--hero-content-gap);
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  color: #fff;
+  transform: translate(-50%, calc(-50% + 20px));
   opacity: 0;
-  transform: var(--hero-content-transform);
-  transition: opacity 1s ease, transform 1s ease;
-  z-index: 5;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .hero-content.animate {
   opacity: 1;
-  transform: var(--hero-content-transform-active);
+  transform: translate(-50%, -50%);
 }
 
 .hero-title {
   margin: 0;
+  max-width: 14ch;
+  color: #fff;
   font-size: var(--hero-title-size);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .hero-text {
   margin: 0;
+  max-width: 40ch;
+  color: rgba(255, 255, 255, 0.92);
   font-size: var(--hero-text-size);
-  line-height: var(--hero-text-line);
-  color: var(--hero-text-color);
-}
-
-.hero-kicker {
-  display: inline-block;
-  background: var(--hero-kicker-bg);
-  color: var(--hero-kicker-color);
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--hero-kicker-radius);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  margin: 0;
-  align-self: flex-start;
+  line-height: 1.55;
+  font-weight: 500;
 }
 
 .hero-actions {
   display: flex;
-  justify-content: center;
-  gap: var(--hero-actions-gap);
   flex-wrap: wrap;
-  margin-top: var(--hero-actions-margin-top);
-
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
 }
 
 .hero-btn-primary,
 .hero-btn-secondary {
-  padding: 0.65rem 1.2rem;
-  border-radius: var(--hero-btn-radius);
-  font-weight: 600;
-  font-size: var(--hero-btn-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px !important;
   text-decoration: none;
-  border: 1px solid #fff;
-  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--hero-btn-font);
+  font-weight: 700;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 .hero-btn-primary {
   background: #fff;
-  color: var(--brand-blue);
+  color: #0d1736;
 }
 
 .hero-btn-primary:hover {
@@ -154,51 +132,40 @@
 }
 
 .hero-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .hero-dots {
   position: absolute;
-  bottom: 1rem;
+  bottom: 28px;
   left: 50%;
-  transform: translateX(-50%);
+  z-index: 6;
   display: flex;
-  gap: var(--hero-dot-gap);
-  z-index: 10;
+  align-items: center;
+  gap: 0.45rem;
+  transform: translateX(-50%);
 }
 
 .hero-dots .dot {
-  width: var(--hero-dot-size);
-  height: var(--hero-dot-size);
+  width: 8px;
+  height: 8px;
   padding: 0;
-  border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  transition: transform 0.3s, background 0.3s;
-  display: inline-block;
-  line-height: 1;
-  box-sizing: border-box;
-  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background: transparent;
+  opacity: 0.75;
   appearance: none;
+  cursor: pointer;
+  transition: background 0.2s ease, opacity 0.2s ease;
 }
 
 .hero-dots .dot.active {
-  background: white;
-  transform: scale(1.2);
+  background: #fff;
+  opacity: 1;
 }
 
-.hero-single {
-  /* min-height: 70vh; */
-  align-items: stretch;
-}
-
-.hero-single .hero-track {
-  width: 100%;
-}
-
-.hero-single .hero-slide {
-  height: 100%;
+.hero-single::after {
+  background: none;
 }
 
 .hero-single .hero-slide::after {
@@ -206,56 +173,58 @@
   position: absolute;
   inset: 0;
   background: var(--hero-overlay);
-  pointer-events: none;
-}
-.hero-single::after {
-  background: none;
 }
 
-.hero-single .hero-slide img {
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-single .hero-content {
-  max-width: var(--hero-content-max-width);
-  bottom: var(--hero-content-bottom);
-}
-
-@media (max-width: 768px) {
+@media (max-width: 1279px) {
   :root {
-    --hero-min-height: 55vh;
-    --hero-content-left: 50%;
-    --hero-content-bottom: 10%;
-    --hero-content-width: 90%;
-    --hero-content-max-width: 90%;
-    --hero-content-transform: translate(-50%, 20px);
-    --hero-content-transform-active: translate(-50%, 0);
-    --hero-title-size: 1.6rem;
-    --hero-text-size: 1.1rem;
-    --hero-btn-font: 1rem;
+    --hero-min-height: 860px;
   }
-  .hero { height: 52vh; }
-  .hero-slide img {
-    height: 100%;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --hero-min-height: 760px;
+    --hero-title-size: clamp(2.6rem, 7vw, 3.8rem);
   }
-  .hero-single .hero-content {
-    bottom: 12%;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --hero-min-height: 78svh;
+    --hero-content-width: calc(100% - 32px);
+    --hero-title-size: clamp(2.15rem, 10vw, 3.15rem);
+    --hero-text-size: 0.96rem;
+    --hero-btn-font: 0.68rem;
   }
-  
+
+  .hero::after,
+  .hero-single .hero-slide::after {
+    background: linear-gradient(180deg, rgba(5, 14, 37, 0.42) 0%, rgba(5, 14, 37, 0.5) 24%, rgba(5, 14, 37, 0.82) 100%);
+  }
+
   .hero-content {
-    text-align: center;
-    align-items: center;
+    gap: 0.85rem;
   }
-}
 
-@media (min-width: 768px) {
-  :root {
-    --hero-title-size: 3rem;
-    --hero-text-size: 1.6rem;
-    --hero-btn-font: 1.2rem;
+  .hero-title {
+    max-width: 11ch;
   }
+
+  .hero-text {
+    max-width: 30ch;
+  }
+
   .hero-actions {
-    justify-content: left;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    width: min(100%, 260px);
+  }
+
+  .hero-dots {
+    bottom: 18px;
   }
 }
