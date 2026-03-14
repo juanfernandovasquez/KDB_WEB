@@ -175,12 +175,6 @@
   background: var(--hero-overlay);
 }
 
-@media (max-width: 1279px) {
-  :root {
-    --hero-min-height: 860px;
-  }
-}
-
 @media (max-width: 1023px) {
   :root {
     --hero-min-height: 760px;
