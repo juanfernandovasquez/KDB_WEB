@@ -25,8 +25,8 @@ footer {
 }
 
 .footer-logo {
-  height: var(--brand-logo-height, 42px);
-  width: auto;
+  width: var(--brand-logo-width, clamp(150px, 13vw, 185px));
+  height: auto;
   max-width: 100%;
 }
 

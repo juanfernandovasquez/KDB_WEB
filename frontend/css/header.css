@@ -2,7 +2,7 @@
   --header-height: 88px;
   --header-shell-width: min(100% - 56px, 1240px);
   --header-link-size: 0.78rem;
-  --brand-logo-height: 46px;
+  --brand-logo-width: clamp(150px, 13vw, 185px);
 }
 
 .header-container {
@@ -48,8 +48,8 @@
 }
 
 .logo-img {
-  height: var(--brand-logo-height);
-  width: auto;
+  width: var(--brand-logo-width);
+  height: auto;
   max-width: 100%;
 }
 
@@ -208,6 +208,7 @@
   min-height: 36px;
   padding: 0 1.05rem;
   border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
   background: #fff;
   color: #0e1731;
   text-decoration: none;
@@ -419,7 +420,7 @@
   :root {
     --header-height: 78px;
     --header-shell-width: calc(100% - 32px);
-    --brand-logo-height: 34px;
+    --brand-logo-width: 150px;
   }
 
   .header-container {
@@ -458,6 +459,7 @@
   :root {
     --header-height: 72px;
     --header-shell-width: calc(100% - 24px);
+    --brand-logo-width: 138px;
   }
 
   .search-modal {
