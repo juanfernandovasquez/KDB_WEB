@@ -138,6 +138,11 @@ footer {
   line-height: 1.45;
 }
 
+.footer-newsletter .newsletter-terms span,
+.footer-newsletter .newsletter-terms a {
+  font-size: inherit;
+}
+
 .footer-newsletter .newsletter-terms input {
   margin-top: 0.16rem;
 }
