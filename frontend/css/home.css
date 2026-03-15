@@ -30,6 +30,9 @@ body[data-page="home"] .intro-card {
 body[data-page="home"] .intro-heading {
   grid-area: heading;
   width: 100%;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -2.2rem;
 }
 
 body[data-page="home"] .intro-heading h2 {
@@ -58,6 +61,8 @@ body[data-page="home"] .intro-copy {
 
 body[data-page="home"] .intro-image {
   grid-area: image;
+  position: relative;
+  z-index: 1;
 }
 
 body[data-page="home"] .intro-text p {
@@ -147,6 +152,10 @@ body[data-page="home"] .intro-image img {
   body[data-page="home"] .intro-heading h2 {
     max-width: none;
     font-size: clamp(1.9rem, 9vw, 2.7rem);
+  }
+
+  body[data-page="home"] .intro-heading {
+    margin-bottom: 0;
   }
 
   body[data-page="home"] .intro-actions {
