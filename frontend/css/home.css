@@ -4,6 +4,7 @@ body[data-page="home"] {
 
 body[data-page="home"] {
   --home-content-width: min(100% - 56px, 960px);
+  --intro-heading-size: clamp(2.2rem, 3vw, 3.4375rem);
 }
 
 body[data-page="home"] .intro-section {
@@ -33,7 +34,7 @@ body[data-page="home"] .intro-heading {
   width: 100%;
   position: relative;
   z-index: 2;
-  margin-bottom: -2.2rem;
+  margin-bottom: 0;
 }
 
 body[data-page="home"] .intro-heading h2 {
@@ -42,7 +43,7 @@ body[data-page="home"] .intro-heading h2 {
   width: 100%;
   max-width: none;
   color: var(--brand-gold);
-  font-size: clamp(2.2rem, 3vw, 3.4375rem);
+  font-size: var(--intro-heading-size);
   font-weight: 500;
   line-height: 0.98;
   letter-spacing: -0.03em;
@@ -65,7 +66,7 @@ body[data-page="home"] .intro-image {
   grid-area: image;
   position: relative;
   z-index: 1;
-  margin-top: -1.7rem;
+  margin-top: calc(var(--intro-heading-size) * -0.5);
 }
 
 body[data-page="home"] .intro-text p {
