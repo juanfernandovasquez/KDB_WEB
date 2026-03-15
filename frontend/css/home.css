@@ -16,31 +16,44 @@ body[data-page="home"] .intro-section {
 body[data-page="home"] .intro-card {
   width: var(--home-content-width);
   display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
-  gap: clamp(2rem, 4vw, 4.5rem);
-  align-items: center;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.86fr);
+  gap: clamp(2rem, 5vw, 5.8rem);
+  align-items: start;
   padding: 0;
   background: transparent;
   box-shadow: none;
 }
 
-body[data-page="home"] .intro-text h2 {
+body[data-page="home"] .intro-visual {
+  display: grid;
+  gap: 1.15rem;
+}
+
+body[data-page="home"] .intro-heading {
+  width: 100%;
+}
+
+body[data-page="home"] .intro-heading h2 {
   margin-top: 0;
-  margin-bottom: 1.15rem;
-  max-width: 11ch;
+  margin-bottom: 0;
+  max-width: 8.4ch;
   color: var(--brand-gold);
-  font-size: clamp(2.2rem, 3.2vw, 3.6rem);
-  line-height: 1.02;
+  font-size: clamp(2.35rem, 3.4vw, 3.95rem);
+  line-height: 0.98;
   letter-spacing: -0.03em;
   text-transform: uppercase;
   text-align: left;
 }
 
+body[data-page="home"] .intro-copy {
+  padding-top: clamp(5.6rem, 11vw, 7.9rem);
+}
+
 body[data-page="home"] .intro-text p {
   margin: 0;
   color: var(--brand-gray);
-  font-size: 0.98rem;
-  line-height: 1.78;
+  font-size: 1rem;
+  line-height: 1.68;
   text-align: left;
 }
 
@@ -54,7 +67,7 @@ body[data-page="home"] .intro-actions {
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.3rem;
 }
 
 body[data-page="home"] .intro-primary,
@@ -97,7 +110,7 @@ body[data-page="home"] .intro-secondary:hover {
 
 body[data-page="home"] .intro-image img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 0.82;
   object-fit: cover;
   box-shadow: 0 28px 42px rgba(0, 0, 0, 0.12);
 }
@@ -116,11 +129,11 @@ body[data-page="home"] .intro-image img {
     gap: 1.5rem;
   }
 
-  body[data-page="home"] .intro-image {
-    order: -1;
+  body[data-page="home"] .intro-copy {
+    padding-top: 0;
   }
 
-  body[data-page="home"] .intro-text h2 {
+  body[data-page="home"] .intro-heading h2 {
     max-width: none;
     font-size: clamp(1.9rem, 9vw, 2.7rem);
   }
