@@ -1265,7 +1265,11 @@ let currentAdminUserId = null;
     const isNosotros = page === "nosotros";
     const isServicios = page === "servicios";
     const isLegal = LEGAL_PAGE_SET.has(page);
-    if (aboutSectionEl) aboutSectionEl.classList.toggle("hidden", !isHome);
+    if (aboutSectionEl) {
+      aboutSectionEl.classList.toggle("hidden", !(isHome || isNosotros));
+      const aboutTitle = aboutSectionEl.querySelector("h3");
+      if (aboutTitle) aboutTitle.textContent = isNosotros ? "Mensaje previo al equipo" : "Seccion sobre la empresa";
+    }
     if (storySection) {
       storySection.classList.toggle("hidden", !(isNosotros || isLegal));
       const storyTitle = storySection.querySelector("h3");
