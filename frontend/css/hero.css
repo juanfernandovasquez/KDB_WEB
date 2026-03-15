@@ -3,9 +3,9 @@
   --hero-margin-top: 0px;
   --hero-overlay: linear-gradient(90deg, rgba(5, 14, 37, 0.78) 0%, rgba(5, 14, 37, 0.48) 38%, rgba(5, 14, 37, 0.16) 70%, rgba(5, 14, 37, 0.36) 100%);
   --hero-content-width: min(100% - 48px, 720px);
-  --hero-title-size: clamp(3.2rem, 5vw, 4.7rem);
-  --hero-text-size: clamp(1rem, 1.4vw, 1.2rem);
-  --hero-btn-font: 0.72rem;
+  --hero-title-size: 82px;
+  --hero-text-size: 24px;
+  --hero-btn-font: 15px;
 }
 
 .hero {
@@ -79,7 +79,7 @@
   max-width: 14ch;
   color: #fff;
   font-size: var(--hero-title-size);
-  line-height: 0.98;
+  line-height: 1;
   font-weight: 700;
   letter-spacing: -0.03em;
 }
@@ -89,7 +89,7 @@
   max-width: 40ch;
   color: rgba(255, 255, 255, 0.92);
   font-size: var(--hero-text-size);
-  line-height: 1.55;
+  line-height: 1.45;
   font-weight: 500;
 }
 
@@ -107,15 +107,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  padding: 0 1.15rem;
+  min-height: 46px;
+  padding: 0 1.35rem;
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 999px !important;
   text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  text-transform: none;
+  letter-spacing: 0;
   font-size: var(--hero-btn-font);
-  font-weight: 700;
+  font-weight: 600;
   transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
@@ -182,6 +182,8 @@
   :root {
     --hero-min-height: 760px;
     --hero-title-size: clamp(2.6rem, 7vw, 3.8rem);
+    --hero-text-size: 20px;
+    --hero-btn-font: 14px;
   }
 
   .hero {
@@ -195,7 +197,7 @@
     --hero-content-width: calc(100% - 32px);
     --hero-title-size: clamp(2.15rem, 10vw, 3.15rem);
     --hero-text-size: 0.96rem;
-    --hero-btn-font: 0.68rem;
+    --hero-btn-font: 0.8rem;
   }
 
   .hero::after,
