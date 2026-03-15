@@ -193,6 +193,19 @@ def save_about(page, about):
     title_raw = about.get("title") or ""
     content_raw = about.get("content") or ""
     try:
+        for _ in range(3):
+            new_title = _html.unescape(title_raw)
+            if new_title == title_raw:
+                break
+            title_raw = new_title
+        for _ in range(3):
+            new_content = _html.unescape(content_raw)
+            if new_content == content_raw:
+                break
+            content_raw = new_content
+    except Exception:
+        pass
+    try:
         title = bleach.clean(
             title_raw,
             tags=TITLE_ALLOWED_TAGS,
