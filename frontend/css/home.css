@@ -135,6 +135,36 @@ body[data-page="home"] .intro-image img {
   box-shadow: 0 28px 42px rgba(0, 0, 0, 0.12);
 }
 
+@media (max-width: 1023px) {
+  body[data-page="home"] {
+    --home-content-width: min(100% - 40px, 920px);
+    --intro-heading-size: clamp(2rem, 4vw, 2.9rem);
+  }
+
+  body[data-page="home"] .intro-card {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.92fr);
+    column-gap: clamp(1.5rem, 4vw, 2.75rem);
+    row-gap: 0.9rem;
+  }
+
+  body[data-page="home"] .intro-heading {
+    margin-left: 0;
+  }
+
+  body[data-page="home"] .intro-image {
+    margin-top: calc(var(--intro-heading-size) * -0.22);
+  }
+
+  body[data-page="home"] .intro-copy {
+    align-self: center;
+  }
+
+  body[data-page="home"] .intro-text p {
+    font-size: 0.96rem;
+    line-height: 1.58;
+  }
+}
+
 @media (max-width: 767px) {
   body[data-page="home"] {
     --home-content-width: calc(100% - 24px);

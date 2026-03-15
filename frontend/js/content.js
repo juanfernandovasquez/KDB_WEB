@@ -156,6 +156,14 @@ const escapeHtml = (str) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+const decodeHtml = (value) => {
+  const html = value || '';
+  if (!html || !html.includes('&')) return html;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = html;
+  return textarea.value;
+};
+
 async function fetchCompanyInfo() {
   try {
     if (window.apiClient?.getCompany) {
@@ -195,7 +203,7 @@ function setText(id, value) {
 
 function setHTML(id, value) {
   const el = document.getElementById(id);
-  if (el) el.innerHTML = value || '';
+  if (el) el.innerHTML = decodeHtml(value);
 }
 
 function setAttr(id, attr, value) {
@@ -209,7 +217,7 @@ function applyHomeIntro(about) {
   const introContent = document.getElementById('intro-content');
   if (introContent) {
     if (about.content) {
-      introContent.innerHTML = about.content;
+      introContent.innerHTML = decodeHtml(about.content);
     } else {
       const lines = Array.isArray(about.content_lines) && about.content_lines.length
         ? about.content_lines
