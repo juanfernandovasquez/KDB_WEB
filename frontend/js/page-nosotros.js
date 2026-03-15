@@ -89,27 +89,19 @@ function renderNosotrosMessage(about) {
   const secondaryEl = document.getElementById('nosotros-message-secondary');
   if (!section || !titleEl || !contentEl || !primaryEl || !secondaryEl) return;
 
-  const hasTitle = !!safeText(about.title).trim();
   const hasContent = !!safeText(about.content).trim();
-  const hasPrimary = !!safeText(about.primary_label).trim() && !!safeText(about.primary_href).trim();
-  const hasSecondary = !!safeText(about.secondary_label).trim() && !!safeText(about.secondary_href).trim();
 
-  if (!hasTitle && !hasContent && !hasPrimary && !hasSecondary) {
+  if (!hasContent) {
     section.classList.add('hidden');
     return;
   }
 
   section.classList.remove('hidden');
-  titleEl.innerHTML = decodeHtmlValue(about.title || '');
+  titleEl.innerHTML = '';
+  titleEl.style.display = 'none';
   contentEl.innerHTML = decodeHtmlValue(about.content || '');
-
-  primaryEl.textContent = about.primary_label || '';
-  primaryEl.href = about.primary_href || '#';
-  primaryEl.style.display = hasPrimary ? '' : 'none';
-
-  secondaryEl.textContent = about.secondary_label || '';
-  secondaryEl.href = about.secondary_href || '#';
-  secondaryEl.style.display = hasSecondary ? '' : 'none';
+  primaryEl.style.display = 'none';
+  secondaryEl.style.display = 'none';
 }
 
 function renderTeam(team, teamMeta) {

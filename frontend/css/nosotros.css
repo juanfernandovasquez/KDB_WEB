@@ -82,7 +82,7 @@ body[data-page="nosotros"] .story-text p:last-child {
 }
 
 body[data-page="nosotros"] .nosotros-message-section {
-  padding: 0 0 3rem;
+  padding: 1.4rem 0 3rem;
 }
 
 body[data-page="nosotros"] .nosotros-message-section.hidden {
@@ -94,25 +94,21 @@ body[data-page="nosotros"] .nosotros-message-card {
 }
 
 body[data-page="nosotros"] .nosotros-message-copy {
-  max-width: 860px;
-}
-
-body[data-page="nosotros"] #nosotros-message-title {
-  margin: 0 0 1rem;
-  color: var(--brand-blue);
-  font-size: clamp(1.8rem, 2.6vw, 2.75rem);
-  font-weight: 600;
-  line-height: 1.05;
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 body[data-page="nosotros"] #nosotros-message-content {
-  color: var(--brand-gray);
+  color: var(--brand-blue);
 }
 
 body[data-page="nosotros"] #nosotros-message-content p {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  line-height: 1.7;
+  margin: 0;
+  font-size: clamp(1.55rem, 2.8vw, 2.25rem);
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: -0.02em;
 }
 
 body[data-page="nosotros"] #nosotros-message-content p:last-child {
@@ -120,27 +116,13 @@ body[data-page="nosotros"] #nosotros-message-content p:last-child {
 }
 
 body[data-page="nosotros"] .nosotros-message-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-body[data-page="nosotros"] .nosotros-message-actions .intro-primary,
-body[data-page="nosotros"] .nosotros-message-actions .intro-secondary {
-  min-height: 42px;
-  padding: 0 1.15rem;
-  border-radius: 6px !important;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  display: none;
 }
 
 body[data-page="nosotros"] .nosotros-team-divider {
   width: var(--nosotros-content-width);
-  margin-top: 2.75rem;
-  border-top: 1px solid rgba(6, 24, 109, 0.16);
+  margin-top: 3rem;
+  border-top: 1px solid rgba(43, 43, 43, 0.22);
 }
 
 body[data-page="nosotros"] .team-section {
@@ -220,11 +202,6 @@ body[data-page="nosotros"] .team-header {
 
   body[data-page="nosotros"] .nosotros-message-section {
     padding-bottom: 2.5rem;
-  }
-
-  body[data-page="nosotros"] .nosotros-message-actions .intro-primary,
-  body[data-page="nosotros"] .nosotros-message-actions .intro-secondary {
-    width: 100%;
   }
 
   body[data-page="nosotros"] .team-section {

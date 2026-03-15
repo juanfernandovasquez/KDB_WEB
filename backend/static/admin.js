@@ -1060,14 +1060,15 @@ let currentAdminUserId = null;
     const content = getAboutHTML();
     setVal("about-title", title);
     setVal("about-content", content);
+    const isNosotros = currentPage === "nosotros";
     return {
-      title,
+      title: isNosotros ? "" : title,
       content,
-      image_url: getVal("about-image"),
-      primary_label: getVal("about-primary-label"),
-      primary_href: getVal("about-primary-href"),
-      secondary_label: getVal("about-secondary-label"),
-      secondary_href: getVal("about-secondary-href"),
+      image_url: isNosotros ? "" : getVal("about-image"),
+      primary_label: isNosotros ? "" : getVal("about-primary-label"),
+      primary_href: isNosotros ? "" : getVal("about-primary-href"),
+      secondary_label: isNosotros ? "" : getVal("about-secondary-label"),
+      secondary_href: isNosotros ? "" : getVal("about-secondary-href"),
     };
   }
 
@@ -1270,6 +1271,9 @@ let currentAdminUserId = null;
     const storySection = q("story-section");
     const storyImageRow = q("story-image-row");
     const aboutSectionEl = q("about-section");
+    const aboutTitleWrap = q("about-title-wrap");
+    const aboutImageWrap = q("about-image-wrap");
+    const aboutActionsWrap = q("about-actions-wrap");
     const servicesSection = q("services-section");
     const heroSection = q("page-hero-body")?.closest(".section-card");
     const isHome = page === "home";
@@ -1281,6 +1285,9 @@ let currentAdminUserId = null;
       const aboutTitle = aboutSectionEl.querySelector("h3");
       if (aboutTitle) aboutTitle.textContent = isNosotros ? "Mensaje previo al equipo" : "Seccion sobre la empresa";
     }
+    if (aboutTitleWrap) aboutTitleWrap.classList.toggle("hidden", isNosotros);
+    if (aboutImageWrap) aboutImageWrap.classList.toggle("hidden", isNosotros);
+    if (aboutActionsWrap) aboutActionsWrap.classList.toggle("hidden", isNosotros);
     if (storySection) {
       storySection.classList.toggle("hidden", !(isNosotros || isLegal));
       const storyTitle = storySection.querySelector("h3");
