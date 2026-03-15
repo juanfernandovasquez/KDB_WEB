@@ -209,10 +209,19 @@
                   <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
                 </div>
               </div>
-            </div>
-            <label>Titulo</label>
-            <input id="story-title" type="text">
-            <label>Contenido</label>
+              </div>
+              <label>Titulo</label>
+              <div class="rich-editor">
+                <div class="editor-toolbar" id="story-title-toolbar">
+                  <button type="button" data-cmd="bold"><strong>B</strong></button>
+                  <button type="button" data-cmd="italic"><em>I</em></button>
+                  <button type="button" data-cmd="underline"><u>U</u></button>
+                  <button type="button" data-cmd="removeFormat">Limpiar</button>
+                </div>
+                <div id="story-title-editor" class="editor-surface" contenteditable="true"></div>
+                <textarea id="story-title" class="hidden"></textarea>
+              </div>
+              <label>Contenido</label>
             <div class="rich-editor">
               <div class="editor-toolbar" id="story-toolbar">
                 <button type="button" data-cmd="bold"><strong>B</strong></button>

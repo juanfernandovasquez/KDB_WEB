@@ -161,10 +161,28 @@ def fetch_story(page):
 
 
 def save_story(page, story):
-    title = story.get("title")
+    title_raw = story.get("title") or ""
     paragraphs = story.get("paragraphs") or []
     html = story.get("html") or story.get("content_html")
     image_url = story.get("image_url")
+    try:
+        for _ in range(3):
+            new_title = _html.unescape(title_raw)
+            if new_title == title_raw:
+                break
+            title_raw = new_title
+    except Exception:
+        pass
+    try:
+        title = bleach.clean(
+            title_raw,
+            tags=TITLE_ALLOWED_TAGS,
+            attributes=TITLE_ALLOWED_ATTRIBUTES,
+            css_sanitizer=IMG_CSS_SANITIZER,
+            strip=True,
+        )
+    except Exception:
+        title = title_raw
     conn = get_conn()
     with conn:
         conn.execute(

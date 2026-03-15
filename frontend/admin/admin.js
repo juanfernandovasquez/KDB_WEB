@@ -1045,6 +1045,11 @@ let currentAdminUserId = null;
     return editor ? editor.innerHTML : getVal("about-title");
   };
 
+  const getStoryTitleHTML = () => {
+    const editor = q("story-title-editor");
+    return editor ? editor.innerHTML : getVal("story-title");
+  };
+
   const getStoryHTML = () => {
     const editor = q("story-content-editor");
     return editor ? editor.innerHTML : getVal("story-paragraphs");
@@ -1067,6 +1072,7 @@ let currentAdminUserId = null;
   }
 
   function readStoryForm() {
+    const title = getStoryTitleHTML();
     const html = getStoryHTML();
     const editor = q("story-content-editor");
     const textSource = editor ? editor.textContent || "" : getVal("story-paragraphs") || "";
@@ -1074,9 +1080,10 @@ let currentAdminUserId = null;
       .split(/\n+/)
       .map((s) => s.trim())
       .filter(Boolean);
+    setVal("story-title", title);
     setVal("story-paragraphs", paragraphs.join("\n"));
     return {
-      title: getVal("story-title"),
+      title,
       html,
       paragraphs,
       image_url: getVal("story-image"),
@@ -1107,6 +1114,10 @@ let currentAdminUserId = null;
   function setStoryForm(story = {}) {
     setVal("story-title", story.title || "");
     setVal("story-image", story.image_url || "");
+    const titleEditor = q("story-title-editor");
+    if (titleEditor) {
+      titleEditor.innerHTML = story.title || "";
+    }
     const editor = q("story-content-editor");
     const html = story.html || "";
     const paragraphs = story.paragraphs || [];
@@ -2894,11 +2905,12 @@ let currentAdminUserId = null;
     bind("save-page", savePage);
     bind("legal-save", saveLegalPage);
     bind("legal-save-bottom", saveLegalPage);
-    bind("legal-cancel", () => loadLegalPage(currentLegalPage));
-    setupRichEditor("about-title-toolbar", "about-title-editor");
-    setupRichEditor("about-toolbar", "about-content-editor");
-    setupRichEditor("story-toolbar", "story-content-editor");
-    setupRichEditor("kdbweb-content-toolbar", "kdbweb-content-editor");
+      bind("legal-cancel", () => loadLegalPage(currentLegalPage));
+      setupRichEditor("about-title-toolbar", "about-title-editor");
+      setupRichEditor("about-toolbar", "about-content-editor");
+      setupRichEditor("story-title-toolbar", "story-title-editor");
+      setupRichEditor("story-toolbar", "story-content-editor");
+      setupRichEditor("kdbweb-content-toolbar", "kdbweb-content-editor");
     setupRichEditor("legal-content-toolbar", "legal-content-editor");
     const legalSelect = q("legal-page-select");
     if (legalSelect) {
