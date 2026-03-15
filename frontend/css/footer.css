@@ -61,48 +61,63 @@ footer {
 }
 
 .footer-newsletter {
-  padding: 1.35rem 1.35rem 1.2rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
+  max-width: 420px;
+  padding: 1.05rem 1.15rem 0.95rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.footer-newsletter h4 {
+  margin: 0 0 0.2rem;
+  color: #fff;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-transform: none;
 }
 
 .footer-newsletter p {
-  margin-bottom: 0.95rem;
-  max-width: 34ch;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.84);
-  line-height: 1.5;
+  margin-bottom: 0.85rem;
+  max-width: 38ch;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.35;
 }
 
 .footer-newsletter .newsletter-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.7rem;
+  column-gap: 0.8rem;
+  row-gap: 0.55rem;
+  align-items: end;
 }
 
 .footer-newsletter input[type="email"] {
   min-width: 0;
-  height: 42px;
-  padding: 0 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.96);
-  color: #1c2340;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.34);
+  background: transparent;
+  color: #fff;
   font: inherit;
 }
 
 .footer-newsletter input[type="email"]::placeholder {
-  color: #717898;
+  color: rgba(255, 255, 255, 0.58);
 }
 
 .footer-newsletter button[type="submit"] {
-  min-width: 118px;
-  height: 42px;
-  padding: 0 1rem;
+  min-width: 104px;
+  height: 28px;
+  padding: 0 0.85rem;
   border: 1px solid #fff;
+  border-radius: 3px;
   background: #fff;
   color: var(--brand-blue);
-  font: inherit;
+  font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
@@ -118,8 +133,8 @@ footer {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
   line-height: 1.45;
 }
 
