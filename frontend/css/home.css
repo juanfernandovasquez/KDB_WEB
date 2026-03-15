@@ -39,7 +39,8 @@ body[data-page="home"] .intro-heading {
 body[data-page="home"] .intro-heading h2 {
   margin-top: 0;
   margin-bottom: 0;
-  max-width: 8.4ch;
+  width: 100%;
+  max-width: none;
   color: var(--brand-gold);
   font-size: clamp(2.2rem, 3vw, 3.4375rem);
   font-weight: 500;
