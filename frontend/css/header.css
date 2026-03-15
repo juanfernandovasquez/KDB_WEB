@@ -432,6 +432,8 @@
   }
 
   .header-inner {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     gap: 0.8rem;
   }
 
@@ -446,10 +448,14 @@
   }
 
   .header-actions {
+    width: 44px;
     gap: 0;
+    margin-left: 0;
+    justify-content: center;
   }
 
   .logo {
+    grid-column: 2;
     justify-self: center;
     margin: 0 auto;
   }
@@ -469,5 +475,9 @@
 
   .search-modal {
     width: min(92vw, 360px);
+  }
+
+  .header-inner {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
   }
 }
