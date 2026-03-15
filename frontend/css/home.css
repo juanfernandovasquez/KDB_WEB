@@ -35,7 +35,7 @@ body[data-page="home"] .intro-heading {
   position: relative;
   z-index: 2;
   margin-bottom: 0;
-  margin-left: -4ch;
+  margin-left: -4.5ch;
 }
 
 body[data-page="home"] .intro-heading h2 {
