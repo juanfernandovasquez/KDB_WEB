@@ -22,7 +22,7 @@ body[data-page="nosotros"] .story-card {
     "heading ."
     "image copy";
   column-gap: clamp(2rem, 4vw, 4.2rem);
-  row-gap: 0.75rem;
+  row-gap: 0.5rem;
   align-items: start;
 }
 
@@ -54,7 +54,7 @@ body[data-page="nosotros"] .story-image {
   grid-area: image;
   position: relative;
   z-index: 1;
-  margin-top: calc(var(--story-heading-size) * -0.5);
+  margin-top: calc(var(--story-heading-size) * -0.6);
 }
 
 body[data-page="nosotros"] .story-image img {
@@ -173,7 +173,7 @@ body[data-page="nosotros"] .team-header {
   }
 
   body[data-page="nosotros"] .story-image {
-    margin-top: calc(var(--story-heading-size) * -0.22);
+    margin-top: calc(var(--story-heading-size) * -0.3);
   }
 
   body[data-page="nosotros"] .story-copy {
