@@ -10,6 +10,12 @@ function safeText(value) {
   return (value || '').toString();
 }
 
+function normalizeRichText(value) {
+  const html = decodeHtmlValue(value).trim();
+  if (!html) return '';
+  return /<[^>]+>/.test(html) ? html : `<p>${html}</p>`;
+}
+
 async function loadNosotrosPage() {
   const page = 'nosotros';
   const data = await fetchPageData(page);
@@ -99,7 +105,7 @@ function renderNosotrosMessage(about) {
   section.classList.remove('hidden');
   titleEl.innerHTML = '';
   titleEl.style.display = 'none';
-  contentEl.innerHTML = decodeHtmlValue(about.content || '');
+  contentEl.innerHTML = normalizeRichText(about.content || '');
   primaryEl.style.display = 'none';
   secondaryEl.style.display = 'none';
 }
@@ -110,7 +116,7 @@ function renderTeam(team, teamMeta) {
   if (header) {
     const titleEl = header.querySelector('h2');
     const subEl = header.querySelector('p');
-    if (titleEl) titleEl.textContent = teamMeta.title || 'Conoce a nuestro equipo';
+    if (titleEl) titleEl.innerHTML = normalizeRichText(teamMeta.title || 'Conoce a <strong>nuestro equipo</strong>');
     if (subEl) subEl.textContent = teamMeta.subtitle || 'Especialistas en tributacion y corporativo, listos para acompanar tus decisiones.';
   }
   if (!grid) return;
