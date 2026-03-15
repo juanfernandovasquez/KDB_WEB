@@ -17,6 +17,9 @@ body[data-page="home"] .intro-card {
   width: var(--home-content-width);
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.86fr);
+  grid-template-areas:
+    "heading copy"
+    "image copy";
   gap: clamp(2rem, 5vw, 5.8rem);
   align-items: start;
   padding: 0;
@@ -24,12 +27,8 @@ body[data-page="home"] .intro-card {
   box-shadow: none;
 }
 
-body[data-page="home"] .intro-visual {
-  display: grid;
-  gap: 1.15rem;
-}
-
 body[data-page="home"] .intro-heading {
+  grid-area: heading;
   width: 100%;
 }
 
@@ -52,7 +51,13 @@ body[data-page="home"] .intro-heading h2 strong {
 }
 
 body[data-page="home"] .intro-copy {
-  padding-top: clamp(3.4rem, 6vw, 4.75rem);
+  grid-area: copy;
+  align-self: start;
+  padding-top: 0;
+}
+
+body[data-page="home"] .intro-image {
+  grid-area: image;
 }
 
 body[data-page="home"] .intro-text p {
@@ -132,11 +137,11 @@ body[data-page="home"] .intro-image img {
 
   body[data-page="home"] .intro-card {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "heading"
+      "image"
+      "copy";
     gap: 1.5rem;
-  }
-
-  body[data-page="home"] .intro-copy {
-    padding-top: 0;
   }
 
   body[data-page="home"] .intro-heading h2 {
