@@ -52,6 +52,11 @@ IMG_CSS_SANITIZER = CSSSanitizer(
     ]
 )
 
+TITLE_ALLOWED_TAGS = ["b", "strong", "i", "em", "u", "br", "span"]
+TITLE_ALLOWED_ATTRIBUTES = {
+    "span": ["class", "style"],
+}
+
 
 def fetch_company():
     conn = get_conn()
@@ -185,6 +190,30 @@ def fetch_about(page):
 
 
 def save_about(page, about):
+    title_raw = about.get("title") or ""
+    content_raw = about.get("content") or ""
+    try:
+        title = bleach.clean(
+            title_raw,
+            tags=TITLE_ALLOWED_TAGS,
+            attributes=TITLE_ALLOWED_ATTRIBUTES,
+            css_sanitizer=IMG_CSS_SANITIZER,
+            strip=True,
+        )
+    except Exception:
+        title = title_raw
+    try:
+        allowed_protocols = list(bleach.sanitizer.ALLOWED_PROTOCOLS)
+        content = bleach.clean(
+            content_raw,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            protocols=allowed_protocols,
+            css_sanitizer=IMG_CSS_SANITIZER,
+            strip=True,
+        )
+    except Exception:
+        content = content_raw
     fields = [
         "title",
         "content",
@@ -194,7 +223,8 @@ def save_about(page, about):
         "secondary_label",
         "secondary_href",
     ]
-    values = [about.get(f) for f in fields]
+    normalized = {**about, "title": title, "content": content}
+    values = [normalized.get(f) for f in fields]
     conn = get_conn()
     with conn:
         conn.execute(

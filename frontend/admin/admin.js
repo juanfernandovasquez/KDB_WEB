@@ -1040,16 +1040,23 @@ let currentAdminUserId = null;
     return editor ? editor.innerHTML : getVal("about-content");
   };
 
+  const getAboutTitleHTML = () => {
+    const editor = q("about-title-editor");
+    return editor ? editor.innerHTML : getVal("about-title");
+  };
+
   const getStoryHTML = () => {
     const editor = q("story-content-editor");
     return editor ? editor.innerHTML : getVal("story-paragraphs");
   };
 
   function readAboutForm() {
+    const title = getAboutTitleHTML();
     const content = getAboutHTML();
+    setVal("about-title", title);
     setVal("about-content", content);
     return {
-      title: getVal("about-title"),
+      title,
       content,
       image_url: getVal("about-image"),
       primary_label: getVal("about-primary-label"),
@@ -1078,6 +1085,10 @@ let currentAdminUserId = null;
 
   function setAboutForm(about = {}) {
     setVal("about-title", about.title || "");
+    const titleEditor = q("about-title-editor");
+    if (titleEditor) {
+      titleEditor.innerHTML = about.title || "";
+    }
     setVal("about-content", about.content || "");
     const editor = q("about-content-editor");
     if (editor) {
@@ -2880,6 +2891,7 @@ let currentAdminUserId = null;
     bind("legal-save", saveLegalPage);
     bind("legal-save-bottom", saveLegalPage);
     bind("legal-cancel", () => loadLegalPage(currentLegalPage));
+    setupRichEditor("about-title-toolbar", "about-title-editor");
     setupRichEditor("about-toolbar", "about-content-editor");
     setupRichEditor("story-toolbar", "story-content-editor");
     setupRichEditor("kdbweb-content-toolbar", "kdbweb-content-editor");

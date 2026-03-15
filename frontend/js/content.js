@@ -193,6 +193,11 @@ function setText(id, value) {
   if (el && value) el.textContent = value;
 }
 
+function setHTML(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = value || '';
+}
+
 function setAttr(id, attr, value) {
   const el = document.getElementById(id);
   if (el && value) el.setAttribute(attr, value);
@@ -200,7 +205,7 @@ function setAttr(id, attr, value) {
 
 function applyHomeIntro(about) {
   if (!about) return;
-  setText('intro-title', about.title);
+  setHTML('intro-title', about.title || '');
   const introContent = document.getElementById('intro-content');
   if (introContent) {
     if (about.content) {
