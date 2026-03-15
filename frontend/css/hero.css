@@ -79,8 +79,8 @@
   color: #fff;
   font-size: var(--hero-title-size);
   line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .hero-text {
@@ -88,7 +88,7 @@
   color: rgba(255, 255, 255, 0.92);
   font-size: var(--hero-text-size);
   line-height: 1.4;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .hero-actions {
@@ -113,7 +113,7 @@
   text-transform: none;
   letter-spacing: 0;
   font-size: var(--hero-btn-font);
-  font-weight: 700;
+  font-weight: 500;
   transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
