@@ -35,6 +35,7 @@ body[data-page="home"] .intro-heading {
   position: relative;
   z-index: 2;
   margin-bottom: 0;
+  margin-left: -2ch;
 }
 
 body[data-page="home"] .intro-heading h2 {
@@ -160,6 +161,7 @@ body[data-page="home"] .intro-image img {
 
   body[data-page="home"] .intro-heading {
     margin-bottom: 0;
+    margin-left: 0;
   }
 
   body[data-page="home"] .intro-image {
