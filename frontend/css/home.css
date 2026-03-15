@@ -18,7 +18,7 @@ body[data-page="home"] .intro-card {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.86fr);
   grid-template-areas:
-    "heading copy"
+    "heading ."
     "image copy";
   gap: clamp(2rem, 5vw, 5.8rem);
   align-items: start;
