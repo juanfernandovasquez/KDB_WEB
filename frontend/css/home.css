@@ -97,7 +97,7 @@ body[data-page="home"] .intro-secondary {
   justify-content: center;
   min-height: 42px;
   padding: 0 1.15rem;
-  border-radius: 999px !important;
+  border-radius: 6px !important;
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.08em;
