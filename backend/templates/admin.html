@@ -135,6 +135,53 @@
           </div>
         </div>
 
+        <div id="story-section" class="section-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Historia</h3>
+              <!-- <p class="small">Solo visible en paginas con historia.</p> -->
+            </div>
+            <button class="collapse-btn" data-collapse-target="story-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="story-body">
+            <div class="grid-2" id="story-image-row">
+              <div>
+                <label>Imagen (URL)</label>
+                <div class="row media-input-row">
+                  <input id="story-image" type="text">
+                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                </div>
+              </div>
+              </div>
+              <label>Titulo</label>
+              <div class="rich-editor">
+                <div class="editor-toolbar" id="story-title-toolbar">
+                  <button type="button" data-cmd="bold"><strong>B</strong></button>
+                  <button type="button" data-cmd="italic"><em>I</em></button>
+                  <button type="button" data-cmd="underline"><u>U</u></button>
+                  <button type="button" data-cmd="removeFormat">Limpiar</button>
+                </div>
+                <div id="story-title-editor" class="editor-surface" contenteditable="true"></div>
+                <textarea id="story-title" class="hidden"></textarea>
+              </div>
+              <label>Contenido</label>
+            <div class="rich-editor">
+              <div class="editor-toolbar" id="story-toolbar">
+                <button type="button" data-cmd="bold"><strong>B</strong></button>
+                <button type="button" data-cmd="italic"><em>I</em></button>
+                <button type="button" data-cmd="underline"><u>U</u></button>
+                <button type="button" data-cmd="insertUnorderedList">Lista</button>
+                <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
+                <button type="button" data-cmd="unlink">Quitar enlace</button>
+                <button type="button" data-cmd="removeFormat">Limpiar</button>
+              </div>
+              <div id="story-content-editor" class="editor-surface" contenteditable="true"></div>
+              <textarea id="story-paragraphs" class="hidden"></textarea>
+            </div>
+          </div>
+        </div>
+
         <div id="about-section" class="section-card hidden">
           <div class="section-head spaced">
             <div>
@@ -188,53 +235,6 @@
               <div><label>Boton primario (enlace)</label><input id="about-primary-href" type="text"></div>
               <div><label>Boton secundario (texto)</label><input id="about-secondary-label" type="text"></div>
               <div><label>Boton secundario (enlace)</label><input id="about-secondary-href" type="text"></div>
-            </div>
-          </div>
-        </div>
-
-        <div id="story-section" class="section-card">
-          <div class="section-head spaced">
-            <div>
-              <h3>Historia</h3>
-              <!-- <p class="small">Solo visible en paginas con historia.</p> -->
-            </div>
-            <button class="collapse-btn" data-collapse-target="story-body">+</button>
-          </div>
-          <div class="collapsible-body collapsed" id="story-body">
-            <div class="grid-2" id="story-image-row">
-              <div>
-                <label>Imagen (URL)</label>
-                <div class="row media-input-row">
-                  <input id="story-image" type="text">
-                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
-                </div>
-              </div>
-              </div>
-              <label>Titulo</label>
-              <div class="rich-editor">
-                <div class="editor-toolbar" id="story-title-toolbar">
-                  <button type="button" data-cmd="bold"><strong>B</strong></button>
-                  <button type="button" data-cmd="italic"><em>I</em></button>
-                  <button type="button" data-cmd="underline"><u>U</u></button>
-                  <button type="button" data-cmd="removeFormat">Limpiar</button>
-                </div>
-                <div id="story-title-editor" class="editor-surface" contenteditable="true"></div>
-                <textarea id="story-title" class="hidden"></textarea>
-              </div>
-              <label>Contenido</label>
-            <div class="rich-editor">
-              <div class="editor-toolbar" id="story-toolbar">
-                <button type="button" data-cmd="bold"><strong>B</strong></button>
-                <button type="button" data-cmd="italic"><em>I</em></button>
-                <button type="button" data-cmd="underline"><u>U</u></button>
-                <button type="button" data-cmd="insertUnorderedList">Lista</button>
-                <button type="button" data-cmd="insertOrderedList">1. Lista</button>
-                <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
-                <button type="button" data-cmd="unlink">Quitar enlace</button>
-                <button type="button" data-cmd="removeFormat">Limpiar</button>
-              </div>
-              <div id="story-content-editor" class="editor-surface" contenteditable="true"></div>
-              <textarea id="story-paragraphs" class="hidden"></textarea>
             </div>
           </div>
         </div>

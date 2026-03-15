@@ -1311,7 +1311,7 @@ let currentAdminUserId = null;
     const hero = isLegal ? [] : serializeCards("#hero-slides .hero-card");
     const team = currentPage === "home" || isLegal ? [] : serializeCards(".team-card-admin");
     const story = readStoryForm();
-    const about = currentPage === "home" && !isLegal ? readAboutForm() : {};
+    const about = (currentPage === "home" || currentPage === "nosotros") && !isLegal ? readAboutForm() : {};
     const services = currentPage === "servicios" ? serializeServices() : [];
     const services_meta =
       currentPage === "servicios"
