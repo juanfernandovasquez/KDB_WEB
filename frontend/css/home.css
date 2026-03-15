@@ -20,7 +20,8 @@ body[data-page="home"] .intro-card {
   grid-template-areas:
     "heading ."
     "image copy";
-  gap: clamp(2rem, 5vw, 5.8rem);
+  column-gap: clamp(2rem, 5vw, 5.8rem);
+  row-gap: 0.5rem;
   align-items: start;
   padding: 0;
   background: transparent;
@@ -63,6 +64,7 @@ body[data-page="home"] .intro-image {
   grid-area: image;
   position: relative;
   z-index: 1;
+  margin-top: -1.7rem;
 }
 
 body[data-page="home"] .intro-text p {
@@ -146,7 +148,8 @@ body[data-page="home"] .intro-image img {
       "heading"
       "image"
       "copy";
-    gap: 1.5rem;
+    row-gap: 1.5rem;
+    column-gap: 0;
   }
 
   body[data-page="home"] .intro-heading h2 {
@@ -156,6 +159,10 @@ body[data-page="home"] .intro-image img {
 
   body[data-page="home"] .intro-heading {
     margin-bottom: 0;
+  }
+
+  body[data-page="home"] .intro-image {
+    margin-top: 0;
   }
 
   body[data-page="home"] .intro-actions {
