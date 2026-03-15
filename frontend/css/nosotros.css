@@ -67,6 +67,7 @@ body[data-page="nosotros"] .story-image img {
 body[data-page="nosotros"] .story-copy {
   grid-area: copy;
   align-self: center;
+  margin-top: 0.85rem;
 }
 
 body[data-page="nosotros"] .story-text p {
@@ -174,6 +175,10 @@ body[data-page="nosotros"] .team-header {
   body[data-page="nosotros"] .story-image {
     margin-top: calc(var(--story-heading-size) * -0.22);
   }
+
+  body[data-page="nosotros"] .story-copy {
+    margin-top: 0.45rem;
+  }
 }
 
 @media (max-width: 767px) {
@@ -207,6 +212,10 @@ body[data-page="nosotros"] .team-header {
 
   body[data-page="nosotros"] .story-title {
     font-size: clamp(1.9rem, 9vw, 2.7rem);
+  }
+
+  body[data-page="nosotros"] .story-copy {
+    margin-top: 0;
   }
 
   body[data-page="nosotros"] .nosotros-message-section {
