@@ -52,7 +52,7 @@ body[data-page="home"] .intro-heading h2 strong {
 
 body[data-page="home"] .intro-copy {
   grid-area: copy;
-  align-self: start;
+  align-self: center;
   padding-top: 0;
 }
 
