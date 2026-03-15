@@ -449,6 +449,11 @@
     gap: 0;
   }
 
+  .logo {
+    justify-self: center;
+    margin: 0 auto;
+  }
+
   .search-panel {
     right: 0;
     left: auto;
