@@ -52,7 +52,7 @@ body[data-page="home"] .intro-heading h2 {
 
 body[data-page="home"] .intro-heading h2 b,
 body[data-page="home"] .intro-heading h2 strong {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 body[data-page="home"] .intro-copy {
