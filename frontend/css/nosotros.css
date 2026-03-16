@@ -271,6 +271,15 @@ body[data-page="nosotros"] .team-hover-copy h3 {
   line-height: 1.15;
 }
 
+body[data-page="nosotros"] .team-hover-copy h3::after,
+body[data-page="nosotros"] .team-card:hover .team-hover-copy h3::after,
+body[data-page="nosotros"] .team-card:active .team-hover-copy h3::after,
+body[data-page="nosotros"] .team-card:focus-within .team-hover-copy h3::after {
+  display: none;
+  content: none;
+  width: 0;
+}
+
 body[data-page="nosotros"] .team-hover-role {
   margin: 0.2rem 0 0;
   color: rgba(255, 255, 255, 0.92);
