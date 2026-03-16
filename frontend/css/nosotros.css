@@ -184,7 +184,7 @@ body[data-page="nosotros"] .team-grid {
   }
 
   body[data-page="nosotros"] .story-heading {
-    margin-left: 0;
+    margin-left: -2.2ch;
     margin-bottom: 0;
   }
 
