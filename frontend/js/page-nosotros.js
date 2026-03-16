@@ -116,7 +116,7 @@ function renderTeam(team, teamMeta) {
   if (header) {
     const titleEl = header.querySelector('h2');
     const subEl = header.querySelector('p');
-    if (titleEl) titleEl.innerHTML = normalizeRichText(teamMeta.title || 'Conoce a <strong>nuestro equipo</strong>');
+    if (titleEl) titleEl.innerHTML = teamMeta.title || 'Conoce a <strong>nuestro equipo</strong>';
     if (subEl) subEl.textContent = teamMeta.subtitle || 'Especialistas en tributacion y corporativo, listos para acompanar tus decisiones.';
   }
   if (!grid) return;

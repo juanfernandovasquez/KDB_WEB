@@ -142,14 +142,14 @@ body[data-page="nosotros"] .team-section {
 
 body[data-page="nosotros"] .team-header {
   text-align: center;
-  width: min(100%, 720px);
-  margin: 0 auto 2.6rem;
+  width: min(100%, 640px);
+  margin: 0 auto 2.75rem;
 }
 
 body[data-page="nosotros"] .team-header h2 {
   margin: 0;
-  color: var(--brand-gold);
-  font-size: clamp(2.35rem, 3.4vw, 3.75rem);
+  color: #b07d2f;
+  font-size: clamp(2.2rem, 3vw, 3.25rem);
   font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -161,11 +161,11 @@ body[data-page="nosotros"] .team-header h2 b {
 }
 
 body[data-page="nosotros"] .team-header p {
-  width: min(100%, 560px);
-  margin: 0.95rem auto 0;
-  color: rgba(43, 43, 43, 0.72);
-  font-size: 0.78rem;
-  line-height: 1.45;
+  width: min(100%, 520px);
+  margin: 0.8rem auto 0;
+  color: rgba(43, 43, 43, 0.82);
+  font-size: 0.68rem;
+  line-height: 1.35;
 }
 
 body[data-page="nosotros"] .team-grid {
@@ -326,7 +326,7 @@ body[data-page="nosotros"] .team-link.team-linkedin {
   }
 
   body[data-page="nosotros"] .team-header h2 {
-    font-size: clamp(1.9rem, 8vw, 2.7rem);
+    font-size: clamp(1.9rem, 8vw, 2.6rem);
   }
 
   body[data-page="nosotros"] .team-grid {
