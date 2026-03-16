@@ -106,7 +106,7 @@ body[data-page="nosotros"] #nosotros-message-content {
 
 body[data-page="nosotros"] #nosotros-message-content p {
   margin: 0;
-  font-size: clamp(1.615rem, 2.72vw, 3.1875rem);
+  font-size: clamp(1.615rem, 2vw, 3.1875rem);
   line-height: 1.38;
   font-weight: 400;
   letter-spacing: -0.02em;
