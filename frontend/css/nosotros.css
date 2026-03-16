@@ -149,9 +149,10 @@ body[data-page="nosotros"] .team-header {
 body[data-page="nosotros"] .team-header h2 {
   margin: 0;
   color: var(--brand-gold);
-  font-size: clamp(2rem, 3vw, 2.9rem);
+  font-size: clamp(2.35rem, 3.4vw, 3.75rem);
   font-weight: 500;
   line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 body[data-page="nosotros"] .team-header h2 strong,
@@ -160,11 +161,11 @@ body[data-page="nosotros"] .team-header h2 b {
 }
 
 body[data-page="nosotros"] .team-header p {
-  width: min(100%, 620px);
-  margin: 0.9rem auto 0;
+  width: min(100%, 560px);
+  margin: 0.95rem auto 0;
   color: rgba(43, 43, 43, 0.72);
-  font-size: 0.74rem;
-  line-height: 1.5;
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 body[data-page="nosotros"] .team-grid {
