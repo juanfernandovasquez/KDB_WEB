@@ -124,17 +124,28 @@ function renderTeam(team, teamMeta) {
   if (!members.length) return;
   grid.innerHTML = '';
   members.forEach((member) => {
+    const linkedin = safeText(member.linkedin || '#');
+    const description = safeText(member.more_url);
+    const hasLinkedin = linkedin && linkedin !== '#';
     const card = document.createElement('article');
     card.className = 'team-card';
     card.innerHTML = `
       <div class="team-photo">
         <img src="${safeText(member.image_url || member.image)}" alt="${safeText(member.name) || 'Miembro del equipo'}" />
-        <div class="team-overlay">
+        <div class="team-overlay team-overlay-default">
           <div class="team-meta">
             <h3>${safeText(member.name)}</h3>
             <p>${safeText(member.role)}</p>
           </div>
-          <a class="team-link team-linkedin" href="${safeText(member.linkedin || '#')}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+        </div>
+        <div class="team-overlay team-overlay-hover">
+          <div class="team-hover-copy">
+            <h3>${safeText(member.name)}</h3>
+            <p class="team-hover-role">${safeText(member.role)}</p>
+            <div class="team-hover-divider"></div>
+            <p class="team-hover-description">${description}</p>
+          </div>
+          <a class="team-link team-linkedin${hasLinkedin ? '' : ' is-hidden'}" href="${linkedin || '#'}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
             <img src="./assets/icons/linkedin.png" alt="" />
           </a>
         </div>

@@ -205,10 +205,30 @@ body[data-page="nosotros"] .team-photo img {
 
 body[data-page="nosotros"] .team-overlay {
   opacity: 1;
+  transition: opacity 0.28s ease;
+}
+
+body[data-page="nosotros"] .team-overlay-default {
   justify-content: flex-end;
   align-items: flex-start;
   padding: 1.2rem 1rem 1rem;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.08) 38%, rgba(0, 0, 0, 0.58) 100%);
+}
+
+body[data-page="nosotros"] .team-overlay-hover {
+  opacity: 0;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.2rem 1.1rem 1rem;
+  background: var(--brand-blue);
+}
+
+body[data-page="nosotros"] .team-card:hover .team-overlay-default {
+  opacity: 0;
+}
+
+body[data-page="nosotros"] .team-card:hover .team-overlay-hover {
+  opacity: 1;
 }
 
 body[data-page="nosotros"] .team-meta {
@@ -230,13 +250,61 @@ body[data-page="nosotros"] .team-meta p {
   line-height: 1.35;
 }
 
+body[data-page="nosotros"] .team-hover-copy {
+  width: 100%;
+}
+
+body[data-page="nosotros"] .team-hover-copy h3 {
+  margin: 0;
+  color: var(--brand-gold);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+body[data-page="nosotros"] .team-hover-role {
+  margin: 0.2rem 0 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+body[data-page="nosotros"] .team-hover-divider {
+  width: 100%;
+  margin: 0.9rem 0 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body[data-page="nosotros"] .team-hover-description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
 body[data-page="nosotros"] .team-card > h3,
 body[data-page="nosotros"] .team-card > p {
   display: none;
 }
 
 body[data-page="nosotros"] .team-link.team-linkedin {
-  display: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body[data-page="nosotros"] .team-link.team-linkedin img {
+  width: 14px;
+  height: 14px;
+}
+
+body[data-page="nosotros"] .team-link.team-linkedin.is-hidden {
+  visibility: hidden;
 }
 
 @media (max-width: 1150px) {
