@@ -164,8 +164,8 @@ body[data-page="nosotros"] .team-header p {
   width: min(100%, 520px);
   margin: 0.8rem auto 0;
   color: rgba(43, 43, 43, 0.82);
-  font-size: 0.68rem;
-  line-height: 1.35;
+  font-size: 1rem;
+  line-height: 1.68;
 }
 
 body[data-page="nosotros"] .team-grid {
