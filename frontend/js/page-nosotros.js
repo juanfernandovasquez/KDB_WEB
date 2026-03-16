@@ -16,6 +16,8 @@ function normalizeRichText(value) {
   return /<[^>]+>/.test(html) ? html : `<p>${html}</p>`;
 }
 
+let currentTeamMembers = [];
+
 async function loadNosotrosPage() {
   const page = 'nosotros';
   const data = await fetchPageData(page);
@@ -122,13 +124,16 @@ function renderTeam(team, teamMeta) {
   if (!grid) return;
   const members = team && team.length ? team : [];
   if (!members.length) return;
+  currentTeamMembers = members;
   grid.innerHTML = '';
-  members.forEach((member) => {
+  members.forEach((member, idx) => {
     const linkedin = safeText(member.linkedin || '#');
     const description = safeText(member.more_url);
     const hasLinkedin = linkedin && linkedin !== '#';
     const card = document.createElement('article');
     card.className = 'team-card';
+    card.dataset.memberIndex = String(idx);
+    card.tabIndex = 0;
     card.innerHTML = `
       <div class="team-photo">
         <img src="${safeText(member.image_url || member.image)}" alt="${safeText(member.name) || 'Miembro del equipo'}" />
@@ -155,9 +160,82 @@ function renderTeam(team, teamMeta) {
   });
 }
 
+function openTeamModal(member) {
+  const modal = document.getElementById('team-modal');
+  if (!modal || !member) return;
+  const image = document.getElementById('team-modal-image');
+  const name = document.getElementById('team-modal-name');
+  const role = document.getElementById('team-modal-role');
+  const description = document.getElementById('team-modal-description');
+  const linkedin = document.getElementById('team-modal-linkedin');
+
+  if (image) {
+    image.src = safeText(member.image_url || member.image);
+    image.alt = safeText(member.name) || 'Miembro del equipo';
+  }
+  if (name) name.textContent = safeText(member.name);
+  if (role) role.textContent = safeText(member.role);
+  if (description) description.textContent = safeText(member.more_url);
+  if (linkedin) {
+    const href = safeText(member.linkedin || '#');
+    linkedin.href = href || '#';
+    linkedin.style.display = href && href !== '#' ? '' : 'none';
+  }
+
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('team-modal-open');
+}
+
+function closeTeamModal() {
+  const modal = document.getElementById('team-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('team-modal-open');
+}
+
+function bindTeamModal() {
+  const grid = document.querySelector('.team-grid');
+  const closeBtn = document.getElementById('team-modal-close');
+  const backdrop = document.getElementById('team-modal-backdrop');
+  if (grid && !grid.dataset.modalBound) {
+    grid.dataset.modalBound = '1';
+    grid.addEventListener('click', (event) => {
+      const card = event.target.closest('.team-card');
+      if (!card) return;
+      const idx = Number(card.dataset.memberIndex);
+      openTeamModal(currentTeamMembers[idx]);
+    });
+    grid.addEventListener('keydown', (event) => {
+      const card = event.target.closest('.team-card');
+      if (!card) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      const idx = Number(card.dataset.memberIndex);
+      openTeamModal(currentTeamMembers[idx]);
+    });
+  }
+  if (closeBtn && !closeBtn.dataset.modalBound) {
+    closeBtn.dataset.modalBound = '1';
+    closeBtn.addEventListener('click', closeTeamModal);
+  }
+  if (backdrop && !backdrop.dataset.modalBound) {
+    backdrop.dataset.modalBound = '1';
+    backdrop.addEventListener('click', closeTeamModal);
+  }
+  if (!document.body.dataset.teamModalBound) {
+    document.body.dataset.teamModalBound = '1';
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeTeamModal();
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const page = document.body?.dataset?.page;
   if (page === 'nosotros') {
+    bindTeamModal();
     loadNosotrosPage();
   }
 });

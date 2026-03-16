@@ -185,6 +185,7 @@ body[data-page="nosotros"] .team-card {
   background: transparent;
   box-shadow: none;
   overflow: visible;
+  cursor: pointer;
 }
 
 body[data-page="nosotros"] .team-card:hover {
@@ -325,6 +326,118 @@ body[data-page="nosotros"] .team-link.team-linkedin.is-hidden {
   visibility: hidden;
 }
 
+body.team-modal-open {
+  overflow: hidden;
+}
+
+body[data-page="nosotros"] .team-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+}
+
+body[data-page="nosotros"] .team-modal.hidden {
+  display: none;
+}
+
+body[data-page="nosotros"] .team-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.48);
+}
+
+body[data-page="nosotros"] .team-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 32px, 820px);
+  margin: min(14vh, 120px) auto 0;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.78fr) minmax(280px, 1fr);
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.24);
+}
+
+body[data-page="nosotros"] .team-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  color: rgba(43, 43, 43, 0.62);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+body[data-page="nosotros"] .team-modal-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+  object-fit: cover;
+  display: block;
+}
+
+body[data-page="nosotros"] .team-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 2.2rem 2rem 1.6rem;
+}
+
+body[data-page="nosotros"] .team-modal-content h3 {
+  margin: 0;
+  color: var(--brand-gold);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+body[data-page="nosotros"] .team-modal-role {
+  margin: 0;
+  color: var(--brand-gray);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+body[data-page="nosotros"] .team-modal-divider {
+  width: 100%;
+  margin: 0.35rem 0 0.45rem;
+  border-top: 1px solid rgba(43, 43, 43, 0.28);
+}
+
+body[data-page="nosotros"] .team-modal-description {
+  margin: 0;
+  color: var(--brand-gray);
+  font-size: 1rem;
+  line-height: 1.58;
+}
+
+body[data-page="nosotros"] .team-modal-social {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: auto;
+  padding-top: 1.2rem;
+}
+
+body[data-page="nosotros"] .team-modal-social-link {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px !important;
+  border: 1px solid var(--brand-blue);
+  background: var(--brand-blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body[data-page="nosotros"] .team-modal-social-link img {
+  width: 15px;
+  height: 15px;
+}
+
 @media (max-width: 1150px) {
   body[data-page="nosotros"] {
     --story-heading-size: clamp(2rem, 3vw, 2.9rem);
@@ -361,6 +474,11 @@ body[data-page="nosotros"] .team-link.team-linkedin.is-hidden {
 
   body[data-page="nosotros"] .story-copy {
     margin-top: 0.45rem;
+  }
+
+  body[data-page="nosotros"] .team-modal-dialog {
+    width: min(100% - 24px, 720px);
+    grid-template-columns: minmax(220px, 0.82fr) minmax(260px, 1fr);
   }
 }
 
@@ -422,5 +540,23 @@ body[data-page="nosotros"] .team-link.team-linkedin.is-hidden {
 
   body[data-page="nosotros"] .team-card {
     max-width: 100%;
+  }
+
+  body[data-page="nosotros"] .team-modal-dialog {
+    width: min(100% - 16px, 420px);
+    margin-top: 4vh;
+    grid-template-columns: 1fr;
+  }
+
+  body[data-page="nosotros"] .team-modal-media img {
+    min-height: 260px;
+  }
+
+  body[data-page="nosotros"] .team-modal-content {
+    padding: 1.35rem 1.1rem 1.1rem;
+  }
+
+  body[data-page="nosotros"] .team-modal-content h3 {
+    font-size: 1.55rem;
   }
 }
