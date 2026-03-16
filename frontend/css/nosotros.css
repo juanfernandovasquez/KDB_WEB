@@ -172,6 +172,20 @@ body[data-page="nosotros"] .team-grid {
   justify-items: stretch;
 }
 
+@media (max-width: 1150px) {
+  body[data-page="nosotros"] {
+    --story-heading-size: clamp(2rem, 3vw, 2.9rem);
+  }
+
+  body[data-page="nosotros"] .story-heading {
+    margin-left: -1ch;
+  }
+
+  body[data-page="nosotros"] .story-image {
+    margin-top: calc(var(--story-heading-size) * -0.45);
+  }
+}
+
 @media (max-width: 1023px) {
   body[data-page="nosotros"] {
     --nosotros-content-width: min(100% - 40px, 920px);
