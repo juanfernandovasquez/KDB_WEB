@@ -243,6 +243,15 @@ body[data-page="nosotros"] .team-meta h3 {
   line-height: 1.05;
 }
 
+body[data-page="nosotros"] .team-meta h3::after,
+body[data-page="nosotros"] .team-card:hover .team-meta h3::after,
+body[data-page="nosotros"] .team-card:active .team-meta h3::after,
+body[data-page="nosotros"] .team-card:focus-within .team-meta h3::after {
+  display: none;
+  content: none;
+  width: 0;
+}
+
 body[data-page="nosotros"] .team-meta p {
   margin: 0.25rem 0 0;
   color: rgba(255, 255, 255, 0.88);
