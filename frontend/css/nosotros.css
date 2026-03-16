@@ -136,20 +136,20 @@ body[data-page="nosotros"] .nosotros-team-divider {
 body[data-page="nosotros"] .team-section {
   width: var(--nosotros-content-width);
   margin: 0 auto;
-  padding: 0 0 4rem;
+  padding: 0 0 4.5rem;
   display: block;
 }
 
 body[data-page="nosotros"] .team-header {
   text-align: center;
-  width: min(100%, 760px);
-  margin: 0 auto 2.5rem;
+  width: min(100%, 720px);
+  margin: 0 auto 2.6rem;
 }
 
 body[data-page="nosotros"] .team-header h2 {
   margin: 0;
   color: var(--brand-gold);
-  font-size: clamp(2.1rem, 3.2vw, 3.2rem);
+  font-size: clamp(2rem, 3vw, 2.9rem);
   font-weight: 500;
   line-height: 1.05;
 }
@@ -161,15 +161,81 @@ body[data-page="nosotros"] .team-header h2 b {
 
 body[data-page="nosotros"] .team-header p {
   width: min(100%, 620px);
-  margin: 0.85rem auto 0;
+  margin: 0.9rem auto 0;
   color: rgba(43, 43, 43, 0.72);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.74rem;
+  line-height: 1.5;
 }
 
 body[data-page="nosotros"] .team-grid {
   width: 100%;
-  justify-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+  max-width: 980px;
+  margin: 0 auto;
+  justify-items: center;
+}
+
+body[data-page="nosotros"] .team-card {
+  width: 100%;
+  max-width: 290px;
+  min-height: auto;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+body[data-page="nosotros"] .team-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+body[data-page="nosotros"] .team-photo {
+  height: 320px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+body[data-page="nosotros"] .team-photo img {
+  height: 320px;
+  box-shadow: none;
+}
+
+body[data-page="nosotros"] .team-overlay {
+  opacity: 1;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 1.2rem 1rem 1rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.08) 38%, rgba(0, 0, 0, 0.58) 100%);
+}
+
+body[data-page="nosotros"] .team-meta {
+  width: 100%;
+}
+
+body[data-page="nosotros"] .team-meta h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+body[data-page="nosotros"] .team-meta p {
+  margin: 0.25rem 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+body[data-page="nosotros"] .team-card > h3,
+body[data-page="nosotros"] .team-card > p {
+  display: none;
+}
+
+body[data-page="nosotros"] .team-link.team-linkedin {
+  display: none;
 }
 
 @media (max-width: 1150px) {
@@ -260,5 +326,14 @@ body[data-page="nosotros"] .team-grid {
 
   body[data-page="nosotros"] .team-header h2 {
     font-size: clamp(1.9rem, 8vw, 2.7rem);
+  }
+
+  body[data-page="nosotros"] .team-grid {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+  }
+
+  body[data-page="nosotros"] .team-card {
+    max-width: 100%;
   }
 }

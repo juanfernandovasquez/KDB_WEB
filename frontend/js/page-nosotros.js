@@ -130,13 +130,15 @@ function renderTeam(team, teamMeta) {
       <div class="team-photo">
         <img src="${safeText(member.image_url || member.image)}" alt="${safeText(member.name) || 'Miembro del equipo'}" />
         <div class="team-overlay">
+          <div class="team-meta">
+            <h3>${safeText(member.name)}</h3>
+            <p>${safeText(member.role)}</p>
+          </div>
           <a class="team-link team-linkedin" href="${safeText(member.linkedin || '#')}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
             <img src="./assets/icons/linkedin.png" alt="" />
           </a>
         </div>
       </div>
-      <h3>${safeText(member.name)}</h3>
-      <p>${safeText(member.role)}</p>
     `;
     grid.appendChild(card);
   });
