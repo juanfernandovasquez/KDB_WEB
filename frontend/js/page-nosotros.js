@@ -16,8 +16,16 @@ function normalizeRichText(value) {
   return /<[^>]+>/.test(html) ? html : `<p>${html}</p>`;
 }
 
+function stripHtml(value) {
+  const html = decodeHtmlValue(value);
+  if (!html) return '';
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return (div.textContent || div.innerText || '').trim();
+}
+
 function buildExcerpt(value, maxLength = 110) {
-  const text = safeText(value).replace(/\s+/g, ' ').trim();
+  const text = stripHtml(value).replace(/\s+/g, ' ').trim();
   if (!text) return '';
   const firstSentence = text.match(/.+?[.!?](\s|$)/);
   const source = firstSentence ? firstSentence[0].trim() : text;
@@ -185,7 +193,7 @@ function openTeamModal(member) {
   }
   if (name) name.textContent = safeText(member.name);
   if (role) role.textContent = safeText(member.role);
-  if (description) description.textContent = safeText(member.more_url);
+  if (description) description.innerHTML = normalizeRichText(member.more_url);
   if (linkedin) {
     const href = safeText(member.linkedin || '#');
     linkedin.href = href || '#';

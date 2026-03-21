@@ -173,6 +173,7 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 .editor-surface { min-height: 160px; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: #fff; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
 .editor-surface:focus { outline: 2px solid rgba(11, 59, 145, 0.2); border-color: var(--blue); }
 .service-card-admin textarea { min-height: 90px; }
+.team-description-editor .editor-surface { min-height: 220px; }
 .form-select { width: 100%; padding: 0.55rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: var(--text); }
 .editor-surface img { max-width: 100%; height: auto; }
 .editor-surface img { display:block; margin:0 auto 1rem auto; }

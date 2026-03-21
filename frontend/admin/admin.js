@@ -834,10 +834,10 @@ let currentAdminUserId = null;
   };
 
   const teamCard = (member = {}, idx = 0) => {
-    const val = (field) => safe(member[field]);
-    const uid = safe(member._uid || member.id || `member-${idx}-${Date.now()}`);
-    return `
-      <div class="card team-card-admin" draggable="true" data-uid="${uid}">
+      const val = (field) => safe(member[field]);
+      const uid = safe(member._uid || member.id || `member-${idx}-${Date.now()}`);
+      return `
+        <div class="card team-card-admin" draggable="true" data-uid="${uid}">
         <div class="row between">
           <div class="small">Miembro</div>
           <button type="button" class="danger small-btn" data-action="remove-team">Eliminar</button>
@@ -845,26 +845,50 @@ let currentAdminUserId = null;
         <label>Nombre</label><input type="text" data-field="name" value="${val("name")}" placeholder="${val("name")}">
         <label>Cargo</label><input type="text" data-field="role" value="${val("role")}" placeholder="${val("role")}">
         <label>Imagen (URL)</label>
-        <div class="row media-input-row">
-          <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
-          <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
-        </div>
-        <label>LinkedIn</label><input type="text" data-field="linkedin" value="${val("linkedin")}" placeholder="${val("linkedin")}">
-        <label>Descripcion completa</label><textarea data-field="more_url" rows="10" placeholder="Resumen y detalle del miembro...">${val("more_url")}</textarea>
+          <div class="row media-input-row">
+            <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
+            <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+          </div>
+          <label>LinkedIn</label><input type="text" data-field="linkedin" value="${val("linkedin")}" placeholder="${val("linkedin")}">
+          <label>Descripcion completa</label>
+          <div class="rich-editor team-description-editor">
+            <div class="editor-toolbar" id="team-description-toolbar-${uid}">
+              <button type="button" data-cmd="bold"><strong>B</strong></button>
+              <button type="button" data-cmd="italic"><em>I</em></button>
+              <button type="button" data-cmd="underline"><u>U</u></button>
+              <button type="button" data-cmd="insertUnorderedList">Lista</button>
+              <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+              <button type="button" data-cmd="createLink">Enlace</button>
+              <button type="button" data-cmd="unlink">Quitar enlace</button>
+              <button type="button" data-cmd="removeFormat">Limpiar</button>
+            </div>
+            <div id="team-description-editor-${uid}" class="editor-surface" contenteditable="true" data-editor-field="more_url">${member.more_url || ""}</div>
+          </div>
         </div>
       `;
     };
-
-  function serializeCards(selector) {
-    return Array.from(document.querySelectorAll(selector)).map((card) => {
-      const inputs = card.querySelectorAll("input, textarea");
-      const obj = { _uid: card.dataset.uid };
-      inputs.forEach((input) => {
-        obj[input.dataset.field] = (input.value || "").trim();
+  
+    function serializeCards(selector) {
+      return Array.from(document.querySelectorAll(selector)).map((card) => {
+        const inputs = card.querySelectorAll("input, textarea");
+        const obj = { _uid: card.dataset.uid };
+        inputs.forEach((input) => {
+          obj[input.dataset.field] = (input.value || "").trim();
+        });
+        card.querySelectorAll("[data-editor-field]").forEach((editor) => {
+          obj[editor.dataset.editorField] = serializeEditorContent(editor).trim();
+        });
+        return obj;
       });
-      return obj;
-    });
-  }
+    }
+
+    const initTeamDescriptionEditors = (scope = document) => {
+      scope.querySelectorAll(".team-card-admin").forEach((card) => {
+        const uid = card.dataset.uid;
+        if (!uid) return;
+        setupRichEditor(`team-description-toolbar-${uid}`, `team-description-editor-${uid}`);
+      });
+    };
 
   function serializeServices() {
     return Array.from(document.querySelectorAll("#services-cards .service-card-admin")).map((card) => {
@@ -1304,13 +1328,14 @@ let currentAdminUserId = null;
     const addTeamBtn = q("add-team");
     if (addTeamBtn) addTeamBtn.style.display = isHome || isServicios || isLegal ? "none" : "";
 
-    if (!isHome && !isServicios && !isLegal) {
-      const team = data.team || [];
-      (team.length ? team : [{}]).forEach((m, idx) => {
-        if (!m._uid) m._uid = m.id || `member-${idx}-${Date.now()}`;
-        teamCont.insertAdjacentHTML("beforeend", teamCard(m, idx));
-      });
-    }
+      if (!isHome && !isServicios && !isLegal) {
+        const team = data.team || [];
+        (team.length ? team : [{}]).forEach((m, idx) => {
+          if (!m._uid) m._uid = m.id || `member-${idx}-${Date.now()}`;
+          teamCont.insertAdjacentHTML("beforeend", teamCard(m, idx));
+        });
+        initTeamDescriptionEditors(teamCont);
+      }
   }
 
   async function savePage() {
@@ -2950,6 +2975,7 @@ let currentAdminUserId = null;
       const cont = q("team-cards");
       const m = { _uid: `member-${Date.now()}` };
       cont.insertAdjacentHTML("beforeend", teamCard(m, cont.children.length));
+      initTeamDescriptionEditors(cont);
     });
     bind("cancel-page", () => {
       if (!currentPage) return;
