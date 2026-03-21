@@ -48,7 +48,14 @@
     nextItems.forEach((p) => {
       const catName = p.category ? (typeof p.category === 'object' ? p.category.name : p.category) : '';
       const categoryHtml = catName ? `<span class="category-badge">${escapeHtml(catName)}</span>` : '';
-      const date = p.published_at ? new Date(`${p.published_at}T00:00:00Z`).toLocaleDateString('es-ES', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      const date = p.published_at
+        ? new Date(`${p.published_at}T00:00:00Z`).toLocaleDateString('es-ES', {
+            timeZone: 'UTC',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
+        : '';
       const snippet = (() => {
         if (p.content_html) {
           const tmp = document.createElement('div');
