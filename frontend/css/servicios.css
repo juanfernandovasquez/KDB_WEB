@@ -1,15 +1,11 @@
 .services-section {
   width: min(100%, 1480px);
   padding: 0;
-  background: rgba(6, 24, 109, 0.045);
+  background: transparent;
 }
 
-.services-side {
-  display: flex;
-  flex-direction: column;
-  gap: 1.15rem;
-  padding: 4.35rem 2rem 4.5rem 2rem;
-  background: #fff;
+.services-shell {
+  background: linear-gradient(90deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
 }
 
 .services-header {
@@ -40,6 +36,18 @@
   grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
   gap: clamp(4.5rem, 8vw, 8.5rem);
   align-items: start;
+  background: transparent;
+}
+
+.services-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 4.35rem 2rem 4.5rem 2rem;
+  background: transparent;
+}
+
+.services-detail-side {
   background: transparent;
 }
 
@@ -264,7 +272,11 @@
 @media (max-width: 1023px) {
   .services-section {
     width: min(100%, 1120px);
-    background: rgba(6, 24, 109, 0.045);
+    background: transparent;
+  }
+
+  .services-shell {
+    background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
   }
 
   .services-side {
