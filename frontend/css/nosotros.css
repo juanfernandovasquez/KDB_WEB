@@ -560,6 +560,7 @@ body[data-page="nosotros"] .team-modal-social-link img {
     display: block;
     height: min(88vh, 760px);
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   body[data-page="nosotros"] .team-modal-media {
