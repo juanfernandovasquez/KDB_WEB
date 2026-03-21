@@ -1,11 +1,12 @@
 .services-section {
   width: min(100%, 1480px);
+  margin: 0 auto;
   padding: 0;
   background: transparent;
 }
 
 .services-shell {
-  background: linear-gradient(90deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
+  background: transparent;
 }
 
 .services-header {
@@ -33,9 +34,9 @@
 
 .services-layout {
   display: grid;
-  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
-  gap: clamp(4.5rem, 8vw, 8.5rem);
-  align-items: start;
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
   background: transparent;
 }
 
@@ -43,12 +44,13 @@
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
-  padding: 4.35rem 2rem 4.5rem 2rem;
-  background: transparent;
+  padding: 4.35rem 2.35rem 4.5rem 2rem;
+  background: #fff;
 }
 
 .services-detail-side {
-  background: transparent;
+  background: rgba(6, 24, 109, 0.045);
+  padding: 4.1rem 0 3.4rem clamp(4rem, 6vw, 5.75rem);
 }
 
 .services-nav {
@@ -172,7 +174,7 @@
 
 .service-detail-panel {
   min-height: 420px;
-  padding: 4.1rem clamp(4.5rem, 7vw, 6.75rem) 3.4rem 0;
+  padding: 0 2.5rem 0 0;
   background: transparent;
 }
 
@@ -276,18 +278,24 @@
   }
 
   .services-shell {
-    background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
+    background: transparent;
   }
 
   .services-side {
     gap: 1rem;
     padding: 2.4rem 1.25rem 1.5rem;
+    background: #fff;
   }
 
   .services-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
     background: transparent;
+  }
+
+  .services-detail-side {
+    background: rgba(6, 24, 109, 0.045);
+    padding: 0 0 2.2rem;
   }
 
   .services-nav {
