@@ -1,74 +1,152 @@
 (() => {
   const escapeHtmlLocal = (str) =>
-    (str || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+    (str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
 
   const fetchFallback = async () => {
-    const base = window.API_BASE || '';
+    const base = window.API_BASE || "";
     const res = await fetch(`${base}/api/page/servicios`);
-    if (!res.ok) throw new Error('No se pudo cargar servicios');
+    if (!res.ok) throw new Error("No se pudo cargar servicios");
     return await res.json();
   };
 
-  document.addEventListener('DOMContentLoaded', async () => {
+  const setText = (el, txt) => {
+    if (el && txt != null) el.textContent = txt;
+  };
+
+  const buildDetailMarkup = (svc = {}) => {
+    const bullets = Array.isArray(svc.bullets) ? svc.bullets.filter(Boolean) : [];
+    return `
+      <div class="service-detail-content">
+        <h3 class="service-detail-title">${escapeHtmlLocal(svc.title || "")}</h3>
+        <p class="service-detail-description">${escapeHtmlLocal(svc.description || "")}</p>
+        ${
+          bullets.length
+            ? `<ul class="service-detail-bullets">${bullets
+                .map((bullet) => `<li>${escapeHtmlLocal(bullet)}</li>`)
+                .join("")}</ul>`
+            : ""
+        }
+      </div>
+    `;
+  };
+
+  const renderDetail = (panel, svc) => {
+    if (!panel) return;
+    const current = panel.querySelector(".service-detail-content");
+    if (!current) {
+      panel.innerHTML = buildDetailMarkup(svc);
+      return;
+    }
+
+    current.classList.add("is-transitioning");
+    window.setTimeout(() => {
+      panel.innerHTML = buildDetailMarkup(svc);
+    }, 180);
+  };
+
+  document.addEventListener("DOMContentLoaded", async () => {
     const page = document.body?.dataset?.page;
-    if (page !== 'servicios') return;
+    if (page !== "servicios") return;
 
-    const grid = document.getElementById('services-grid');
-    const titleEl = document.getElementById('services-title-el');
-    const subtitleEl = document.getElementById('services-subtitle-el');
-
-    const setText = (el, txt) => {
-      if (el && txt != null) el.textContent = txt;
-    };
+    const nav = document.getElementById("services-nav");
+    const detailPanel = document.getElementById("service-detail-panel");
+    const titleEl = document.getElementById("services-title-el");
+    const subtitleEl = document.getElementById("services-subtitle-el");
 
     try {
-      const data = window.apiClient?.getPage ? await window.apiClient.getPage('servicios') : await fetchFallback();
-      console.debug('[services] data fetched', data);
+      const data = window.apiClient?.getPage
+        ? await window.apiClient.getPage("servicios")
+        : await fetchFallback();
       const meta = data?.services_meta || {};
-      const items = data?.services || [];
-      setText(titleEl, meta.title || 'Servicios');
-      setText(subtitleEl, meta.subtitle || '');
-      try {
-        if (Array.isArray(items) && grid) {
-          // Validate first item as representative
-          const first = items[0] || {};
-          const { valid, errors } = await window.validateSchema('service_item', first);
-          if (!valid) {
-            console.warn('[validate] services validation failed, using fallback content', errors);
-            if (grid) grid.innerHTML = '<p class="error">Contenido de servicios inválido. Intenta más tarde.</p>';
-            return;
-          }
-          grid.innerHTML = '';
-          items.forEach((svc) => {
-            const bullets = Array.isArray(svc.bullets) ? svc.bullets : [];
-            const card = document.createElement('article');
-            card.className = 'service-card';
-            card.setAttribute('tabindex', '0');
-            card.innerHTML = `
-              <h3>${escapeHtmlLocal(svc.title || '')}</h3>
-              <p>${escapeHtmlLocal(svc.description || '')}</p>
-              ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtmlLocal(b)}</li>`).join('')}</ul>` : ''}
-            `;
-            if (window.matchMedia('(max-width: 768px)').matches) {
-              card.addEventListener('click', () => {
-                card.classList.add('is-active');
-                setTimeout(() => card.classList.remove('is-active'), 1200);
-              });
-            }
-            grid.appendChild(card);
+      const items = Array.isArray(data?.services) ? data.services : [];
+
+      setText(titleEl, meta.title || "Servicios");
+      setText(subtitleEl, meta.subtitle || "");
+
+      if (!items.length) {
+        if (nav) nav.innerHTML = "";
+        if (detailPanel) {
+          detailPanel.innerHTML = '<p class="service-detail-empty">No hay servicios configurados.</p>';
+        }
+        return;
+      }
+
+      let activeIndex = 0;
+
+      const applyActiveState = (nextIndex) => {
+        activeIndex = nextIndex;
+        if (nav) {
+          nav.querySelectorAll(".service-nav-item").forEach((button, idx) => {
+            const isActive = idx === nextIndex;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-selected", isActive ? "true" : "false");
+            button.setAttribute("tabindex", isActive ? "0" : "-1");
           });
         }
-      } catch (e) {
-        console.warn('[validate] error validating services', e);
+        renderDetail(detailPanel, items[nextIndex]);
+      };
+
+      if (nav) {
+        nav.innerHTML = items
+          .map(
+            (svc, idx) => `
+              <button
+                type="button"
+                class="service-nav-item${idx === 0 ? " is-active" : ""}"
+                role="tab"
+                aria-selected="${idx === 0 ? "true" : "false"}"
+                tabindex="${idx === 0 ? "0" : "-1"}"
+                data-service-index="${idx}"
+              >
+                <span class="service-nav-marker" aria-hidden="true"></span>
+                <span class="service-nav-copy">
+                  <span class="service-nav-index">Servicio ${String(idx + 1).padStart(2, "0")}</span>
+                  <span class="service-nav-title">${escapeHtmlLocal(svc.title || "")}</span>
+                </span>
+              </button>
+            `,
+          )
+          .join("");
+
+        nav.addEventListener("click", (event) => {
+          const button = event.target.closest(".service-nav-item");
+          if (!button) return;
+          const nextIndex = Number(button.dataset.serviceIndex || 0);
+          if (Number.isNaN(nextIndex) || nextIndex === activeIndex) return;
+          applyActiveState(nextIndex);
+        });
+
+        nav.addEventListener("keydown", (event) => {
+          if (!["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          let nextIndex = activeIndex;
+          if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+            nextIndex = (activeIndex + 1) % items.length;
+          } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+            nextIndex = (activeIndex - 1 + items.length) % items.length;
+          } else if (event.key === "Home") {
+            nextIndex = 0;
+          } else if (event.key === "End") {
+            nextIndex = items.length - 1;
+          }
+          applyActiveState(nextIndex);
+          nav.querySelector(`.service-nav-item[data-service-index="${nextIndex}"]`)?.focus();
+        });
       }
+
+      renderDetail(detailPanel, items[0]);
     } catch (err) {
-      console.error('Error cargando servicios', err);
-      if (grid) grid.innerHTML = '<p class="error">No se pudo cargar los servicios. Revisa la consola para más detalles.</p>';
+      console.error("Error cargando servicios", err);
+      if (nav) nav.innerHTML = "";
+      if (detailPanel) {
+        detailPanel.innerHTML =
+          '<p class="service-detail-empty">No se pudo cargar los servicios. Revisa la consola para mas detalles.</p>';
+      }
     }
   });
 })();
