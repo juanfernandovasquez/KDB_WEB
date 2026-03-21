@@ -30,10 +30,10 @@
   overflow: visible;
 }
 
-.category-chip {
+.publications-section .category-chip {
   min-width: 122px;
   padding: 0.6rem 1rem;
-  border-radius: 6px;
+  border-radius: 6px !important;
   border: 1px solid rgba(6, 24, 109, 0.28);
   box-shadow: none;
   font-size: 0.83rem;
@@ -179,8 +179,8 @@
   margin-top: 2.2rem;
 }
 
-.btn.load-more-btn {
-  border-radius: 6px;
+.publications-section .btn.load-more-btn {
+  border-radius: 6px !important;
   box-shadow: none;
   padding: 0.8rem 1.35rem;
 }
