@@ -850,10 +850,10 @@ let currentAdminUserId = null;
           <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
         </div>
         <label>LinkedIn</label><input type="text" data-field="linkedin" value="${val("linkedin")}" placeholder="${val("linkedin")}">
-        <label>Descripcion</label><input type="text" data-field="more_url" value="${val("more_url")}" placeholder="${val("more_url")}">
-      </div>
-    `;
-  };
+        <label>Descripcion completa</label><textarea data-field="more_url" rows="6" placeholder="Resumen y detalle del miembro...">${val("more_url")}</textarea>
+        </div>
+      `;
+    };
 
   function serializeCards(selector) {
     return Array.from(document.querySelectorAll(selector)).map((card) => {

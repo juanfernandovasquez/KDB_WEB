@@ -357,6 +357,7 @@ body[data-page="nosotros"] .team-modal-dialog {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 24px 56px rgba(0, 0, 0, 0.24);
+  max-height: min(78vh, 720px);
 }
 
 body[data-page="nosotros"] .team-modal-close {
@@ -385,6 +386,8 @@ body[data-page="nosotros"] .team-modal-content {
   flex-direction: column;
   gap: 0.7rem;
   padding: 2.2rem 2rem 1.6rem;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 body[data-page="nosotros"] .team-modal-content h3 {

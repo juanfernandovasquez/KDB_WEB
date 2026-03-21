@@ -16,6 +16,15 @@ function normalizeRichText(value) {
   return /<[^>]+>/.test(html) ? html : `<p>${html}</p>`;
 }
 
+function buildExcerpt(value, maxLength = 110) {
+  const text = safeText(value).replace(/\s+/g, ' ').trim();
+  if (!text) return '';
+  const firstSentence = text.match(/.+?[.!?](\s|$)/);
+  const source = firstSentence ? firstSentence[0].trim() : text;
+  if (source.length <= maxLength) return source;
+  return `${source.slice(0, maxLength).trimEnd()}...`;
+}
+
 let currentTeamMembers = [];
 
 async function loadNosotrosPage() {
@@ -129,6 +138,7 @@ function renderTeam(team, teamMeta) {
   members.forEach((member, idx) => {
     const linkedin = safeText(member.linkedin || '#');
     const description = safeText(member.more_url);
+    const hoverDescription = buildExcerpt(description);
     const hasLinkedin = linkedin && linkedin !== '#';
     const card = document.createElement('article');
     card.className = 'team-card';
@@ -148,7 +158,7 @@ function renderTeam(team, teamMeta) {
             <h3>${safeText(member.name)}</h3>
             <p class="team-hover-role">${safeText(member.role)}</p>
             <div class="team-hover-divider"></div>
-            <p class="team-hover-description">${description}</p>
+            <p class="team-hover-description">${hoverDescription}</p>
           </div>
           <a class="team-link team-linkedin${hasLinkedin ? '' : ' is-hidden'}" href="${linkedin || '#'}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
             <img src="./assets/icons/linkedin.png" alt="" />
