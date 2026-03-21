@@ -1,8 +1,13 @@
+.publications-shell {
+  width: 100%;
+  background: #fff;
+}
+
 .publications-section {
   width: min(100% - 48px, 1240px);
   margin: 0 auto;
   padding: 2.4rem 0 4.8rem;
-  background: #fff;
+  background: transparent;
 }
 
 .publications-controls {

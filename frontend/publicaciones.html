@@ -16,21 +16,23 @@
   <main>
     <div id="site-hero"></div>
 
-    <section class="publications-section">
-      <div class="publications-controls">
-        <div class="filter-block">
-          <div class="category-row">
-            <div id="publications-category-chips" class="category-chips" role="tablist" aria-label="Categorias"></div>
+    <div class="publications-shell">
+      <section class="publications-section">
+        <div class="publications-controls">
+          <div class="filter-block">
+            <div class="category-row">
+              <div id="publications-category-chips" class="category-chips" role="tablist" aria-label="Categorias"></div>
+            </div>
+            <label class="sr-only" for="publications-category">Categoria</label>
+            <select id="publications-category" class="sr-only"><option value="">Todas</option></select>
           </div>
-          <label class="sr-only" for="publications-category">Categoria</label>
-          <select id="publications-category" class="sr-only"><option value="">Todas</option></select>
         </div>
-      </div>
-      <div id="publications-list" class="publications-list"></div>
-      <div class="load-more-wrapper">
-        <button type="button" id="load-more-pubs" class="btn load-more-btn">Ver más publicaciones</button>
-      </div>
-    </section>
+        <div id="publications-list" class="publications-list"></div>
+        <div class="load-more-wrapper">
+          <button type="button" id="load-more-pubs" class="btn load-more-btn">Ver más publicaciones</button>
+        </div>
+      </section>
+    </div>
   </main>
 
   <div id="site-footer"></div>
