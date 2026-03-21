@@ -101,8 +101,8 @@
 }
 
 .service-nav-marker img {
-  width: 39px;
-  height: 39px;
+  width: 43px;
+  height: 43px;
   object-fit: contain;
   filter: saturate(0.8);
 }
@@ -325,8 +325,8 @@
   }
 
   .service-nav-marker img {
-    width: 32px;
-    height: 32px;
+    width: 35px;
+    height: 35px;
   }
 
   .service-nav-title {
