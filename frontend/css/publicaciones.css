@@ -110,7 +110,7 @@
 
 .publication-card .pub-body {
   gap: 0.85rem;
-  padding: 0.95rem 0.95rem 1.05rem;
+  padding: 0.95rem 1.6rem 1.05rem;
 }
 
 .publication-card .meta {
@@ -138,7 +138,7 @@
   color: var(--brand-blue);
   font-size: 18px;
   line-height: 1.33;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .publication-card:hover .pub-title a {
@@ -166,7 +166,7 @@
   color: var(--brand-blue);
   text-decoration: none;
   font-size: 0.74rem;
-  font-weight: 500;
+  font-weight: 600;
   background: #fff;
   transition: border-color 0.2s ease, color 0.2s ease;
 }
