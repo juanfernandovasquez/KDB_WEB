@@ -367,8 +367,8 @@ def replace_services(page, services):
             bullets = s.get("bullets") or []
             conn.execute(
                 """
-                INSERT INTO services_items (page, position, title, description, bullets)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO services_items (page, position, title, description, bullets, image_url, icon_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     page,
@@ -376,6 +376,8 @@ def replace_services(page, services):
                     s.get("title"),
                     s.get("description"),
                     json.dumps(bullets),
+                    s.get("image_url"),
+                    s.get("icon_url"),
                 ),
             )
     conn.close()

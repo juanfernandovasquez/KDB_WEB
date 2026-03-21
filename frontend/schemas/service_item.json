@@ -8,7 +8,9 @@
     "position": { "type": "integer" },
     "title": { "type": "string" },
     "description": { "type": "string" },
-    "bullets": { "type": "array", "items": { "type": "string" } }
+    "bullets": { "type": "array", "items": { "type": "string" } },
+    "image_url": { "type": "string" },
+    "icon_url": { "type": "string" }
   },
   "additionalProperties": false
 }

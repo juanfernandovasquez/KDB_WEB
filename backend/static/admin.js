@@ -829,6 +829,16 @@ let currentAdminUserId = null;
         <label>Titulo</label><input type="text" data-field="title" value="${val("title")}" placeholder="${val("title")}">
         <label>Descripcion</label><textarea data-field="description" placeholder="${val("description")}">${val("description")}</textarea>
         <label>Bullets (uno por linea)</label><textarea data-field="bullets" placeholder="Linea 1\nLinea 2">${safe(bullets)}</textarea>
+        <label>Imagen del servicio (URL)</label>
+        <div class="row media-input-row">
+          <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
+          <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+        </div>
+        <label>Icono del servicio (URL)</label>
+        <div class="row media-input-row">
+          <input type="text" data-field="icon_url" value="${val("icon_url")}" placeholder="${val("icon_url")}">
+          <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+        </div>
       </div>
     `;
   };
@@ -894,9 +904,11 @@ let currentAdminUserId = null;
     return Array.from(document.querySelectorAll("#services-cards .service-card-admin")).map((card) => {
       const title = (card.querySelector('[data-field="title"]')?.value || "").trim();
       const description = (card.querySelector('[data-field="description"]')?.value || "").trim();
+      const image_url = (card.querySelector('[data-field="image_url"]')?.value || "").trim();
+      const icon_url = (card.querySelector('[data-field="icon_url"]')?.value || "").trim();
       const bulletsRaw = (card.querySelector('[data-field="bullets"]')?.value || "").split(/\r?\n/);
       const bullets = bulletsRaw.map((b) => b.trim()).filter(Boolean);
-      return { title, description, bullets };
+      return { title, description, bullets, image_url, icon_url };
     });
   }
 

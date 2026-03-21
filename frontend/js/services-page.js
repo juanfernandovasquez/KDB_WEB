@@ -22,6 +22,13 @@
     const bullets = Array.isArray(svc.bullets) ? svc.bullets.filter(Boolean) : [];
     return `
       <div class="service-detail-content">
+        ${
+          svc.image_url
+            ? `<figure class="service-detail-media"><img src="${escapeHtmlLocal(svc.image_url)}" alt="${escapeHtmlLocal(
+                svc.title || "Servicio",
+              )}"></figure>`
+            : ""
+        }
         <h3 class="service-detail-title">${escapeHtmlLocal(svc.title || "")}</h3>
         <p class="service-detail-description">${escapeHtmlLocal(svc.description || "")}</p>
         ${
@@ -103,12 +110,18 @@
                 tabindex="${idx === 0 ? "0" : "-1"}"
                 data-service-index="${idx}"
               >
-                <span class="service-nav-marker" aria-hidden="true"></span>
+                ${
+                  svc.icon_url
+                    ? `<span class="service-nav-marker" aria-hidden="true"><img src="${escapeHtmlLocal(
+                        svc.icon_url,
+                      )}" alt=""></span>`
+                    : `<span class="service-nav-marker" aria-hidden="true"><span class="service-nav-marker-fallback"></span></span>`
+                }
                 <span class="service-nav-copy">
-                  <span class="service-nav-index">Servicio ${String(idx + 1).padStart(2, "0")}</span>
-                  <span class="service-nav-title">${escapeHtmlLocal(svc.title || "")}</span>
-                </span>
-              </button>
+                    <span class="service-nav-index">Servicio ${String(idx + 1).padStart(2, "0")}</span>
+                    <span class="service-nav-title">${escapeHtmlLocal(svc.title || "")}</span>
+                  </span>
+                </button>
             `,
           )
           .join("");

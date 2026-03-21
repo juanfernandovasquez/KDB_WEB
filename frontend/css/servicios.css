@@ -3,27 +3,33 @@
   padding: 5.5rem 0 6rem;
 }
 
+.services-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
 .services-header {
-  width: min(100%, 840px);
-  margin: 0 auto 3.5rem;
-  text-align: center;
+  width: 100%;
+  margin: 0;
+  text-align: left;
 }
 
 .services-header h2 {
-  margin: 0;
+  margin: 0 0 0.7rem;
   color: var(--brand-gold);
-  font-size: clamp(2.2rem, 4vw, 3.7rem);
-  line-height: 1.04;
+  font-size: clamp(1.8rem, 2.8vw, 2.9rem);
+  line-height: 1.08;
   font-weight: 500;
   letter-spacing: -0.03em;
 }
 
 .services-header p {
-  width: min(100%, 680px);
-  margin: 1rem auto 0;
+  width: min(100%, 420px);
+  margin: 0;
   color: rgba(43, 43, 43, 0.78);
-  font-size: 1rem;
-  line-height: 1.68;
+  font-size: 0.98rem;
+  line-height: 1.62;
 }
 
 .services-layout {
@@ -45,7 +51,7 @@
   border-bottom: 1px solid rgba(43, 43, 43, 0.18);
   background: transparent;
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(0, 1fr);
   gap: 1rem;
   align-items: center;
   width: 100%;
@@ -67,18 +73,43 @@
 }
 
 .service-nav-marker {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(6, 24, 109, 0.28);
-  background: transparent;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(6, 24, 109, 0.16);
+  background: rgba(6, 24, 109, 0.03);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   transition: background-color 0.28s ease, border-color 0.28s ease, transform 0.28s ease;
+}
+
+.service-nav-marker img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: saturate(0.8);
+}
+
+.service-nav-marker-fallback {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(6, 24, 109, 0.42);
+  transition: background-color 0.28s ease, transform 0.28s ease;
 }
 
 .service-nav-item.is-active .service-nav-marker,
 .service-nav-item:hover .service-nav-marker,
 .service-nav-item:focus-visible .service-nav-marker {
   border-color: var(--brand-gold);
+  background: rgba(176, 125, 47, 0.1);
+  transform: scale(1.05);
+}
+
+.service-nav-item.is-active .service-nav-marker-fallback,
+.service-nav-item:hover .service-nav-marker-fallback,
+.service-nav-item:focus-visible .service-nav-marker-fallback {
   background: var(--brand-gold);
   transform: scale(1.05);
 }
@@ -135,7 +166,8 @@
 
 .service-detail-content {
   display: grid;
-  gap: 1.4rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.2rem;
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.28s ease, transform 0.28s ease;
@@ -149,10 +181,27 @@
 .service-detail-title {
   margin: 0;
   color: var(--brand-blue);
-  font-size: clamp(1.7rem, 2.6vw, 2.85rem);
+  font-size: clamp(1.55rem, 2.3vw, 2.35rem);
   line-height: 1.06;
   font-weight: 600;
   letter-spacing: -0.03em;
+}
+
+.service-detail-media {
+  width: 100%;
+  margin: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(6, 24, 109, 0.12);
+  background: rgba(6, 24, 109, 0.04);
+  aspect-ratio: 16 / 9;
+}
+
+.service-detail-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .service-detail-description {
@@ -204,6 +253,10 @@
     padding: 4rem 0 4.5rem;
   }
 
+  .services-side {
+    gap: 1rem;
+  }
+
   .services-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -236,7 +289,7 @@
   }
 
   .services-header h2 {
-    font-size: clamp(1.9rem, 8vw, 2.7rem);
+    font-size: clamp(1.9rem, 8vw, 2.4rem);
   }
 
   .services-header p {
@@ -245,9 +298,14 @@
   }
 
   .service-nav-item {
-    grid-template-columns: 16px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr);
     gap: 0.85rem;
     padding: 0.95rem 0.95rem 0.95rem 0.8rem;
+  }
+
+  .service-nav-marker {
+    width: 42px;
+    height: 42px;
   }
 
   .service-nav-title {

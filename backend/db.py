@@ -152,7 +152,9 @@ def init_db():
               position INTEGER NOT NULL DEFAULT 0,
               title TEXT,
               description TEXT,
-              bullets TEXT
+              bullets TEXT,
+              image_url TEXT,
+              icon_url TEXT
             )
             """
         )
@@ -385,6 +387,12 @@ def init_db():
             conn.execute("ALTER TABLE page_story ADD COLUMN image_url TEXT")
         except Exception:
             pass
+        # Legacy DBs: add media fields to services
+        for col in ["image_url", "icon_url"]:
+            try:
+                conn.execute(f"ALTER TABLE services_items ADD COLUMN {col} TEXT")
+            except Exception:
+                pass
         # Legacy DBs: add new content fields
         for col in ["author", "hero_title", "hero_subtitle", "hero_image_url", "hero_cta_label", "hero_cta_href"]:
             try:
