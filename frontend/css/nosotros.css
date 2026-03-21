@@ -357,7 +357,7 @@ body[data-page="nosotros"] .team-modal-dialog {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 24px 56px rgba(0, 0, 0, 0.24);
-  height: min(78vh, 720px);
+  height: min(62vh, 520px);
   align-items: stretch;
 }
 
