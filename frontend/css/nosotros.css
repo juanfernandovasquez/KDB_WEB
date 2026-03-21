@@ -358,6 +358,7 @@ body[data-page="nosotros"] .team-modal-dialog {
   overflow: hidden;
   box-shadow: 0 24px 56px rgba(0, 0, 0, 0.24);
   height: min(78vh, 720px);
+  align-items: stretch;
 }
 
 body[data-page="nosotros"] .team-modal-close {
@@ -373,6 +374,10 @@ body[data-page="nosotros"] .team-modal-close {
   cursor: pointer;
 }
 
+body[data-page="nosotros"] .team-modal-media {
+  height: 100%;
+}
+
 body[data-page="nosotros"] .team-modal-media img {
   width: 100%;
   height: 100%;
@@ -385,6 +390,8 @@ body[data-page="nosotros"] .team-modal-content {
   flex-direction: column;
   gap: 0.7rem;
   padding: 2.2rem 2rem 1.6rem;
+  height: 100%;
+  box-sizing: border-box;
   min-height: 0;
   overflow-y: auto;
 }
