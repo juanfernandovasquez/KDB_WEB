@@ -119,10 +119,10 @@
 
 .publication-card .meta .date {
   margin-left: 0;
-  color: rgba(43, 43, 43, 0.48);
+  color: var(--brand-blue);
   font-size: 0.67rem;
   font-weight: 500;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
 .publication-card .pub-title {
@@ -136,7 +136,7 @@
 
 .publication-card .pub-title a {
   color: var(--brand-blue);
-  font-size: 1.6rem;
+  font-size: 18px;
   line-height: 1.33;
   font-weight: 700;
 }
@@ -149,7 +149,7 @@
   display: none;
 }
 
-.pub-actions {
+.publication-card .pub-actions {
   margin-top: auto;
   text-align: left;
 }
@@ -161,9 +161,9 @@
   min-width: 92px;
   min-height: 31px;
   padding: 0.35rem 0.8rem;
-  border: 1px solid rgba(6, 24, 109, 0.3);
+  border: 1px solid var(--brand-blue);
   border-radius: 3px;
-  color: rgba(43, 43, 43, 0.62);
+  color: var(--brand-blue);
   text-decoration: none;
   font-size: 0.74rem;
   font-weight: 500;
