@@ -1,7 +1,7 @@
 .services-section {
   width: min(100%, 1480px);
   padding: 0;
-  background: linear-gradient(90deg, #ffffff 0 41%, rgba(6, 24, 109, 0.045) 41% 100%);
+  background: rgba(6, 24, 109, 0.045);
 }
 
 .services-side {
@@ -40,7 +40,7 @@
   grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
   gap: clamp(4.5rem, 8vw, 8.5rem);
   align-items: start;
-  background: linear-gradient(90deg, #ffffff 0 41%, rgba(6, 24, 109, 0.045) 41% 100%);
+  background: transparent;
 }
 
 .services-nav {
@@ -264,7 +264,7 @@
 @media (max-width: 1023px) {
   .services-section {
     width: min(100%, 1120px);
-    background: transparent;
+    background: rgba(6, 24, 109, 0.045);
   }
 
   .services-side {
@@ -275,7 +275,7 @@
   .services-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
-    background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
+    background: transparent;
   }
 
   .services-nav {
