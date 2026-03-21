@@ -1,14 +1,14 @@
 .services-section {
-  width: min(100% - 24px, 1480px);
+  width: min(100%, 1480px);
   padding: 0;
-  background: linear-gradient(90deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
+  background: linear-gradient(90deg, #ffffff 0 36.5%, rgba(6, 24, 109, 0.045) 36.5% 100%);
 }
 
 .services-side {
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
-  padding: 4.5rem 2.25rem 4.75rem 2.2rem;
+  padding: 4.5rem 2.5rem 4.75rem 2.4rem;
   background: #fff;
 }
 
@@ -38,7 +38,7 @@
 .services-layout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-  gap: clamp(2rem, 4vw, 5rem);
+  gap: clamp(3rem, 5.5vw, 6.5rem);
   align-items: start;
 }
 
@@ -163,7 +163,7 @@
 
 .service-detail-panel {
   min-height: 420px;
-  padding: 4.5rem clamp(2rem, 4vw, 4rem) 4.75rem 0;
+  padding: 4.5rem clamp(2.75rem, 4.5vw, 4.5rem) 4.75rem 0;
   background: transparent;
 }
 
@@ -252,7 +252,7 @@
 
 @media (max-width: 1023px) {
   .services-section {
-    width: min(100% - 16px, 1120px);
+    width: min(100%, 1120px);
     background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
   }
 
