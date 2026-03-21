@@ -40,6 +40,7 @@
   grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
   gap: clamp(4.5rem, 8vw, 8.5rem);
   align-items: start;
+  background: linear-gradient(90deg, #ffffff 0 41%, rgba(6, 24, 109, 0.045) 41% 100%);
 }
 
 .services-nav {
@@ -90,7 +91,7 @@
 }
 
 .service-nav-item.is-active::before {
-  height: calc(100% - 1rem);
+  height: calc(100% - 1.4rem);
   opacity: 1;
 }
 
@@ -140,7 +141,7 @@
 
 .service-nav-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.94rem;
   line-height: 1.32;
   font-weight: 600;
 }
@@ -163,7 +164,7 @@
 
 .service-detail-panel {
   min-height: 420px;
-  padding: 4.1rem clamp(3.75rem, 6.2vw, 6rem) 4.25rem 0;
+  padding: 4.1rem clamp(4.5rem, 7vw, 6.75rem) 3.4rem 0;
   background: transparent;
 }
 
@@ -184,7 +185,7 @@
 .service-detail-title {
   margin: 0;
   color: var(--brand-blue);
-  font-size: clamp(1.3rem, 1.9vw, 1.9rem);
+  font-size: clamp(1.2rem, 1.65vw, 1.65rem);
   line-height: 1.1;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -192,13 +193,13 @@
 
 .service-detail-media {
   width: 100%;
-  max-width: 760px;
+  max-width: 680px;
   margin: 0;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(6, 24, 109, 0.12);
   background: rgba(6, 24, 109, 0.04);
-  height: 270px;
+  height: 245px;
 }
 
 .service-detail-media img {
@@ -209,7 +210,7 @@
 }
 
 .service-detail-description {
-  max-width: 760px;
+  max-width: 680px;
   margin: 0;
   color: rgba(43, 43, 43, 0.86);
   font-size: 0.95rem;
@@ -263,7 +264,7 @@
 @media (max-width: 1023px) {
   .services-section {
     width: min(100%, 1120px);
-    background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
+    background: transparent;
   }
 
   .services-side {
@@ -274,6 +275,7 @@
   .services-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
+    background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
   }
 
   .services-nav {
@@ -294,12 +296,12 @@
 
   .service-detail-panel {
     min-height: 360px;
-    padding: 0 1.75rem 2.4rem;
+    padding: 0 2rem 2.2rem;
   }
 
   .service-detail-media {
     max-width: none;
-    height: 280px;
+    height: 260px;
   }
 }
 
