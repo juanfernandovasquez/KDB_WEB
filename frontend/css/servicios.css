@@ -59,7 +59,21 @@
   color: var(--brand-blue);
   text-align: left;
   cursor: pointer;
+  position: relative;
   transition: color 0.28s ease, border-color 0.28s ease, transform 0.28s ease;
+}
+
+.service-nav-item::before {
+  content: "";
+  position: absolute;
+  left: -0.95rem;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  background: var(--brand-gold);
+  transform: translateY(-50%);
+  transition: height 0.28s ease, opacity 0.28s ease;
+  opacity: 0;
 }
 
 .service-nav-item:hover,
@@ -70,6 +84,11 @@
 
 .service-nav-item.is-active {
   color: var(--brand-gold);
+}
+
+.service-nav-item.is-active::before {
+  height: calc(100% - 1rem);
+  opacity: 1;
 }
 
 .service-nav-marker {
@@ -130,8 +149,9 @@
 
 .service-nav-index {
   margin: 0;
-  color: rgba(43, 43, 43, 0.48);
-  font-size: 0.78rem;
+  color: rgba(43, 43, 43, 0.72);
+  font-size: 0.8rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: color 0.28s ease;
@@ -154,14 +174,6 @@
     linear-gradient(180deg, rgba(6, 24, 109, 0.02), rgba(6, 24, 109, 0.01)),
     #fff;
   overflow: hidden;
-}
-
-.service-detail-panel::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 6px;
-  background: linear-gradient(180deg, var(--brand-gold), rgba(176, 125, 47, 0.14));
 }
 
 .service-detail-content {
@@ -194,7 +206,7 @@
   overflow: hidden;
   border: 1px solid rgba(6, 24, 109, 0.12);
   background: rgba(6, 24, 109, 0.04);
-  aspect-ratio: 16 / 9;
+  height: 320px;
 }
 
 .service-detail-media img {
@@ -270,11 +282,20 @@
   .service-nav-item {
     border: 1px solid rgba(6, 24, 109, 0.14);
     border-radius: 14px;
-    padding: 1rem 1rem 1rem 0.9rem;
+    padding: 1rem 1rem 1rem 1rem;
+  }
+
+  .service-nav-item::before {
+    left: 0;
+    width: 4px;
   }
 
   .service-detail-panel {
     min-height: 360px;
+  }
+
+  .service-detail-media {
+    height: 280px;
   }
 }
 
@@ -316,6 +337,10 @@
     min-height: 0;
     padding: 1.35rem 1.15rem 1.25rem 1.35rem;
     border-radius: 16px;
+  }
+
+  .service-detail-media {
+    height: 220px;
   }
 
   .service-detail-title {
