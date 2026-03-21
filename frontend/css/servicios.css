@@ -1,12 +1,15 @@
 .services-section {
-  width: min(100% - 56px, 1280px);
-  padding: 5.5rem 0 6rem;
+  width: min(100% - 24px, 1480px);
+  padding: 0;
+  background: linear-gradient(90deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
 }
 
 .services-side {
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
+  padding: 4.5rem 2.25rem 4.75rem 2.2rem;
+  background: #fff;
 }
 
 .services-header {
@@ -159,16 +162,9 @@
 }
 
 .service-detail-panel {
-  position: relative;
   min-height: 420px;
-  padding: clamp(1.75rem, 3vw, 2.5rem);
-  border: 1px solid rgba(6, 24, 109, 0.12);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at top right, rgba(176, 125, 47, 0.08), transparent 32%),
-    linear-gradient(180deg, rgba(6, 24, 109, 0.02), rgba(6, 24, 109, 0.01)),
-    #fff;
-  overflow: hidden;
+  padding: 4.5rem clamp(2rem, 4vw, 4rem) 4.75rem 0;
+  background: transparent;
 }
 
 .service-detail-content {
@@ -256,12 +252,13 @@
 
 @media (max-width: 1023px) {
   .services-section {
-    width: min(100% - 40px, 1120px);
-    padding: 4rem 0 4.5rem;
+    width: min(100% - 16px, 1120px);
+    background: linear-gradient(180deg, #ffffff 0 34%, rgba(6, 24, 109, 0.045) 34% 100%);
   }
 
   .services-side {
     gap: 1rem;
+    padding: 2.4rem 1.25rem 1.5rem;
   }
 
   .services-layout {
@@ -287,6 +284,7 @@
 
   .service-detail-panel {
     min-height: 360px;
+    padding: 0 1.25rem 2.4rem;
   }
 
   .service-detail-media {
@@ -296,8 +294,7 @@
 
 @media (max-width: 767px) {
   .services-section {
-    width: min(100% - 28px, 720px);
-    padding: 3rem 0 3.5rem;
+    width: min(100% - 12px, 720px);
   }
 
   .services-header {
@@ -335,8 +332,7 @@
 
   .service-detail-panel {
     min-height: 0;
-    padding: 1.35rem 1.15rem 1.25rem 1.35rem;
-    border-radius: 16px;
+    padding: 0 1rem 2rem;
   }
 
   .service-detail-media {
