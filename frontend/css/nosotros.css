@@ -393,7 +393,7 @@ body[data-page="nosotros"] .team-modal-content {
   height: 100%;
   box-sizing: border-box;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 body[data-page="nosotros"] .team-modal-content h3 {
@@ -422,12 +422,15 @@ body[data-page="nosotros"] .team-modal-description {
   color: var(--brand-gray);
   font-size: 1rem;
   line-height: 1.58;
+  overflow-y: auto;
+  padding-right: 0.35rem;
 }
 
 body[data-page="nosotros"] .team-modal-social {
   display: flex;
   gap: 0.7rem;
   margin-top: auto;
+  flex-shrink: 0;
   padding-top: 1.2rem;
 }
 
