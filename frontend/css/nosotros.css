@@ -558,6 +558,7 @@ body[data-page="nosotros"] .team-modal-social-link img {
     width: min(100% - 16px, 420px);
     margin-top: 4vh;
     grid-template-columns: 1fr;
+    height: min(88vh, 760px);
   }
 
   body[data-page="nosotros"] .team-modal-media img {
@@ -566,9 +567,18 @@ body[data-page="nosotros"] .team-modal-social-link img {
 
   body[data-page="nosotros"] .team-modal-content {
     padding: 1.35rem 1.1rem 1.1rem;
+    min-height: 0;
   }
 
   body[data-page="nosotros"] .team-modal-content h3 {
     font-size: 1.55rem;
+  }
+
+  body[data-page="nosotros"] .team-modal-description {
+    min-height: 0;
+  }
+
+  body[data-page="nosotros"] .team-modal-social {
+    padding-top: 0.9rem;
   }
 }
