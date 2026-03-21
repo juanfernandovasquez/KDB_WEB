@@ -1,7 +1,7 @@
 .services-section {
   width: min(100%, 1480px);
   padding: 0;
-  background: rgba(6, 24, 109, 0.045);
+  background: #fff;
 }
 
 .services-side {
@@ -10,6 +10,11 @@
   gap: 1.15rem;
   padding: 4.35rem 2rem 4.5rem 2rem;
   background: #fff;
+}
+
+.services-detail-side {
+  background: rgba(6, 24, 109, 0.045);
+  padding: 4.1rem 0 3.4rem;
 }
 
 .services-header {
@@ -39,7 +44,7 @@
   display: grid;
   grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
   gap: clamp(4.5rem, 8vw, 8.5rem);
-  align-items: start;
+  align-items: stretch;
   background: transparent;
 }
 
@@ -164,7 +169,7 @@
 
 .service-detail-panel {
   min-height: 420px;
-  padding: 4.1rem clamp(4.5rem, 7vw, 6.75rem) 3.4rem 0;
+  padding: 0 clamp(4.5rem, 7vw, 6.75rem) 0 0;
   background: transparent;
 }
 
@@ -264,7 +269,7 @@
 @media (max-width: 1023px) {
   .services-section {
     width: min(100%, 1120px);
-    background: rgba(6, 24, 109, 0.045);
+    background: #fff;
   }
 
   .services-side {
@@ -276,6 +281,10 @@
     grid-template-columns: 1fr;
     gap: 2rem;
     background: transparent;
+  }
+
+  .services-detail-side {
+    padding: 0 0 2.2rem;
   }
 
   .services-nav {
