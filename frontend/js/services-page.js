@@ -118,10 +118,9 @@
                     : `<span class="service-nav-marker" aria-hidden="true"><span class="service-nav-marker-fallback"></span></span>`
                 }
                 <span class="service-nav-copy">
-                    <span class="service-nav-index">Servicio ${String(idx + 1).padStart(2, "0")}</span>
-                    <span class="service-nav-title">${escapeHtmlLocal(svc.title || "")}</span>
-                  </span>
-                </button>
+                  <span class="service-nav-title">${escapeHtmlLocal(svc.title || "")}</span>
+                </span>
+              </button>
             `,
           )
           .join("");

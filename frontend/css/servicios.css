@@ -51,7 +51,7 @@
   border-bottom: 1px solid rgba(43, 43, 43, 0.18);
   background: transparent;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: 58px minmax(0, 1fr);
   gap: 1rem;
   align-items: center;
   width: 100%;
@@ -92,20 +92,17 @@
 }
 
 .service-nav-marker {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: 1px solid rgba(6, 24, 109, 0.16);
-  background: rgba(6, 24, 109, 0.03);
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  transition: background-color 0.28s ease, border-color 0.28s ease, transform 0.28s ease;
+  transition: transform 0.28s ease;
 }
 
 .service-nav-marker img {
-  width: 24px;
-  height: 24px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
   filter: saturate(0.8);
 }
@@ -121,8 +118,6 @@
 .service-nav-item.is-active .service-nav-marker,
 .service-nav-item:hover .service-nav-marker,
 .service-nav-item:focus-visible .service-nav-marker {
-  border-color: var(--brand-gold);
-  background: rgba(176, 125, 47, 0.1);
   transform: scale(1.05);
 }
 
@@ -202,7 +197,7 @@
 .service-detail-media {
   width: 100%;
   margin: 0;
-  border-radius: 18px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(6, 24, 109, 0.12);
   background: rgba(6, 24, 109, 0.04);
@@ -325,8 +320,13 @@
   }
 
   .service-nav-marker {
-    width: 42px;
-    height: 42px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .service-nav-marker img {
+    width: 28px;
+    height: 28px;
   }
 
   .service-nav-title {
