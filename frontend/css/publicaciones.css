@@ -56,16 +56,19 @@
 }
 
 .publications-list {
+  width: 100%;
   max-width: none;
   margin: 0;
 }
 
 .publication-row.vertical,
 .publication-row {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.55rem;
   justify-items: stretch;
+  align-items: start;
 }
 
 .publication-card {
@@ -76,6 +79,8 @@
   gap: 0;
   overflow: hidden;
   transition: transform 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+  max-width: none;
 }
 
 .publication-card:hover {
