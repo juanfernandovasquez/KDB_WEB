@@ -68,6 +68,9 @@
             <div class="meta"><span class="date">${escapeHtml(date)}</span></div>
             <h3 class="pub-title"><a href="publicacion.html?slug=${encodeURIComponent(p.slug || '')}">${escapeHtml(p.title)}</a></h3>
             ${snippet ? `<p class="pub-snippet">${escapeHtml(snippet)}</p>` : ''}
+            <div class="pub-actions">
+              <a class="pub-read-more" href="publicacion.html?slug=${encodeURIComponent(p.slug || '')}">Leer más</a>
+            </div>
           </div>
         </article>
       `;
