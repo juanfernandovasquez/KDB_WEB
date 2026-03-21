@@ -365,6 +365,19 @@ def replace_services(page, services):
         conn.execute("DELETE FROM services_items WHERE page = ?", (page,))
         for pos, s in enumerate(services):
             bullets = s.get("bullets") or []
+            description_raw = _html.unescape((s.get("description") or "").strip())
+            try:
+                allowed_protocols = list(bleach.sanitizer.ALLOWED_PROTOCOLS)
+                description = bleach.clean(
+                    description_raw,
+                    tags=ALLOWED_TAGS,
+                    attributes=ALLOWED_ATTRIBUTES,
+                    protocols=allowed_protocols,
+                    css_sanitizer=IMG_CSS_SANITIZER,
+                    strip=True,
+                )
+            except Exception:
+                description = description_raw
             conn.execute(
                 """
                 INSERT INTO services_items (page, position, title, description, bullets, image_url, icon_url)
@@ -374,7 +387,7 @@ def replace_services(page, services):
                     page,
                     pos,
                     s.get("title"),
-                    s.get("description"),
+                    description,
                     json.dumps(bullets),
                     s.get("image_url"),
                     s.get("icon_url"),

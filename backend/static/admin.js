@@ -820,15 +820,28 @@ let currentAdminUserId = null;
   const serviceCard = (svc = {}, idx = 0) => {
     const val = (field) => safe(svc[field]);
     const bullets = Array.isArray(svc.bullets) ? svc.bullets.join("\n") : "";
+    const uid = safe(svc._uid || svc.id || `service-${idx}-${Date.now()}`);
     return `
-      <div class="card service-card-admin" draggable="true">
+      <div class="card service-card-admin" draggable="true" data-uid="${uid}">
         <div class="row between">
           <span class="small"></span>
           <button type="button" class="danger small-btn" data-action="remove-service">Eliminar</button>
         </div>
         <label>Titulo</label><input type="text" data-field="title" value="${val("title")}" placeholder="${val("title")}">
-        <label>Descripcion</label><textarea data-field="description" placeholder="${val("description")}">${val("description")}</textarea>
-        <label>Bullets (uno por linea)</label><textarea data-field="bullets" placeholder="Linea 1\nLinea 2">${safe(bullets)}</textarea>
+        <label>Descripcion</label>
+        <div class="rich-editor service-description-editor">
+          <div class="editor-toolbar" id="service-description-toolbar-${uid}">
+            <button type="button" data-cmd="bold"><strong>B</strong></button>
+            <button type="button" data-cmd="italic"><em>I</em></button>
+            <button type="button" data-cmd="underline"><u>U</u></button>
+            <button type="button" data-cmd="insertUnorderedList">Lista</button>
+            <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+            <button type="button" data-cmd="createLink">Enlace</button>
+            <button type="button" data-cmd="unlink">Quitar enlace</button>
+            <button type="button" data-cmd="removeFormat">Limpiar</button>
+          </div>
+          <div id="service-description-editor-${uid}" class="editor-surface" contenteditable="true" data-editor-field="description">${svc.description || ""}</div>
+        </div>
         <label>Imagen del servicio (URL)</label>
         <div class="row media-input-row">
           <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
@@ -892,23 +905,29 @@ let currentAdminUserId = null;
       });
     }
 
-    const initTeamDescriptionEditors = (scope = document) => {
-      scope.querySelectorAll(".team-card-admin").forEach((card) => {
-        const uid = card.dataset.uid;
-        if (!uid) return;
-        setupRichEditor(`team-description-toolbar-${uid}`, `team-description-editor-${uid}`);
-      });
-    };
+  const initTeamDescriptionEditors = (scope = document) => {
+    scope.querySelectorAll(".team-card-admin").forEach((card) => {
+      const uid = card.dataset.uid;
+      if (!uid) return;
+      setupRichEditor(`team-description-toolbar-${uid}`, `team-description-editor-${uid}`);
+    });
+  };
+
+  const initServiceDescriptionEditors = (scope = document) => {
+    scope.querySelectorAll(".service-card-admin").forEach((card) => {
+      const uid = card.dataset.uid;
+      if (!uid) return;
+      setupRichEditor(`service-description-toolbar-${uid}`, `service-description-editor-${uid}`);
+    });
+  };
 
   function serializeServices() {
     return Array.from(document.querySelectorAll("#services-cards .service-card-admin")).map((card) => {
       const title = (card.querySelector('[data-field="title"]')?.value || "").trim();
-      const description = (card.querySelector('[data-field="description"]')?.value || "").trim();
+      const description = serializeEditorContent(card.querySelector('[data-editor-field="description"]')).trim();
       const image_url = (card.querySelector('[data-field="image_url"]')?.value || "").trim();
       const icon_url = (card.querySelector('[data-field="icon_url"]')?.value || "").trim();
-      const bulletsRaw = (card.querySelector('[data-field="bullets"]')?.value || "").split(/\r?\n/);
-      const bullets = bulletsRaw.map((b) => b.trim()).filter(Boolean);
-      return { title, description, bullets, image_url, icon_url };
+      return { title, description, bullets: [], image_url, icon_url };
     });
   }
 
@@ -1183,6 +1202,7 @@ let currentAdminUserId = null;
     list.forEach((svc, idx) => {
       cont.insertAdjacentHTML("beforeend", serviceCard(svc, idx));
     });
+    initServiceDescriptionEditors(cont);
   }
 
   function setLegalForm(story = {}) {
@@ -2981,7 +3001,9 @@ let currentAdminUserId = null;
     bind("add-service", () => {
       const cont = q("services-cards");
       if (!cont) return;
-      cont.insertAdjacentHTML("beforeend", serviceCard({}, cont.children.length));
+      const svc = { _uid: `service-${Date.now()}` };
+      cont.insertAdjacentHTML("beforeend", serviceCard(svc, cont.children.length));
+      initServiceDescriptionEditors(cont);
     });
     bind("add-team", () => {
       const cont = q("team-cards");

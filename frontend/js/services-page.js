@@ -18,8 +18,19 @@
     if (el && txt != null) el.textContent = txt;
   };
 
+  const decodeHtmlValue = (value) => {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = value || "";
+    return textarea.value;
+  };
+
+  const normalizeRichText = (value) => {
+    const decoded = decodeHtmlValue(value || "").trim();
+    if (!decoded) return "";
+    return /<[^>]+>/.test(decoded) ? decoded : `<p>${escapeHtmlLocal(decoded)}</p>`;
+  };
+
   const buildDetailMarkup = (svc = {}) => {
-    const bullets = Array.isArray(svc.bullets) ? svc.bullets.filter(Boolean) : [];
     return `
       <div class="service-detail-content">
         ${
@@ -30,14 +41,7 @@
             : ""
         }
         <h3 class="service-detail-title">${escapeHtmlLocal(svc.title || "")}</h3>
-        <p class="service-detail-description">${escapeHtmlLocal(svc.description || "")}</p>
-        ${
-          bullets.length
-            ? `<ul class="service-detail-bullets">${bullets
-                .map((bullet) => `<li>${escapeHtmlLocal(bullet)}</li>`)
-                .join("")}</ul>`
-            : ""
-        }
+        <div class="service-detail-description">${normalizeRichText(svc.description || "")}</div>
       </div>
     `;
   };
