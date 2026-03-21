@@ -33,7 +33,7 @@
 .category-chip {
   min-width: 122px;
   padding: 0.6rem 1rem;
-  border-radius: 3px;
+  border-radius: 6px;
   border: 1px solid rgba(6, 24, 109, 0.28);
   box-shadow: none;
   font-size: 0.83rem;
@@ -70,7 +70,7 @@
 
 .publication-card {
   background: #f4f4f4;
-  border: 1px solid rgba(6, 24, 109, 0.08);
+  border: 0;
   box-shadow: none;
   min-height: 0;
   gap: 0;
@@ -81,7 +81,6 @@
 .publication-card:hover {
   transform: translateY(-3px);
   box-shadow: none;
-  border-color: rgba(176, 125, 47, 0.26);
 }
 
 .publication-card .pub-thumb {
@@ -181,7 +180,7 @@
 }
 
 .btn.load-more-btn {
-  border-radius: 4px;
+  border-radius: 6px;
   box-shadow: none;
   padding: 0.8rem 1.35rem;
 }
