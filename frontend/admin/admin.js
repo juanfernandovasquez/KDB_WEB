@@ -850,7 +850,7 @@ let currentAdminUserId = null;
           <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
         </div>
         <label>LinkedIn</label><input type="text" data-field="linkedin" value="${val("linkedin")}" placeholder="${val("linkedin")}">
-        <label>Descripcion completa</label><textarea data-field="more_url" rows="6" placeholder="Resumen y detalle del miembro...">${val("more_url")}</textarea>
+        <label>Descripcion completa</label><textarea data-field="more_url" rows="10" placeholder="Resumen y detalle del miembro...">${val("more_url")}</textarea>
         </div>
       `;
     };
