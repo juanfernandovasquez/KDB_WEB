@@ -1,5 +1,5 @@
 .hero.hero-single {
-  --hero-min-height: 420px;
+  --hero-min-height: 360px;
   position: relative;
   min-height: var(--hero-min-height);
   height: var(--hero-min-height);
@@ -8,7 +8,7 @@
 
 .hero.hero-single::after {
   background:
-    linear-gradient(90deg, rgba(8, 14, 36, 0.78) 0%, rgba(8, 14, 36, 0.45) 42%, rgba(8, 14, 36, 0.12) 78%, rgba(8, 14, 36, 0.24) 100%);
+    linear-gradient(90deg, rgba(8, 14, 36, 0.72) 0%, rgba(8, 14, 36, 0.4) 40%, rgba(8, 14, 36, 0.1) 78%, rgba(8, 14, 36, 0.2) 100%);
 }
 
 .hero.hero-single .hero-track,
@@ -28,7 +28,7 @@
 .hero.hero-single .hero-content {
   width: min(100% - 112px, 1360px);
   margin: 0 auto;
-  padding: 7.2rem 0 3.4rem;
+  padding: 4.2rem 0 2.2rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -41,32 +41,32 @@
   align-items: center;
   justify-content: center;
   min-width: 68px;
-  min-height: 28px;
-  margin: 0 0 1.9rem;
-  padding: 0.3rem 0.8rem;
+  min-height: 24px;
+  margin: 0 0 1.15rem;
+  padding: 0.22rem 0.72rem;
   border-radius: 2px;
   background: var(--brand-blue);
   color: #fff;
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
 }
 
 .hero.hero-single .hero-title {
-  width: min(100%, 560px);
+  width: min(100%, 500px);
   margin: 0;
   color: #fff;
-  font-size: clamp(2rem, 3.5vw, 3.05rem);
-  line-height: 1.02;
+  font-size: clamp(1.9rem, 3.05vw, 2.75rem);
+  line-height: 1.04;
   font-weight: 700;
   letter-spacing: -0.03em;
 }
 
 .hero.hero-single .post-hero-date {
-  margin: 1.55rem 0 0;
+  margin: 1.05rem 0 0;
   color: rgba(255, 255, 255, 0.84);
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   font-weight: 400;
   letter-spacing: 0;
 }
@@ -78,43 +78,43 @@
 
 @media (max-width: 1023px) {
   .hero.hero-single {
-    --hero-min-height: 360px;
+    --hero-min-height: 320px;
   }
 
   .hero.hero-single .hero-content {
     width: min(100% - 56px, 960px);
-    padding: 6.3rem 0 2.5rem;
+    padding: 3.6rem 0 2rem;
   }
 
   .hero.hero-single .hero-title {
-    width: min(100%, 510px);
-    font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+    width: min(100%, 450px);
+    font-size: clamp(1.65rem, 4.1vw, 2.3rem);
   }
 }
 
 @media (max-width: 767px) {
   .hero.hero-single {
-    --hero-min-height: 300px;
+    --hero-min-height: 280px;
   }
 
   .hero.hero-single .hero-content {
     width: min(100% - 32px, 720px);
-    padding: 5.3rem 0 1.8rem;
+    padding: 3.1rem 0 1.5rem;
   }
 
   .hero.hero-single .hero-kicker {
-    margin-bottom: 0.9rem;
-    min-height: 26px;
-    font-size: 0.7rem;
+    margin-bottom: 0.75rem;
+    min-height: 24px;
+    font-size: 0.66rem;
   }
 
   .hero.hero-single .hero-title {
-    width: min(100%, 360px);
-    font-size: clamp(1.55rem, 7vw, 2rem);
+    width: min(100%, 320px);
+    font-size: clamp(1.35rem, 6.5vw, 1.8rem);
   }
 
   .hero.hero-single .post-hero-date {
-    margin-top: 1rem;
-    font-size: 0.8rem;
+    margin-top: 0.8rem;
+    font-size: 0.72rem;
   }
 }
