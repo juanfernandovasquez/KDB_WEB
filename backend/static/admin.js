@@ -2985,7 +2985,7 @@ let currentAdminUserId = null;
         TableCell,
       } = await loadTiptapModules();
 
-      publicationEditor = new Editor({
+    publicationEditor = new Editor({
         element: editorEl,
         extensions: [
           StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
@@ -3009,8 +3009,14 @@ let currentAdminUserId = null;
         },
         onUpdate: ({ editor }) => {
           if (textarea) textarea.value = editor.getHTML();
-        },
-      });
+      },
+    });
+
+    toolbar.addEventListener("mousedown", (ev) => {
+      if (ev.target.closest("[data-cmd]")) {
+        ev.preventDefault();
+      }
+    });
 
     toolbar.onclick = (ev) => {
       if (ev.target.closest("button[data-cmd]")) ev.preventDefault();
