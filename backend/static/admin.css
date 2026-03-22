@@ -330,3 +330,137 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 
 
 
+
+
+.editor-toolbar--publication {
+  gap: 0.55rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(35, 54, 86, 0.10);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f9fbff 0%, #f2f6fd 100%);
+}
+.editor-toolbar--publication button,
+.editor-toolbar--publication select {
+  min-height: 44px;
+  border-radius: 12px;
+  border-color: rgba(35, 54, 86, 0.14);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+.editor-toolbar--publication button:hover,
+.editor-toolbar--publication select:hover {
+  border-color: rgba(11, 59, 145, 0.35);
+  background: #f7faff;
+}
+.editor-toolbar--publication .editor-pill-btn {
+  min-width: 0;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+}
+.editor-toolbar--publication .editor-icon-btn {
+  min-width: 44px;
+  width: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-toolbar--publication .editor-text-btn {
+  font-size: 1.05rem;
+}
+.editor-toolbar--publication .editor-palette-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.45rem 0.2rem 0.2rem;
+  border: 1px solid rgba(35, 54, 86, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+}
+.editor-toolbar--publication .editor-palette-group > span {
+  font-weight: 700;
+  color: #233656;
+  margin: 0 0.15rem 0 0.25rem;
+}
+.editor-toolbar--publication .editor-color-swatch {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(35, 54, 86, 0.16) !important;
+}
+.editor-toolbar--publication .editor-color-swatch::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px rgba(35, 54, 86, 0.08);
+}
+.editor-toolbar--publication .editor-color-swatch.light::before {
+  box-shadow: 0 0 0 1px rgba(35, 54, 86, 0.16);
+}
+.editor-toolbar--publication .editor-color-swatch:hover,
+.editor-toolbar--publication .editor-color-swatch:focus-visible,
+.editor-toolbar--publication .editor-icon-btn:hover,
+.editor-toolbar--publication .editor-icon-btn:focus-visible {
+  transform: translateY(-1px);
+}
+.editor-toolbar--publication .editor-align-btn .editor-bars,
+.editor-toolbar--publication .editor-wrap-btn .editor-wrap-glyph {
+  display: block;
+  position: relative;
+}
+.editor-toolbar--publication .editor-align-btn .editor-bars {
+  width: 18px;
+  height: 14px;
+  background:
+    linear-gradient(#233656, #233656) 0 0/18px 2px no-repeat,
+    linear-gradient(#233656, #233656) 0 6px/14px 2px no-repeat,
+    linear-gradient(#233656, #233656) 0 12px/18px 2px no-repeat;
+}
+.editor-toolbar--publication .editor-align-btn.align-center .editor-bars {
+  background:
+    linear-gradient(#233656, #233656) 50% 0/18px 2px no-repeat,
+    linear-gradient(#233656, #233656) 50% 6px/12px 2px no-repeat,
+    linear-gradient(#233656, #233656) 50% 12px/18px 2px no-repeat;
+}
+.editor-toolbar--publication .editor-align-btn.align-right .editor-bars {
+  background:
+    linear-gradient(#233656, #233656) 100% 0/18px 2px no-repeat,
+    linear-gradient(#233656, #233656) 100% 6px/14px 2px no-repeat,
+    linear-gradient(#233656, #233656) 100% 12px/18px 2px no-repeat;
+}
+.editor-toolbar--publication .editor-wrap-btn .editor-wrap-glyph {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #233656;
+  border-radius: 4px;
+}
+.editor-toolbar--publication .editor-wrap-btn.wrap-square .editor-wrap-glyph::before,
+.editor-toolbar--publication .editor-wrap-btn.wrap-square .editor-wrap-glyph::after,
+.editor-toolbar--publication .editor-wrap-btn.wrap-block .editor-wrap-glyph::before,
+.editor-toolbar--publication .editor-wrap-btn.wrap-block .editor-wrap-glyph::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  width: 12px;
+  height: 2px;
+  background: #233656;
+}
+.editor-toolbar--publication .editor-wrap-btn.wrap-square .editor-wrap-glyph::before {
+  top: 3px;
+}
+.editor-toolbar--publication .editor-wrap-btn.wrap-square .editor-wrap-glyph::after {
+  top: 11px;
+}
+.editor-toolbar--publication .editor-wrap-btn.wrap-block .editor-wrap-glyph::before {
+  left: -2px;
+  top: -6px;
+  width: 22px;
+}
+.editor-toolbar--publication .editor-wrap-btn.wrap-block .editor-wrap-glyph::after {
+  left: -2px;
+  bottom: -6px;
+  width: 22px;
+}
+
