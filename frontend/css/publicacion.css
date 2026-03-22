@@ -42,7 +42,7 @@
   justify-content: center;
   min-width: 68px;
   min-height: 24px;
-  margin: 0 0 1.15rem;
+  margin: 0 0 1.725rem;
   padding: 0.22rem 0.72rem;
   border-radius: 2px;
   background: var(--brand-blue);
@@ -65,7 +65,7 @@
 }
 
 .hero.hero-single .post-hero-date {
-  margin: 1.05rem 0 0;
+  margin: 1.575rem 0 0;
   color: rgba(255, 255, 255, 0.84);
   font-size: 0.78rem;
   font-weight: 400;
@@ -96,7 +96,7 @@
   }
 
   .hero.hero-single .hero-kicker {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.125rem;
     min-height: 24px;
     font-size: 0.66rem;
   }
@@ -107,7 +107,7 @@
   }
 
   .hero.hero-single .post-hero-date {
-    margin-top: 0.8rem;
+    margin-top: 1.2rem;
     font-size: 0.72rem;
   }
 }
