@@ -123,6 +123,39 @@
     });
   }
 
+  function renderSidebarLatest(publications) {
+    const section = document.querySelector(".post-sidebar-latest");
+    const list = document.getElementById("post-sidebar-latest-list");
+    if (!section || !list) return;
+    if (!publications.length) {
+      section.style.display = "none";
+      return;
+    }
+    list.innerHTML = "";
+    publications.forEach((p) => {
+      const catName = p.category ? (typeof p.category === "object" ? p.category.name : p.category) : "";
+      const date = p.published_at
+        ? new Date(`${p.published_at}T00:00:00Z`).toLocaleDateString("es-ES", {
+            timeZone: "UTC",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : "";
+      const card = `
+        <a class="post-sidebar-card" href="publicacion.html?slug=${encodeURIComponent(p.slug || "")}">
+          <div class="post-sidebar-thumb">
+            ${catName ? `<span class="post-sidebar-badge">${escapeHtml(catName)}</span>` : ""}
+            <img src="${escapeHtml(p.hero_image_url || "")}" alt="${escapeHtml(p.title || "")}">
+          </div>
+          <span class="post-sidebar-date">${escapeHtml(date)}</span>
+          <h3 class="post-sidebar-title">${escapeHtml(p.title || "")}</h3>
+        </a>
+      `;
+      list.insertAdjacentHTML("beforeend", card);
+    });
+  }
+
   async function loadLatest(currentSlug) {
     try {
       const base = window.API_BASE || "";
@@ -132,9 +165,12 @@
       const list = Array.isArray(data) ? data : data.publications || [];
       const filtered = (list || []).filter((p) => p.slug && p.slug !== currentSlug);
       filtered.sort((a, b) => new Date(b.published_at || 0) - new Date(a.published_at || 0));
-      renderLatest(filtered.slice(0, 3));
+      const latest = filtered.slice(0, 3);
+      renderLatest(latest);
+      renderSidebarLatest(latest);
     } catch (_) {
       renderLatest([]);
+      renderSidebarLatest([]);
     }
   }
 
