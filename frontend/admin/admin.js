@@ -594,15 +594,11 @@
     return null;
   };
 
-  const applyFontSize = (editor, sizePx) => {
-    const size = Number.parseInt(sizePx, 10);
-    if (!editor || !Number.isFinite(size) || size < 8 || size > 96) {
-      alert("Tamano invalido. Usa un valor entre 8 y 96.");
-      return;
-    }
+  const withEditorSelection = (editor) => {
+    if (!editor) return null;
     editor.focus();
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
+    if (!sel || sel.rangeCount === 0) return null;
     let range = sel.getRangeAt(0);
     if (!editor.contains(range.commonAncestorContainer)) {
       const endRange = document.createRange();
@@ -612,9 +608,17 @@
       sel.addRange(endRange);
       range = sel.getRangeAt(0);
     }
+    return { sel, range };
+  };
+
+  const applyInlineStyle = (editor, styleName, styleValue) => {
+    const ctx = withEditorSelection(editor);
+    if (!ctx || !styleName || !styleValue) return;
+    const { sel } = ctx;
+    let { range } = ctx;
     if (range.collapsed) {
       const span = document.createElement("span");
-      span.style.fontSize = `${size}px`;
+      span.style[styleName] = styleValue;
       span.appendChild(document.createTextNode("\u200B"));
       range.insertNode(span);
       const textNode = span.firstChild;
@@ -623,18 +627,74 @@
       newRange.collapse(true);
       sel.removeAllRanges();
       sel.addRange(newRange);
-    } else {
-      const span = document.createElement("span");
-      span.style.fontSize = `${size}px`;
-      const contents = range.extractContents();
-      span.appendChild(contents);
-      range.insertNode(span);
+      return;
+    }
+    const span = document.createElement("span");
+    span.style[styleName] = styleValue;
+    const contents = range.extractContents();
+    span.appendChild(contents);
+    range.insertNode(span);
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    newRange.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+  };
+
+  const applyFontSize = (editor, sizePx) => {
+    const size = Number.parseInt(sizePx, 10);
+    if (!editor || !Number.isFinite(size) || size < 8 || size > 96) {
+      alert("Tamano invalido. Usa un valor entre 8 y 96.");
+      return;
+    }
+    applyInlineStyle(editor, "fontSize", `${size}px`);
+  };
+
+  const applyTextColor = (editor, value) => {
+    if (!value) return;
+    applyInlineStyle(editor, "color", value);
+  };
+
+  const applyTextHighlight = (editor, value) => {
+    if (!value) return;
+    applyInlineStyle(editor, "backgroundColor", value);
+  };
+
+  const insertHtmlAtSelection = (editor, html) => {
+    const ctx = withEditorSelection(editor);
+    if (!ctx || !html) return;
+    const { sel } = ctx;
+    let { range } = ctx;
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    const frag = document.createDocumentFragment();
+    let node;
+    let lastNode = null;
+    while ((node = temp.firstChild)) {
+      lastNode = frag.appendChild(node);
+    }
+    range.deleteContents();
+    range.insertNode(frag);
+    if (lastNode) {
       const newRange = document.createRange();
-      newRange.selectNodeContents(span);
-      newRange.collapse(false);
+      newRange.setStartAfter(lastNode);
+      newRange.collapse(true);
       sel.removeAllRanges();
       sel.addRange(newRange);
     }
+    editor.focus();
+  };
+
+  const insertTableAtSelection = (editor) => {
+    const rows = Number.parseInt(prompt("Numero de filas:", "3"), 10);
+    const cols = Number.parseInt(prompt("Numero de columnas:", "3"), 10);
+    if (!Number.isFinite(rows) || !Number.isFinite(cols) || rows < 1 || cols < 1 || rows > 12 || cols > 8) {
+      alert("Usa un rango valido: filas 1-12, columnas 1-8.");
+      return;
+    }
+    const header = `<tr>${Array.from({ length: cols }, (_, i) => `<th>Columna ${i + 1}</th>`).join("")}</tr>`;
+    const body = Array.from({ length: rows - 1 }, () => `<tr>${Array.from({ length: cols }, () => `<td>Dato</td>`).join("")}</tr>`).join("");
+    insertHtmlAtSelection(editor, `<table><thead>${header}</thead><tbody>${body}</tbody></table><p><br></p>`);
   };
 
   const applyTextClass = (editor, className) => {
@@ -2328,11 +2388,20 @@ let currentAdminUserId = null;
         <label>Extracto</label>
         <div class="rich-editor pub-excerpt-editor">
           <div class="editor-toolbar" id="excerpt-toolbar-${uid}">
+            <button type="button" data-cmd="undo">Deshacer</button>
+            <button type="button" data-cmd="redo">Rehacer</button>
             <button type="button" data-cmd="bold"><strong>B</strong></button>
             <button type="button" data-cmd="italic"><em>I</em></button>
             <button type="button" data-cmd="underline"><u>U</u></button>
             <button type="button" data-cmd="styleTitle">Titulo</button>
             <button type="button" data-cmd="styleSubtitle">Subtitulo</button>
+            <select class="editor-block-select" data-cmd="formatBlock">
+              <option value="">Bloque</option>
+              <option value="P">Parrafo</option>
+              <option value="H2">H2</option>
+              <option value="H3">H3</option>
+              <option value="H4">H4</option>
+            </select>
             <select class="font-size-select" data-cmd="fontSizePx">
               <option value="">Tamano</option>
               <option value="10">10 px</option>
@@ -2346,10 +2415,18 @@ let currentAdminUserId = null;
               <option value="28">28 px</option>
               <option value="32">32 px</option>
             </select>
-            <button type="button" data-cmd="insertUnorderedList">• Lista</button>
+            <label class="editor-color-field">Color<input type="color" data-cmd="textColor" value="#0b3b91"></label>
+            <label class="editor-color-field">Fondo<input type="color" data-cmd="textBackgroundColor" value="#fff4bf"></label>
+            <button type="button" data-cmd="insertUnorderedList">Lista</button>
             <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+            <button type="button" data-cmd="blockquote">Cita</button>
+            <button type="button" data-cmd="insertHorizontalRule">Linea</button>
             <button type="button" data-cmd="createLink">Enlace</button>
             <button type="button" data-cmd="unlink">Quitar enlace</button>
+            <button type="button" data-cmd="textAlignLeft">Alinear izq</button>
+            <button type="button" data-cmd="textAlignCenter">Centrar</button>
+            <button type="button" data-cmd="textAlignRight">Alinear der</button>
+            <button type="button" data-cmd="insertTable">Tabla</button>
             <button type="button" data-cmd="removeFormat">Limpiar</button>
           </div>
           <div id="excerpt-editor-${uid}" class="editor-surface" contenteditable="true" data-editor-field="excerpt">${post.excerpt || ''}</div>
@@ -2358,11 +2435,20 @@ let currentAdminUserId = null;
         <label>Contenido (HTML)</label>
         <div class="rich-editor pub-content-editor">
           <div class="editor-toolbar" id="content-toolbar-${uid}">
+            <button type="button" data-cmd="undo">Deshacer</button>
+            <button type="button" data-cmd="redo">Rehacer</button>
             <button type="button" data-cmd="bold"><strong>B</strong></button>
             <button type="button" data-cmd="italic"><em>I</em></button>
             <button type="button" data-cmd="underline"><u>U</u></button>
             <button type="button" data-cmd="styleTitle">Titulo</button>
             <button type="button" data-cmd="styleSubtitle">Subtitulo</button>
+            <select class="editor-block-select" data-cmd="formatBlock">
+              <option value="">Bloque</option>
+              <option value="P">Parrafo</option>
+              <option value="H2">H2</option>
+              <option value="H3">H3</option>
+              <option value="H4">H4</option>
+            </select>
             <select class="font-size-select" data-cmd="fontSizePx">
               <option value="">Tamano</option>
               <option value="10">10 px</option>
@@ -2376,10 +2462,21 @@ let currentAdminUserId = null;
               <option value="28">28 px</option>
               <option value="32">32 px</option>
             </select>
-            <button type="button" data-cmd="insertUnorderedList">• Lista</button>
+            <label class="editor-color-field">Color<input type="color" data-cmd="textColor" value="#0b3b91"></label>
+            <label class="editor-color-field">Fondo<input type="color" data-cmd="textBackgroundColor" value="#fff4bf"></label>
+            <button type="button" data-cmd="insertUnorderedList">Lista</button>
             <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+            <button type="button" data-cmd="blockquote">Cita</button>
+            <button type="button" data-cmd="insertHorizontalRule">Linea</button>
             <button type="button" data-cmd="createLink">Enlace</button>
             <button type="button" data-cmd="unlink">Quitar enlace</button>
+            <button type="button" data-cmd="insertImage">Imagen</button>
+            <button type="button" data-cmd="textAlignLeft">Alinear izq</button>
+            <button type="button" data-cmd="textAlignCenter">Centrar</button>
+            <button type="button" data-cmd="textAlignRight">Alinear der</button>
+            <button type="button" data-cmd="wrapSquare">Ajuste cuadrado</button>
+            <button type="button" data-cmd="wrapBlock">Ajuste arriba/abajo</button>
+            <button type="button" data-cmd="insertTable">Tabla</button>
             <button type="button" data-cmd="removeFormat">Limpiar</button>
           </div>
           <div id="content-editor-${uid}" class="editor-surface" contenteditable="true" data-editor-field="content_html">${post.content_html || ''}</div>
@@ -2627,6 +2724,26 @@ let currentAdminUserId = null;
         return;
       }
 
+      if (cmd === "blockquote") {
+        document.execCommand("formatBlock", false, "BLOCKQUOTE");
+        editor.focus();
+        ensureLinkTargets();
+        return;
+      }
+
+      if (cmd === "insertHorizontalRule") {
+        document.execCommand("insertHorizontalRule", false, null);
+        editor.focus();
+        ensureLinkTargets();
+        return;
+      }
+
+      if (cmd === "insertTable") {
+        insertTableAtSelection(editor);
+        ensureLinkTargets();
+        return;
+      }
+
       if (cmd === "styleTitle" || cmd === "styleSubtitle") {
         const className = cmd === "styleTitle" ? "text-title" : "text-subtitle";
         applyTextClass(editor, className);
@@ -2657,6 +2774,13 @@ let currentAdminUserId = null;
         return;
       }
 
+      if (cmd === "undo" || cmd === "redo") {
+        document.execCommand(cmd, false, null);
+        editor.focus();
+        ensureLinkTargets();
+        return;
+      }
+
       // fallback: execute command
       document.execCommand(cmd, false, null);
       editor.focus();
@@ -2669,15 +2793,35 @@ let currentAdminUserId = null;
       ensureResizableImages(editor);
     });
     toolbar.addEventListener("change", (ev) => {
-      const select = ev.target.closest("select[data-cmd]");
-      if (!select) return;
-      const cmd = select.dataset.cmd;
-      if (cmd !== "fontSizePx") return;
-      const size = select.value;
-      if (!size) return;
-      applyFontSize(editor, size);
-      ensureLinkTargets();
-      select.value = "";
+      const control = ev.target.closest("select[data-cmd], input[data-cmd]");
+      if (!control) return;
+      const cmd = control.dataset.cmd;
+      if (cmd === "fontSizePx") {
+        const size = control.value;
+        if (!size) return;
+        applyFontSize(editor, size);
+        ensureLinkTargets();
+        control.value = "";
+        return;
+      }
+      if (cmd === "formatBlock") {
+        const block = control.value;
+        if (!block) return;
+        document.execCommand("formatBlock", false, block.toUpperCase());
+        ensureLinkTargets();
+        control.value = "";
+        editor.focus();
+        return;
+      }
+      if (cmd === "textColor") {
+        applyTextColor(editor, control.value);
+        ensureLinkTargets();
+        return;
+      }
+      if (cmd === "textBackgroundColor") {
+        applyTextHighlight(editor, control.value);
+        ensureLinkTargets();
+      }
     });
     editor.addEventListener("keydown", (ev) => {
       if (ev.key !== "Backspace" && ev.key !== "Delete") return;

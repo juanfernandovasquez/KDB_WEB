@@ -766,11 +766,20 @@
             <label>Contenido (HTML permitido)</label>
             <div class="rich-editor">
               <div class="editor-toolbar" id="pub-content-toolbar">
+                <button type="button" data-cmd="undo">Deshacer</button>
+                <button type="button" data-cmd="redo">Rehacer</button>
                 <button type="button" data-cmd="bold"><strong>B</strong></button>
                 <button type="button" data-cmd="italic"><em>I</em></button>
                 <button type="button" data-cmd="underline"><u>U</u></button>
                 <button type="button" data-cmd="styleTitle">Titulo</button>
                 <button type="button" data-cmd="styleSubtitle">Subtitulo</button>
+                <select class="editor-block-select" data-cmd="formatBlock">
+                  <option value="">Bloque</option>
+                  <option value="P">Parrafo</option>
+                  <option value="H2">H2</option>
+                  <option value="H3">H3</option>
+                  <option value="H4">H4</option>
+                </select>
                 <select class="font-size-select" data-cmd="fontSizePx">
                   <option value="">Tamano</option>
                   <option value="10">10 px</option>
@@ -784,8 +793,12 @@
                   <option value="28">28 px</option>
                   <option value="32">32 px</option>
                 </select>
+                <label class="editor-color-field">Color<input type="color" data-cmd="textColor" value="#0b3b91"></label>
+                <label class="editor-color-field">Fondo<input type="color" data-cmd="textBackgroundColor" value="#fff4bf"></label>
                 <button type="button" data-cmd="insertUnorderedList">Lista</button>
                 <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                <button type="button" data-cmd="blockquote">Cita</button>
+                <button type="button" data-cmd="insertHorizontalRule">Linea</button>
                 <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
                 <button type="button" data-cmd="unlink">Quitar enlace</button>
                 <button type="button" data-cmd="insertImage">Imagen</button>
@@ -794,6 +807,7 @@
                 <button type="button" data-cmd="textAlignRight">Alinea der</button>
                 <button type="button" data-cmd="wrapSquare">Ajuste cuadrado</button>
                 <button type="button" data-cmd="wrapBlock">Ajuste arriba/abajo</button>
+                <button type="button" data-cmd="insertTable">Tabla</button>
                 <button type="button" data-cmd="removeFormat">Limpiar</button>
               </div>
               <div id="pub-content-editor" class="editor-surface" contenteditable="true"></div>

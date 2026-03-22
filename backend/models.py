@@ -17,6 +17,7 @@ ALLOWED_TAGS = [
     "i",
     "em",
     "u",
+    "s",
     "a",
     "ul",
     "ol",
@@ -26,6 +27,20 @@ ALLOWED_TAGS = [
     "span",
     "div",
     "img",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "blockquote",
+    "hr",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
 ]
 ALLOWED_ATTRIBUTES = {
     "a": ["href", "target", "rel"],
@@ -33,6 +48,19 @@ ALLOWED_ATTRIBUTES = {
     "p": ["class", "style"],
     "span": ["class", "style"],
     "div": ["class", "style"],
+    "h1": ["class", "style"],
+    "h2": ["class", "style"],
+    "h3": ["class", "style"],
+    "h4": ["class", "style"],
+    "h5": ["class", "style"],
+    "h6": ["class", "style"],
+    "blockquote": ["class", "style"],
+    "table": ["class", "style"],
+    "thead": ["class", "style"],
+    "tbody": ["class", "style"],
+    "tr": ["class", "style"],
+    "th": ["class", "style", "colspan", "rowspan"],
+    "td": ["class", "style", "colspan", "rowspan"],
 }
 # Allow safe sizing and alignment styles so texto e imagenes se centren si el editor los aplica
 IMG_CSS_SANITIZER = CSSSanitizer(
@@ -49,6 +77,14 @@ IMG_CSS_SANITIZER = CSSSanitizer(
         "margin-bottom",
         "float",
         "display",
+        "color",
+        "background-color",
+        "line-height",
+        "font-weight",
+        "border",
+        "border-collapse",
+        "padding",
+        "vertical-align",
     ]
 )
 

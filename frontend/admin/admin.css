@@ -170,6 +170,8 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 .editor-toolbar button:hover { border-color: var(--blue); color: var(--blue); }
 .editor-toolbar select { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; cursor: pointer; font-weight: 700; color: #233656; min-width: 96px; }
 .editor-toolbar select:focus { outline: 2px solid rgba(11, 59, 145, 0.2); border-color: var(--blue); }
+.editor-color-field { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.45rem 0.65rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; color: #233656; font-size: 0.88rem; font-weight: 700; }
+.editor-color-field input[type="color"] { width: 34px; height: 26px; padding: 0; border: none; background: transparent; cursor: pointer; }
 .editor-surface { min-height: 160px; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: #fff; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
 .editor-surface:focus { outline: 2px solid rgba(11, 59, 145, 0.2); border-color: var(--blue); }
 .service-card-admin textarea { min-height: 90px; }
@@ -180,6 +182,12 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 .editor-surface img { display:block; margin:0 auto 1rem auto; }
 .editor-surface .text-title { color: #002060; font-size: 20px; font-weight: 700; }
 .editor-surface .text-subtitle { color: #004da8; font-size: 16px; font-weight: 600; }
+.editor-surface h1, .editor-surface h2, .editor-surface h3, .editor-surface h4 { color: #002060; line-height: 1.2; margin: 1rem 0 0.6rem; }
+.editor-surface blockquote { margin: 1rem 0; padding: 0.85rem 1rem; border-left: 4px solid #b07d2f; background: rgba(176, 125, 47, 0.08); color: #233656; font-style: italic; }
+.editor-surface hr { border: none; border-top: 1px solid rgba(35, 54, 86, 0.2); margin: 1.25rem 0; }
+.editor-surface table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.editor-surface th, .editor-surface td { border: 1px solid rgba(35, 54, 86, 0.18); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+.editor-surface th { background: rgba(11, 59, 145, 0.08); color: #002060; font-weight: 700; }
 .editor-surface img:not(.img-align-left):not(.img-align-right):not(.img-wrap-square):not(.img-wrap-block):not([style*="float:left"]):not([style*="float:right"]) { float:none !important; }
 .editor-surface::after { content: ""; display: block; clear: both; }
 .editor-surface .img-align-left { float: left; margin: 0 12px 12px 0; }

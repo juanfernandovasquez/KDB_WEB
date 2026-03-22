@@ -1273,8 +1273,53 @@ p, .p  { font-size: var(--p);  line-height: var(--line-height-base); margin: 0 0
     margin: 0 auto 12px auto !important;
   }
 }
-.post-content h2, .post-content h3 {
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4 {
   color: var(--brand-blue);
+  line-height: 1.18;
+  margin: 1.35rem 0 0.8rem;
+}
+.post-content h1 { font-size: 2rem; }
+.post-content h2 { font-size: 1.7rem; }
+.post-content h3 { font-size: 1.45rem; }
+.post-content h4 { font-size: 1.2rem; }
+.post-content blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.2rem;
+  border-left: 4px solid var(--brand-gold);
+  background: rgba(176, 125, 47, 0.08);
+  color: #233656;
+  font-size: 1.08rem;
+  font-style: italic;
+}
+.post-content hr {
+  border: none;
+  border-top: 1px solid rgba(35, 54, 86, 0.22);
+  margin: 1.6rem 0;
+}
+.post-content table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  overflow: hidden;
+}
+.post-content th,
+.post-content td {
+  border: 1px solid rgba(35, 54, 86, 0.14);
+  padding: 0.7rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+}
+.post-content th {
+  background: rgba(11, 59, 145, 0.08);
+  color: var(--brand-blue);
+  font-weight: 700;
+}
+.post-content ul,
+.post-content ol {
+  padding-left: 1.4rem;
 }
 .text-title {
   color: var(--brand-blue);

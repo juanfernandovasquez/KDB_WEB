@@ -1,8 +1,18 @@
-﻿{% extends "admin_base.html" %}
-
-{% block body %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de contenido</title>
+  <link rel="stylesheet" href="./admin.css?v=20260202">
+</head>
+<body>
   <header>
     <h1>Panel de contenido</h1>
+    <div class="admin-user">
+      <span id="admin-user-label"></span>
+      <button type="button" class="secondary small-btn" id="admin-logout">Salir</button>
+    </div>
     <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menu">
       <span></span>
       <span></span>
@@ -23,6 +33,7 @@
         <li><button type="button" data-page="subs">Suscriptores</button></li>
         <li><button type="button" data-page="contacto">Contactos</button></li>
         <li><button type="button" data-page="legales">Legales</button></li>
+        <li><button type="button" data-page="usuarios">Usuarios</button></li>
       </ul>
     </aside>
     <main>
@@ -393,7 +404,7 @@
         <div class="page-header">
           <div class="title">
             <h2>Mensajes de contacto</h2>
-            <p class="small">Mensajes enviados desde la página Contáctanos.</p>
+            <p class="small">Mensajes enviados desde la p gina Cont ctanos.</p>
           </div>
           <div class="row">
             <button class="secondary" id="refresh-contact">Refrescar</button>
@@ -535,14 +546,14 @@
             <h3>Subpaginas</h3>
             <button type="button" class="collapse-btn" data-collapse-target="kdbweb-list-body">+</button>
           </div>
-          <div class="collapsible-body collapsed" id="kdbweb-list-body">
-            <div class="kdbweb-tree-wrap">
-              <div class="kdbweb-tree" id="kdbweb-tree" data-kdbweb-children="true" data-parent=""></div>
+            <div class="collapsible-body collapsed" id="kdbweb-list-body">
+              <div class="kdbweb-tree-wrap">
+                <div class="kdbweb-tree" id="kdbweb-tree" data-kdbweb-children="true" data-parent=""></div>
+              </div>
+              <p class="small kdbweb-help">Arrastra para ordenar dentro del mismo nivel.</p>
+              <div class="status" id="status-kdbweb-list"></div>
             </div>
-            <p class="small kdbweb-help">Arrastra para ordenar dentro del mismo nivel.</p>
-            <div class="status" id="status-kdbweb-list"></div>
           </div>
-        </div>
 
         <div id="kdbweb-edit-panel" class="section-card hidden">
           <div class="section-head spaced">
@@ -610,8 +621,6 @@
             <p class="small">Gestiona publicaciones y categorias.</p>
           </div>
         </div>
-
-
 
         <div class="card" id="pub-hero-card">
           <div class="section-head spaced">
@@ -757,11 +766,20 @@
             <label>Contenido (HTML permitido)</label>
             <div class="rich-editor">
               <div class="editor-toolbar" id="pub-content-toolbar">
+                <button type="button" data-cmd="undo">Deshacer</button>
+                <button type="button" data-cmd="redo">Rehacer</button>
                 <button type="button" data-cmd="bold"><strong>B</strong></button>
                 <button type="button" data-cmd="italic"><em>I</em></button>
                 <button type="button" data-cmd="underline"><u>U</u></button>
                 <button type="button" data-cmd="styleTitle">Titulo</button>
                 <button type="button" data-cmd="styleSubtitle">Subtitulo</button>
+                <select class="editor-block-select" data-cmd="formatBlock">
+                  <option value="">Bloque</option>
+                  <option value="P">Parrafo</option>
+                  <option value="H2">H2</option>
+                  <option value="H3">H3</option>
+                  <option value="H4">H4</option>
+                </select>
                 <select class="font-size-select" data-cmd="fontSizePx">
                   <option value="">Tamano</option>
                   <option value="10">10 px</option>
@@ -775,8 +793,12 @@
                   <option value="28">28 px</option>
                   <option value="32">32 px</option>
                 </select>
+                <label class="editor-color-field">Color<input type="color" data-cmd="textColor" value="#0b3b91"></label>
+                <label class="editor-color-field">Fondo<input type="color" data-cmd="textBackgroundColor" value="#fff4bf"></label>
                 <button type="button" data-cmd="insertUnorderedList">Lista</button>
                 <button type="button" data-cmd="insertOrderedList">1. Lista</button>
+                <button type="button" data-cmd="blockquote">Cita</button>
+                <button type="button" data-cmd="insertHorizontalRule">Linea</button>
                 <button type="button" data-cmd="createLink">Enlace (nueva pestana)</button>
                 <button type="button" data-cmd="unlink">Quitar enlace</button>
                 <button type="button" data-cmd="insertImage">Imagen</button>
@@ -785,6 +807,7 @@
                 <button type="button" data-cmd="textAlignRight">Alinea der</button>
                 <button type="button" data-cmd="wrapSquare">Ajuste cuadrado</button>
                 <button type="button" data-cmd="wrapBlock">Ajuste arriba/abajo</button>
+                <button type="button" data-cmd="insertTable">Tabla</button>
                 <button type="button" data-cmd="removeFormat">Limpiar</button>
               </div>
               <div id="pub-content-editor" class="editor-surface" contenteditable="true"></div>
@@ -798,9 +821,83 @@
           </div>
         </div>
       </section>
+
+      <section id="users-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>Usuarios admin</h2>
+            <p class="small">Crea, edita o desactiva usuarios del panel.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="grid-2">
+            <div><label>Usuario</label><input type="text" id="admin-user-username"></div>
+            <div><label>Password</label><input type="password" id="admin-user-password" placeholder="Solo si deseas cambiar"></div>
+            <div>
+              <label>Rol</label>
+              <select id="admin-user-role" class="form-select">
+                <option value="editor">Editor</option>
+                <option value="super">Super</option>
+              </select>
+            </div>
+            <div>
+              <label>Activo</label>
+              <select id="admin-user-active" class="form-select">
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+          </div>
+          <div class="row row-space-top">
+            <button class="cta" id="admin-user-save">Guardar</button>
+            <button class="secondary" id="admin-user-cancel">Limpiar</button>
+            <span class="status" id="admin-user-status"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="subs-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Activo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-user-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
+  <div class="auth-overlay" id="admin-auth" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-label="Acceso administrador">
+      <h2>Acceso administrador</h2>
+      <p class="small">Ingresa tus credenciales para continuar.</p>
+      <form id="admin-login-form">
+        <label>Usuario</label>
+        <input type="text" id="admin-login-username" autocomplete="username" required>
+        <label>Password</label>
+        <input type="password" id="admin-login-password" autocomplete="current-password" required>
+        <div class="row row-space-top">
+          <button type="submit" class="cta">Ingresar</button>
+          <span class="status" id="admin-login-status"></span>
+        </div>
+      </form>
+      <div class="auth-bootstrap hidden" id="admin-bootstrap">
+        <p class="small">No hay usuarios admin. Crea el primero.</p>
+        <button type="button" class="secondary" id="admin-bootstrap-btn">Crear admin inicial</button>
+      </div>
+    </div>
+  </div>
+  <script src="../js/config.js"></script>
+  <script type="module" src="./main.js?v=20260202"></script>
   <script>
     console.log("admin template loaded");
   </script>
-{% endblock %}
+</body>
+</html>
