@@ -79,6 +79,7 @@ IMG_CSS_SANITIZER = CSSSanitizer(
         "display",
         "color",
         "background-color",
+        "text-decoration",
         "line-height",
         "font-weight",
         "border",

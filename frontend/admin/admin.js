@@ -2415,8 +2415,22 @@ let currentAdminUserId = null;
               <option value="28">28 px</option>
               <option value="32">32 px</option>
             </select>
-            <label class="editor-color-field">Color<input type="color" data-cmd="textColor" value="#0b3b91"></label>
-            <label class="editor-color-field">Fondo<input type="color" data-cmd="textBackgroundColor" value="#fff4bf"></label>
+            <select class="editor-palette-select" data-cmd="textColor">
+              <option value="">Color texto</option>
+              <option value="#0b3b91">Azul marca</option>
+              <option value="#b07d2f">Dorado marca</option>
+              <option value="#233656">Azul oscuro</option>
+              <option value="#4b5563">Gris</option>
+              <option value="#111111">Negro</option>
+            </select>
+            <select class="editor-palette-select" data-cmd="textBackgroundColor">
+              <option value="">Resaltado</option>
+              <option value="#fff4bf">Amarillo suave</option>
+              <option value="#dbeafe">Azul suave</option>
+              <option value="#dcfce7">Verde suave</option>
+              <option value="#fee2e2">Rojo suave</option>
+              <option value="#f3e8ff">Lila suave</option>
+            </select>
             <button type="button" data-cmd="insertUnorderedList">Lista</button>
             <button type="button" data-cmd="insertOrderedList">1. Lista</button>
             <button type="button" data-cmd="blockquote">Cita</button>
@@ -2462,8 +2476,22 @@ let currentAdminUserId = null;
               <option value="28">28 px</option>
               <option value="32">32 px</option>
             </select>
-            <label class="editor-color-field">Color<input type="color" data-cmd="textColor" value="#0b3b91"></label>
-            <label class="editor-color-field">Fondo<input type="color" data-cmd="textBackgroundColor" value="#fff4bf"></label>
+            <select class="editor-palette-select" data-cmd="textColor">
+              <option value="">Color texto</option>
+              <option value="#0b3b91">Azul marca</option>
+              <option value="#b07d2f">Dorado marca</option>
+              <option value="#233656">Azul oscuro</option>
+              <option value="#4b5563">Gris</option>
+              <option value="#111111">Negro</option>
+            </select>
+            <select class="editor-palette-select" data-cmd="textBackgroundColor">
+              <option value="">Resaltado</option>
+              <option value="#fff4bf">Amarillo suave</option>
+              <option value="#dbeafe">Azul suave</option>
+              <option value="#dcfce7">Verde suave</option>
+              <option value="#fee2e2">Rojo suave</option>
+              <option value="#f3e8ff">Lila suave</option>
+            </select>
             <button type="button" data-cmd="insertUnorderedList">Lista</button>
             <button type="button" data-cmd="insertOrderedList">1. Lista</button>
             <button type="button" data-cmd="blockquote">Cita</button>
@@ -2816,11 +2844,13 @@ let currentAdminUserId = null;
       if (cmd === "textColor") {
         applyTextColor(editor, control.value);
         ensureLinkTargets();
+        control.value = "";
         return;
       }
       if (cmd === "textBackgroundColor") {
         applyTextHighlight(editor, control.value);
         ensureLinkTargets();
+        control.value = "";
       }
     });
     editor.addEventListener("keydown", (ev) => {
