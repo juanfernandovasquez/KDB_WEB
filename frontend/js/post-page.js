@@ -77,6 +77,39 @@
     return (tmp.textContent || "").trim();
   }
 
+  function setupShareLinks(data) {
+    const pageUrl = window.location.href;
+    const title = data.title || document.title || "";
+    const encodedUrl = encodeURIComponent(pageUrl);
+    const encodedTitle = encodeURIComponent(title);
+
+    const linkedin = document.getElementById("share-linkedin");
+    const facebook = document.getElementById("share-facebook");
+    const x = document.getElementById("share-x");
+    const copy = document.getElementById("share-copy");
+
+    if (linkedin) {
+      linkedin.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+    }
+    if (facebook) {
+      facebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    }
+    if (x) {
+      x.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+    }
+    if (copy) {
+      copy.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(pageUrl);
+          copy.classList.add("is-copied");
+          setTimeout(() => copy.classList.remove("is-copied"), 1200);
+        } catch (_) {
+          window.prompt("Copia este enlace:", pageUrl);
+        }
+      };
+    }
+  }
+
   function renderLatest(publications) {
     const section = document.getElementById("post-latest-section");
     const list = document.getElementById("post-latest-list");
@@ -215,6 +248,7 @@
       const data = await res.json();
       setHero(data);
       setContent(data);
+      setupShareLinks(data);
       loadLatest(slug);
     } catch (err) {
       const content = document.getElementById("post-content");
