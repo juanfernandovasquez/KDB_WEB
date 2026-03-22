@@ -65,8 +65,8 @@ ALLOWED_ATTRIBUTES = {
     "thead": ["class", "style"],
     "tbody": ["class", "style"],
     "tr": ["class", "style"],
-    "th": ["class", "style", "colspan", "rowspan"],
-    "td": ["class", "style", "colspan", "rowspan"],
+    "th": ["class", "style", "colspan", "rowspan", "colwidth", "data-colwidth", "width"],
+    "td": ["class", "style", "colspan", "rowspan", "colwidth", "data-colwidth", "width"],
 }
 # Allow safe sizing and alignment styles so texto e imagenes se centren si el editor los aplica
 IMG_CSS_SANITIZER = CSSSanitizer(

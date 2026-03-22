@@ -2983,6 +2983,27 @@ let currentAdminUserId = null;
       TableRow: tableRowMod.default,
       TableHeader: tableHeaderMod.default,
       TableCell: tableCellMod.default,
+      FontSize: core.Extension.create({
+        name: "fontSize",
+        addGlobalAttributes() {
+          return [{
+            types: ["textStyle"],
+            attributes: {
+              fontSize: {
+                default: null,
+                parseHTML: element => element.style.fontSize || null,
+                renderHTML: attributes => attributes.fontSize ? { style: `font-size: ${attributes.fontSize}` } : {},
+              },
+            },
+          }];
+        },
+        addCommands() {
+          return {
+            setFontSize: fontSize => ({ chain }) => chain().setMark("textStyle", { fontSize }).run(),
+            unsetFontSize: () => ({ chain }) => chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run(),
+          };
+        },
+      }),
     };
     return window.__KDB_TIPTAP__;
   }
@@ -3104,6 +3125,7 @@ let currentAdminUserId = null;
         TableRow,
         TableHeader,
         TableCell,
+        FontSize,
       } = await loadTiptapModules();
 
       publicationEditor = new Editor({
@@ -3113,6 +3135,7 @@ let currentAdminUserId = null;
           Underline,
           Link.configure({ openOnClick: false }),
           TextStyle,
+          FontSize,
           Color,
           Highlight.configure({ multicolor: true }),
           TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -3214,7 +3237,7 @@ let currentAdminUserId = null;
           if (value === "H3") chain.setHeading({ level: 3 }).run();
           if (value === "H4") chain.setHeading({ level: 4 }).run();
         }
-        if (cmd === "fontSizePx") chain.setMark("textStyle", { fontSize: `${value}px` }).run();
+        if (cmd === "fontSizePx") chain.setFontSize(`${value}px`).run();
         if (cmd === "textColor") chain.setColor(value).run();
         if (cmd === "textBackgroundColor") chain.toggleHighlight({ color: value }).run();
         control.value = "";
