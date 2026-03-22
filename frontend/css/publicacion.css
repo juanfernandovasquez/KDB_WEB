@@ -86,6 +86,16 @@
   box-shadow: none;
 }
 
+.post-content u {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.12em;
+}
+
+.post-content mark {
+  padding: 0.05em 0.18em;
+  border-radius: 0.16rem;
+}
+
 .post-share {
   margin-top: 2.4rem;
 }

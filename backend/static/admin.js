@@ -95,6 +95,9 @@
     const el = q(id);
     return el ? el.innerHTML : "";
   };
+  let publicationEditor = null;
+  let publicationEditorReady = null;
+  let mediaTargetTiptap = null;
   let imagePickerEl = null;
   let selectedImage = null;
   let mediaTargetEditor = null;
@@ -157,6 +160,10 @@
       if (mediaTargetInput.id === "c-favicon-url") {
         setFaviconPreview(cleanUrl);
       }
+      return;
+    }
+    if (mediaTargetTiptap) {
+      mediaTargetTiptap.chain().focus().setImage({ src: cleanUrl, alt: "" }).run();
       return;
     }
     if (mediaTargetEditor) {
@@ -262,13 +269,21 @@
     q("media-search")?.focus();
   };
   const openMediaModalForEditor = async (editor) => {
+    mediaTargetTiptap = null;
     mediaTargetEditor = editor || null;
     mediaTargetInput = null;
     await openMediaModal();
   };
   const openMediaModalForInput = async (input) => {
+    mediaTargetTiptap = null;
     mediaTargetInput = input || null;
     mediaTargetEditor = null;
+    await openMediaModal();
+  };
+  const openMediaModalForTiptap = async (editor) => {
+    mediaTargetTiptap = editor || null;
+    mediaTargetEditor = null;
+    mediaTargetInput = null;
     await openMediaModal();
   };
   const closeMediaModal = () => {
@@ -278,6 +293,7 @@
     modal.setAttribute("aria-hidden", "true");
     mediaTargetEditor = null;
     mediaTargetInput = null;
+    mediaTargetTiptap = null;
   };
   const normalizePrefix = (value) => {
     let prefix = (value || "").trim().replace(/^\/+/, "");
@@ -1819,7 +1835,7 @@ let currentAdminUserId = null;
     }
   }
 
-  function openPublicationForm(pub) {
+  async function openPublicationForm(pub) {
     currentPubEditing = pub && pub.id ? pub.id : null;
     setText("pub-edit-title", pub?.id ? "Editar publicación" : "Nueva publicación");
     q("pub-table-card")?.classList.add("hidden");
@@ -1838,10 +1854,7 @@ let currentAdminUserId = null;
       slugInput.dataset.auto = pub?.id ? "0" : "1";
     }
     const contentEditor = q("pub-content-editor");
-    if (contentEditor) {
-      contentEditor.innerHTML = pub?.content_html || "";
-      ensureResizableImages(contentEditor);
-    }
+    if (contentEditor) contentEditor.innerHTML = "";
     setValSafe("pub-form-content", pub?.content_html || "");
     setValSafe("pub-form-date", pub?.published_at || "");
     setValSafe("pub-form-author", pub?.author || "");
@@ -1853,8 +1866,8 @@ let currentAdminUserId = null;
     }
     const activeSel = q("pub-form-active");
     if (activeSel) activeSel.value = pub?.active ? "1" : "0";
-    // init rich editor for publication content
-    setupRichEditor("pub-content-toolbar", "pub-content-editor");
+    publicationEditorReady = setupPublicationEditor(pub?.content_html || "");
+    await publicationEditorReady;
     if (panel) panel.classList.remove("hidden");
     if (body) body.classList.remove("collapsed");
     if (collapseBtn) collapseBtn.textContent = "-";
@@ -1862,6 +1875,7 @@ let currentAdminUserId = null;
 
   function closePublicationForm() {
     currentPubEditing = null;
+    destroyPublicationEditor();
     q("pub-edit-panel")?.classList.add("hidden");
     q("pub-table-card")?.classList.remove("hidden");
     setText("status-pub-edit", "");
@@ -1870,8 +1884,8 @@ let currentAdminUserId = null;
   async function savePublicationForm() {
     const status = q("status-pub-edit");
     if (status) status.textContent = "Guardando...";
-    const contentEditor = q("pub-content-editor");
-    const content_html = contentEditor ? serializeEditorContent(contentEditor).trim() : q("pub-form-content")?.value.trim();
+    if (publicationEditorReady) await publicationEditorReady;
+    const content_html = publicationEditor ? publicationEditor.getHTML().trim() : q("pub-form-content")?.value.trim();
     const slugInput = q("pub-form-slug");
     const rawTitle = q("pub-form-title")?.value.trim();
     const currentSlug = slugInput?.value.trim();
@@ -2885,6 +2899,170 @@ let currentAdminUserId = null;
       }
     });
     enableImageDrag(editor);
+  }
+
+  async function loadTiptapModules() {
+    if (window.__KDB_TIPTAP__) return window.__KDB_TIPTAP__;
+    const [
+      core,
+      starterKitMod,
+      underlineMod,
+      linkMod,
+      textStyleMod,
+      colorMod,
+      highlightMod,
+      textAlignMod,
+      imageMod,
+      tableMod,
+      tableRowMod,
+      tableHeaderMod,
+      tableCellMod,
+    ] = await Promise.all([
+      import("https://esm.sh/@tiptap/core@2.26.1"),
+      import("https://esm.sh/@tiptap/starter-kit@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-underline@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-link@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-text-style@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-color@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-highlight@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-text-align@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-image@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-table@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-table-row@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-table-header@2.26.1"),
+      import("https://esm.sh/@tiptap/extension-table-cell@2.26.1"),
+    ]);
+    window.__KDB_TIPTAP__ = {
+      Editor: core.Editor,
+      StarterKit: starterKitMod.default,
+      Underline: underlineMod.default,
+      Link: linkMod.default,
+      TextStyle: textStyleMod.default,
+      Color: colorMod.default,
+      Highlight: highlightMod.default,
+      TextAlign: textAlignMod.default,
+      Image: imageMod.default,
+      Table: tableMod.default,
+      TableRow: tableRowMod.default,
+      TableHeader: tableHeaderMod.default,
+      TableCell: tableCellMod.default,
+    };
+    return window.__KDB_TIPTAP__;
+  }
+
+  function destroyPublicationEditor() {
+    if (!publicationEditor) return;
+    publicationEditor.destroy();
+    publicationEditor = null;
+    publicationEditorReady = null;
+  }
+
+  async function setupPublicationEditor(initialHtml) {
+    const editorEl = q("pub-content-editor");
+    const textarea = q("pub-form-content");
+    const toolbar = q("pub-content-toolbar");
+    if (!editorEl || !toolbar) return null;
+    if (publicationEditor) {
+      publicationEditor.commands.setContent(initialHtml || "", false);
+      if (textarea) textarea.value = publicationEditor.getHTML();
+      return publicationEditor;
+    }
+    const {
+      Editor,
+      StarterKit,
+      Underline,
+      Link,
+      TextStyle,
+      Color,
+      Highlight,
+      TextAlign,
+      Image,
+      Table,
+      TableRow,
+      TableHeader,
+      TableCell,
+    } = await loadTiptapModules();
+
+    publicationEditor = new Editor({
+      element: editorEl,
+      extensions: [
+        StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+        Underline,
+        Link.configure({ openOnClick: false }),
+        TextStyle,
+        Color,
+        Highlight.configure({ multicolor: true }),
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+        Image.configure({ HTMLAttributes: { class: "tiptap-image" } }),
+        Table.configure({ resizable: true }),
+        TableRow,
+        TableHeader,
+        TableCell,
+      ],
+      content: initialHtml || "",
+      editorProps: {
+        attributes: {
+          class: "editor-surface tiptap-surface",
+        },
+      },
+      onUpdate: ({ editor }) => {
+        if (textarea) textarea.value = editor.getHTML();
+      },
+    });
+
+    toolbar.onclick = (ev) => {
+      const btn = ev.target.closest("button[data-cmd]");
+      if (!btn || !publicationEditor) return;
+      const cmd = btn.dataset.cmd;
+      const chain = publicationEditor.chain().focus();
+
+      if (cmd === "undo") return publicationEditor.commands.undo();
+      if (cmd === "redo") return publicationEditor.commands.redo();
+      if (cmd === "bold") return chain.toggleBold().run();
+      if (cmd === "italic") return chain.toggleItalic().run();
+      if (cmd === "underline") return chain.toggleUnderline().run();
+      if (cmd === "insertUnorderedList") return chain.toggleBulletList().run();
+      if (cmd === "insertOrderedList") return chain.toggleOrderedList().run();
+      if (cmd === "blockquote") return chain.toggleBlockquote().run();
+      if (cmd === "insertHorizontalRule") return chain.setHorizontalRule().run();
+      if (cmd === "createLink") {
+        const previous = publicationEditor.getAttributes("link").href || "https://";
+        const href = prompt("Ingresa la URL del enlace:", previous);
+        if (!href) return;
+        return chain.extendMarkRange("link").setLink({ href, target: "_blank", rel: "noopener noreferrer" }).run();
+      }
+      if (cmd === "unlink") return chain.unsetLink().run();
+      if (cmd === "insertImage") return openMediaModalForTiptap(publicationEditor);
+      if (cmd === "textAlignLeft") return chain.setTextAlign("left").run();
+      if (cmd === "textAlignCenter") return chain.setTextAlign("center").run();
+      if (cmd === "textAlignRight") return chain.setTextAlign("right").run();
+      if (cmd === "insertTable") return chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+      if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
+      if (cmd === "styleTitle") return chain.setHeading({ level: 2 }).run();
+      if (cmd === "styleSubtitle") return chain.setHeading({ level: 3 }).run();
+    };
+
+    toolbar.onchange = (ev) => {
+      const control = ev.target.closest("select[data-cmd]");
+      if (!control || !publicationEditor) return;
+      const cmd = control.dataset.cmd;
+      const value = control.value;
+      if (!value) return;
+      const chain = publicationEditor.chain().focus();
+      if (cmd === "formatBlock") {
+        if (value === "P") chain.setParagraph().run();
+        if (value === "H2") chain.setHeading({ level: 2 }).run();
+        if (value === "H3") chain.setHeading({ level: 3 }).run();
+        if (value === "H4") chain.setHeading({ level: 4 }).run();
+      }
+      if (cmd === "fontSizePx") chain.setMark("textStyle", { fontSize: `${value}px` }).run();
+      if (cmd === "textColor") chain.setColor(value).run();
+      if (cmd === "textBackgroundColor") chain.toggleHighlight({ color: value }).run();
+      control.value = "";
+    };
+
+    if (textarea) textarea.value = publicationEditor.getHTML();
+    return publicationEditor;
   }
 
   // Publicaciones: eventos del UI
