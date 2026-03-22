@@ -97,6 +97,7 @@
   };
   let publicationEditor = null;
   let publicationEditorReady = null;
+  let publicationEditorSelection = null;
   let mediaTargetTiptap = null;
   let imagePickerEl = null;
   let selectedImage = null;
@@ -2956,6 +2957,7 @@ let currentAdminUserId = null;
     publicationEditor.destroy();
     publicationEditor = null;
     publicationEditorReady = null;
+    publicationEditorSelection = null;
   }
 
   async function setupPublicationEditor(initialHtml) {
@@ -3002,15 +3004,23 @@ let currentAdminUserId = null;
           TableCell,
         ],
         content: initialHtml || "",
-        editorProps: {
-          attributes: {
-            class: "editor-surface tiptap-surface",
-          },
+      editorProps: {
+        attributes: {
+          class: "editor-surface tiptap-surface",
         },
-        onUpdate: ({ editor }) => {
-          if (textarea) textarea.value = editor.getHTML();
+      },
+      onUpdate: ({ editor }) => {
+        if (textarea) textarea.value = editor.getHTML();
+      },
+      onSelectionUpdate: ({ editor }) => {
+        publicationEditorSelection = {
+          from: editor.state.selection.from,
+          to: editor.state.selection.to,
+        };
       },
     });
+
+    window.__pubEditor = publicationEditor;
 
     toolbar.addEventListener("mousedown", (ev) => {
       if (ev.target.closest("[data-cmd]")) {
@@ -3025,6 +3035,9 @@ let currentAdminUserId = null;
       const cmd = btn.dataset.cmd;
       const value = btn.dataset.value;
       const chain = publicationEditor.chain().focus();
+      if (publicationEditorSelection) {
+        chain.setTextSelection(publicationEditorSelection);
+      }
 
         if (cmd === "undo") return publicationEditor.commands.undo();
         if (cmd === "redo") return publicationEditor.commands.redo();
@@ -3057,11 +3070,14 @@ let currentAdminUserId = null;
       toolbar.onchange = (ev) => {
         const control = ev.target.closest("select[data-cmd]");
         if (!control || !publicationEditor) return;
-        const cmd = control.dataset.cmd;
-        const value = control.value;
-        if (!value) return;
-        const chain = publicationEditor.chain().focus();
-        if (cmd === "formatBlock") {
+      const cmd = control.dataset.cmd;
+      const value = control.value;
+      if (!value) return;
+      const chain = publicationEditor.chain().focus();
+      if (publicationEditorSelection) {
+        chain.setTextSelection(publicationEditorSelection);
+      }
+      if (cmd === "formatBlock") {
           if (value === "P") chain.setParagraph().run();
           if (value === "H2") chain.setHeading({ level: 2 }).run();
           if (value === "H3") chain.setHeading({ level: 3 }).run();
