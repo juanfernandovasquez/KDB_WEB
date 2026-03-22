@@ -3062,6 +3062,7 @@ let currentAdminUserId = null;
     const textarea = q("pub-form-content");
     const toolbar = q("pub-content-toolbar");
     if (!editorEl || !toolbar) return null;
+    editorEl.removeAttribute("contenteditable");
     try {
       if (publicationEditor) {
         publicationEditor.commands.setContent(initialHtml || "", false);
@@ -3132,9 +3133,6 @@ let currentAdminUserId = null;
       const cmd = btn.dataset.cmd;
       const value = btn.dataset.value;
       const chain = publicationEditor.chain().focus();
-      if (publicationEditorSelection) {
-        chain.setTextSelection(publicationEditorSelection);
-      }
 
         if (cmd === "undo") return publicationEditor.commands.undo();
         if (cmd === "redo") return publicationEditor.commands.redo();
@@ -3171,9 +3169,6 @@ let currentAdminUserId = null;
       const value = control.value;
       if (!value) return;
       const chain = publicationEditor.chain().focus();
-      if (publicationEditorSelection) {
-        chain.setTextSelection(publicationEditorSelection);
-      }
       if (cmd === "formatBlock") {
           if (value === "P") chain.setParagraph().run();
           if (value === "H2") chain.setHeading({ level: 2 }).run();
