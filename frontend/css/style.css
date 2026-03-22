@@ -1332,6 +1332,17 @@ p, .p  { font-size: var(--p);  line-height: var(--line-height-base); margin: 0 0
   font-weight: 600;
 }
 
+.post-content .text-color-brand-blue { color: #0b3b91; }
+.post-content .text-color-brand-gold { color: #b07d2f; }
+.post-content .text-color-deep-blue { color: #233656; }
+.post-content .text-color-gray { color: #4b5563; }
+.post-content .text-color-black { color: #111111; }
+.post-content .highlight-soft-yellow { background: #fff4bf; }
+.post-content .highlight-soft-blue { background: #dbeafe; }
+.post-content .highlight-soft-green { background: #dcfce7; }
+.post-content .highlight-soft-red { background: #fee2e2; }
+.post-content .highlight-soft-lilac { background: #f3e8ff; }
+
 /* Legal pages */
 .legal-main {
   padding-top: 4rem;

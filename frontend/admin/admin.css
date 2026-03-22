@@ -184,6 +184,16 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 .editor-surface img { display:block; margin:0 auto 1rem auto; }
 .editor-surface .text-title { color: #002060; font-size: 20px; font-weight: 700; }
 .editor-surface .text-subtitle { color: #004da8; font-size: 16px; font-weight: 600; }
+.editor-surface .text-color-brand-blue { color: #0b3b91; }
+.editor-surface .text-color-brand-gold { color: #b07d2f; }
+.editor-surface .text-color-deep-blue { color: #233656; }
+.editor-surface .text-color-gray { color: #4b5563; }
+.editor-surface .text-color-black { color: #111111; }
+.editor-surface .highlight-soft-yellow { background: #fff4bf; }
+.editor-surface .highlight-soft-blue { background: #dbeafe; }
+.editor-surface .highlight-soft-green { background: #dcfce7; }
+.editor-surface .highlight-soft-red { background: #fee2e2; }
+.editor-surface .highlight-soft-lilac { background: #f3e8ff; }
 .editor-surface h1, .editor-surface h2, .editor-surface h3, .editor-surface h4 { color: #002060; line-height: 1.2; margin: 1rem 0 0.6rem; }
 .editor-surface blockquote { margin: 1rem 0; padding: 0.85rem 1rem; border-left: 4px solid #b07d2f; background: rgba(176, 125, 47, 0.08); color: #233656; font-style: italic; }
 .editor-surface hr { border: none; border-top: 1px solid rgba(35, 54, 86, 0.2); margin: 1.25rem 0; }

@@ -95,6 +95,20 @@
     const el = q(id);
     return el ? el.innerHTML : "";
   };
+  const PUBLICATION_TEXT_COLORS = {
+    "#0b3b91": "text-color-brand-blue",
+    "#b07d2f": "text-color-brand-gold",
+    "#233656": "text-color-deep-blue",
+    "#4b5563": "text-color-gray",
+    "#111111": "text-color-black",
+  };
+  const PUBLICATION_HIGHLIGHTS = {
+    "#fff4bf": "highlight-soft-yellow",
+    "#dbeafe": "highlight-soft-blue",
+    "#dcfce7": "highlight-soft-green",
+    "#fee2e2": "highlight-soft-red",
+    "#f3e8ff": "highlight-soft-lilac",
+  };
   let publicationEditor = null;
   let publicationEditorReady = null;
   let publicationEditorSelection = null;
@@ -108,6 +122,25 @@
   let currentMediaPrefix = "";
   let logoGalleryPrefix = "logos/";
   let faviconGalleryPrefix = "favicons/";
+  const resolveCssColor = (value) => {
+    if (!value) return "";
+    const probe = document.createElement("span");
+    probe.style.color = value;
+    document.body.appendChild(probe);
+    const resolved = window.getComputedStyle(probe).color;
+    probe.remove();
+    return resolved || value;
+  };
+  const buildResolvedColorMap = (source) => {
+    const map = {};
+    Object.entries(source).forEach(([hex, cls]) => {
+      map[resolveCssColor(hex)] = { hex, cls };
+      map[hex.toLowerCase()] = { hex, cls };
+    });
+    return map;
+  };
+  const PUBLICATION_TEXT_COLOR_LOOKUP = () => buildResolvedColorMap(PUBLICATION_TEXT_COLORS);
+  const PUBLICATION_HIGHLIGHT_LOOKUP = () => buildResolvedColorMap(PUBLICATION_HIGHLIGHTS);
   const isHttpUrl = (value) => {
     const clean = (value || "").trim().toLowerCase();
     return clean.startsWith("http://") || clean.startsWith("https://");
@@ -1886,7 +1919,9 @@ let currentAdminUserId = null;
     const status = q("status-pub-edit");
     if (status) status.textContent = "Guardando...";
     if (publicationEditorReady) await publicationEditorReady;
-    const content_html = publicationEditor ? publicationEditor.getHTML().trim() : q("pub-form-content")?.value.trim();
+    const content_html = publicationEditor
+      ? normalizePublicationHtmlForStorage(publicationEditor.getHTML().trim())
+      : q("pub-form-content")?.value.trim();
     const slugInput = q("pub-form-slug");
     const rawTitle = q("pub-form-title")?.value.trim();
     const currentSlug = slugInput?.value.trim();
@@ -2960,6 +2995,66 @@ let currentAdminUserId = null;
     publicationEditorSelection = null;
   }
 
+  function preparePublicationHtmlForEditor(html) {
+    if (!html) return "";
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    const textClassToHex = Object.fromEntries(Object.entries(PUBLICATION_TEXT_COLORS).map(([hex, cls]) => [cls, hex]));
+    const highlightClassToHex = Object.fromEntries(Object.entries(PUBLICATION_HIGHLIGHTS).map(([hex, cls]) => [cls, hex]));
+    temp.querySelectorAll("span").forEach((span) => {
+      const colorClass = [...span.classList].find((cls) => textClassToHex[cls]);
+      if (colorClass && !span.style.color) {
+        span.style.color = textClassToHex[colorClass];
+      }
+    });
+    temp.querySelectorAll("mark").forEach((mark) => {
+      const highlightClass = [...mark.classList].find((cls) => highlightClassToHex[cls]);
+      const color = mark.getAttribute("data-color") || (highlightClass ? highlightClassToHex[highlightClass] : "");
+      if (color && !mark.style.backgroundColor) {
+        mark.style.backgroundColor = color;
+      }
+      if (color && !mark.getAttribute("data-color")) {
+        mark.setAttribute("data-color", color);
+      }
+    });
+    return temp.innerHTML;
+  }
+
+  function normalizePublicationHtmlForStorage(html) {
+    if (!html) return "";
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    const textLookup = PUBLICATION_TEXT_COLOR_LOOKUP();
+    const highlightLookup = PUBLICATION_HIGHLIGHT_LOOKUP();
+    temp.querySelectorAll("span[style], span[class]").forEach((span) => {
+      const resolved = resolveCssColor(span.style.color || span.getAttribute("data-color") || "");
+      const hit = textLookup[resolved] || textLookup[(span.style.color || "").toLowerCase()];
+      Object.values(PUBLICATION_TEXT_COLORS).forEach((cls) => span.classList.remove(cls));
+      if (hit) {
+        span.classList.add(hit.cls);
+        span.setAttribute("data-color", hit.hex);
+      } else {
+        span.removeAttribute("data-color");
+      }
+      span.style.removeProperty("color");
+      if (!span.getAttribute("style")?.trim()) span.removeAttribute("style");
+    });
+    temp.querySelectorAll("mark").forEach((mark) => {
+      const resolved = resolveCssColor(mark.style.backgroundColor || mark.getAttribute("data-color") || "");
+      const hit = highlightLookup[resolved] || highlightLookup[(mark.style.backgroundColor || "").toLowerCase()];
+      Object.values(PUBLICATION_HIGHLIGHTS).forEach((cls) => mark.classList.remove(cls));
+      if (hit) {
+        mark.classList.add(hit.cls);
+        mark.setAttribute("data-color", hit.hex);
+      } else {
+        mark.removeAttribute("data-color");
+      }
+      mark.style.removeProperty("background-color");
+      if (!mark.getAttribute("style")?.trim()) mark.removeAttribute("style");
+    });
+    return temp.innerHTML;
+  }
+
   function syncPublicationSelectionFromDOM() {
     if (!publicationEditor) return;
     const editorRoot = document.querySelector("#pub-content-editor .ProseMirror");
@@ -3008,7 +3103,7 @@ let currentAdminUserId = null;
         TableCell,
       } = await loadTiptapModules();
 
-    publicationEditor = new Editor({
+      publicationEditor = new Editor({
         element: editorEl,
         extensions: [
           StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
@@ -3024,7 +3119,7 @@ let currentAdminUserId = null;
           TableHeader,
           TableCell,
         ],
-        content: initialHtml || "",
+        content: preparePublicationHtmlForEditor(initialHtml || ""),
       editorProps: {
         attributes: {
           class: "editor-surface tiptap-surface",
