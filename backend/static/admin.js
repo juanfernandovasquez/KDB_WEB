@@ -3055,26 +3055,7 @@ let currentAdminUserId = null;
     return temp.innerHTML;
   }
 
-  function syncPublicationSelectionFromDOM() {
-    if (!publicationEditor) return;
-    const editorRoot = document.querySelector("#pub-content-editor .ProseMirror");
-    const sel = window.getSelection();
-    if (!editorRoot || !sel || sel.rangeCount === 0) return;
-    const anchorNode = sel.anchorNode;
-    const focusNode = sel.focusNode;
-    if (!anchorNode || !focusNode) return;
-    if (!editorRoot.contains(anchorNode) || !editorRoot.contains(focusNode)) return;
-    try {
-      const from = publicationEditor.view.posAtDOM(anchorNode, sel.anchorOffset);
-      const to = publicationEditor.view.posAtDOM(focusNode, sel.focusOffset);
-      publicationEditorSelection = {
-        from: Math.min(from, to),
-        to: Math.max(from, to),
-      };
-    } catch (_) {
-      // ignore invalid DOM positions
-    }
-  }
+
 
   async function setupPublicationEditor(initialHtml) {
     const editorEl = q("pub-content-editor");
@@ -3136,12 +3117,10 @@ let currentAdminUserId = null;
       },
     });
 
-    document.addEventListener("selectionchange", syncPublicationSelectionFromDOM);
     window.__pubEditor = publicationEditor;
 
     toolbar.addEventListener("mousedown", (ev) => {
       if (ev.target.closest("[data-cmd]")) {
-        syncPublicationSelectionFromDOM();
         ev.preventDefault();
       }
     });
