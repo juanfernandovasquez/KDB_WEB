@@ -464,3 +464,77 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
   width: 22px;
 }
 
+
+
+.editor-toolbar--publication .editor-color-swatch {
+  background: #fff !important;
+}
+.editor-toolbar--publication .editor-color-swatch::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--swatch) !important;
+  box-shadow: 0 0 0 1px rgba(35, 54, 86, 0.10);
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #233656;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph::before,
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph::after {
+  content: "";
+  position: absolute;
+  background: #233656;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph::before {
+  inset: 4px 0 auto 0;
+  height: 2px;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph::after {
+  inset: 0 auto 0 4px;
+  width: 2px;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.add-row::before {
+  inset: auto 0 -6px 0;
+  height: 2px;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.add-row::after {
+  inset: auto auto -9px 7px;
+  width: 2px;
+  height: 8px;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.add-col::before {
+  inset: 7px -9px 7px auto;
+  width: 8px;
+  height: 2px;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.add-col::after {
+  inset: 4px -6px auto auto;
+  width: 2px;
+  height: 8px;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.del-row::before {
+  inset: auto 0 -6px 0;
+  height: 2px;
+  background: #b42318;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.del-row::after {
+  display: none;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.del-col::before {
+  inset: 7px -9px 7px auto;
+  width: 8px;
+  height: 2px;
+  background: #b42318;
+}
+.editor-toolbar--publication .editor-table-btn .editor-table-glyph.del-col::after {
+  display: none;
+}
+

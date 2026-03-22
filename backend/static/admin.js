@@ -3154,8 +3154,17 @@ let currentAdminUserId = null;
         if (cmd === "textAlignLeft") return chain.setTextAlign("left").run();
         if (cmd === "textAlignCenter") return chain.setTextAlign("center").run();
         if (cmd === "textAlignRight") return chain.setTextAlign("right").run();
-      if (cmd === "insertTable") return chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-      if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
+        if (cmd === "insertTable") {
+          const rows = Number.parseInt(prompt("Numero de filas:", "3"), 10);
+          const cols = Number.parseInt(prompt("Numero de columnas:", "3"), 10);
+          if (!Number.isFinite(rows) || !Number.isFinite(cols) || rows < 1 || cols < 1 || rows > 12 || cols > 8) return;
+          return chain.insertTable({ rows, cols, withHeaderRow: true }).run();
+        }
+        if (cmd === "addRowAfter") return chain.addRowAfter().run();
+        if (cmd === "addColumnAfter") return chain.addColumnAfter().run();
+        if (cmd === "deleteRow") return chain.deleteRow().run();
+        if (cmd === "deleteColumn") return chain.deleteColumn().run();
+        if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
       if (cmd === "styleTitle") return chain.setHeading({ level: 2 }).run();
       if (cmd === "styleSubtitle") return chain.setHeading({ level: 3 }).run();
       if (cmd === "textColor" && value) return chain.setColor(value).run();
@@ -3169,6 +3178,9 @@ let currentAdminUserId = null;
       const value = control.value;
       if (!value) return;
       const chain = publicationEditor.chain().focus();
+      if (publicationEditorSelection) {
+        chain.setTextSelection(publicationEditorSelection);
+      }
       if (cmd === "formatBlock") {
           if (value === "P") chain.setParagraph().run();
           if (value === "H2") chain.setHeading({ level: 2 }).run();
