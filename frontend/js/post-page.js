@@ -209,6 +209,16 @@
 
   function normalizePostContent(root) {
     if (!root) return;
+    root.querySelectorAll("mark[data-color]").forEach((mark) => {
+      if (!mark.style.backgroundColor) {
+        mark.style.backgroundColor = mark.getAttribute("data-color");
+      }
+    });
+    root.querySelectorAll("span[data-color]").forEach((span) => {
+      if (!span.style.color) {
+        span.style.color = span.getAttribute("data-color");
+      }
+    });
     root.querySelectorAll(".img-delete").forEach((n) => n.remove());
     root.querySelectorAll(".img-resizable").forEach((wrap) => {
       const img = wrap.querySelector("img");
