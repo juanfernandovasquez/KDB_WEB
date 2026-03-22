@@ -2962,107 +2962,115 @@ let currentAdminUserId = null;
     const textarea = q("pub-form-content");
     const toolbar = q("pub-content-toolbar");
     if (!editorEl || !toolbar) return null;
-    if (publicationEditor) {
-      publicationEditor.commands.setContent(initialHtml || "", false);
-      if (textarea) textarea.value = publicationEditor.getHTML();
-      return publicationEditor;
-    }
-    const {
-      Editor,
-      StarterKit,
-      Underline,
-      Link,
-      TextStyle,
-      Color,
-      Highlight,
-      TextAlign,
-      Image,
-      Table,
-      TableRow,
-      TableHeader,
-      TableCell,
-    } = await loadTiptapModules();
-
-    publicationEditor = new Editor({
-      element: editorEl,
-      extensions: [
-        StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+    try {
+      if (publicationEditor) {
+        publicationEditor.commands.setContent(initialHtml || "", false);
+        if (textarea) textarea.value = publicationEditor.getHTML();
+        return publicationEditor;
+      }
+      const {
+        Editor,
+        StarterKit,
         Underline,
-        Link.configure({ openOnClick: false }),
+        Link,
         TextStyle,
         Color,
-        Highlight.configure({ multicolor: true }),
-        TextAlign.configure({ types: ["heading", "paragraph"] }),
-        Image.configure({ HTMLAttributes: { class: "tiptap-image" } }),
-        Table.configure({ resizable: true }),
+        Highlight,
+        TextAlign,
+        Image,
+        Table,
         TableRow,
         TableHeader,
         TableCell,
-      ],
-      content: initialHtml || "",
-      editorProps: {
-        attributes: {
-          class: "editor-surface tiptap-surface",
+      } = await loadTiptapModules();
+
+      publicationEditor = new Editor({
+        element: editorEl,
+        extensions: [
+          StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+          Underline,
+          Link.configure({ openOnClick: false }),
+          TextStyle,
+          Color,
+          Highlight.configure({ multicolor: true }),
+          TextAlign.configure({ types: ["heading", "paragraph"] }),
+          Image.configure({ HTMLAttributes: { class: "tiptap-image" } }),
+          Table.configure({ resizable: true }),
+          TableRow,
+          TableHeader,
+          TableCell,
+        ],
+        content: initialHtml || "",
+        editorProps: {
+          attributes: {
+            class: "editor-surface tiptap-surface",
+          },
         },
-      },
-      onUpdate: ({ editor }) => {
-        if (textarea) textarea.value = editor.getHTML();
-      },
-    });
+        onUpdate: ({ editor }) => {
+          if (textarea) textarea.value = editor.getHTML();
+        },
+      });
 
-    toolbar.onclick = (ev) => {
-      const btn = ev.target.closest("button[data-cmd]");
-      if (!btn || !publicationEditor) return;
-      const cmd = btn.dataset.cmd;
-      const chain = publicationEditor.chain().focus();
+      toolbar.onclick = (ev) => {
+        const btn = ev.target.closest("button[data-cmd]");
+        if (!btn || !publicationEditor) return;
+        const cmd = btn.dataset.cmd;
+        const chain = publicationEditor.chain().focus();
 
-      if (cmd === "undo") return publicationEditor.commands.undo();
-      if (cmd === "redo") return publicationEditor.commands.redo();
-      if (cmd === "bold") return chain.toggleBold().run();
-      if (cmd === "italic") return chain.toggleItalic().run();
-      if (cmd === "underline") return chain.toggleUnderline().run();
-      if (cmd === "insertUnorderedList") return chain.toggleBulletList().run();
-      if (cmd === "insertOrderedList") return chain.toggleOrderedList().run();
-      if (cmd === "blockquote") return chain.toggleBlockquote().run();
-      if (cmd === "insertHorizontalRule") return chain.setHorizontalRule().run();
-      if (cmd === "createLink") {
-        const previous = publicationEditor.getAttributes("link").href || "https://";
-        const href = prompt("Ingresa la URL del enlace:", previous);
-        if (!href) return;
-        return chain.extendMarkRange("link").setLink({ href, target: "_blank", rel: "noopener noreferrer" }).run();
-      }
-      if (cmd === "unlink") return chain.unsetLink().run();
-      if (cmd === "insertImage") return openMediaModalForTiptap(publicationEditor);
-      if (cmd === "textAlignLeft") return chain.setTextAlign("left").run();
-      if (cmd === "textAlignCenter") return chain.setTextAlign("center").run();
-      if (cmd === "textAlignRight") return chain.setTextAlign("right").run();
-      if (cmd === "insertTable") return chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-      if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
-      if (cmd === "styleTitle") return chain.setHeading({ level: 2 }).run();
-      if (cmd === "styleSubtitle") return chain.setHeading({ level: 3 }).run();
-    };
+        if (cmd === "undo") return publicationEditor.commands.undo();
+        if (cmd === "redo") return publicationEditor.commands.redo();
+        if (cmd === "bold") return chain.toggleBold().run();
+        if (cmd === "italic") return chain.toggleItalic().run();
+        if (cmd === "underline") return chain.toggleUnderline().run();
+        if (cmd === "insertUnorderedList") return chain.toggleBulletList().run();
+        if (cmd === "insertOrderedList") return chain.toggleOrderedList().run();
+        if (cmd === "blockquote") return chain.toggleBlockquote().run();
+        if (cmd === "insertHorizontalRule") return chain.setHorizontalRule().run();
+        if (cmd === "createLink") {
+          const previous = publicationEditor.getAttributes("link").href || "https://";
+          const href = prompt("Ingresa la URL del enlace:", previous);
+          if (!href) return;
+          return chain.extendMarkRange("link").setLink({ href, target: "_blank", rel: "noopener noreferrer" }).run();
+        }
+        if (cmd === "unlink") return chain.unsetLink().run();
+        if (cmd === "insertImage") return openMediaModalForTiptap(publicationEditor);
+        if (cmd === "textAlignLeft") return chain.setTextAlign("left").run();
+        if (cmd === "textAlignCenter") return chain.setTextAlign("center").run();
+        if (cmd === "textAlignRight") return chain.setTextAlign("right").run();
+        if (cmd === "insertTable") return chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+        if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
+        if (cmd === "styleTitle") return chain.setHeading({ level: 2 }).run();
+        if (cmd === "styleSubtitle") return chain.setHeading({ level: 3 }).run();
+      };
 
-    toolbar.onchange = (ev) => {
-      const control = ev.target.closest("select[data-cmd]");
-      if (!control || !publicationEditor) return;
-      const cmd = control.dataset.cmd;
-      const value = control.value;
-      if (!value) return;
-      const chain = publicationEditor.chain().focus();
-      if (cmd === "formatBlock") {
-        if (value === "P") chain.setParagraph().run();
-        if (value === "H2") chain.setHeading({ level: 2 }).run();
-        if (value === "H3") chain.setHeading({ level: 3 }).run();
-        if (value === "H4") chain.setHeading({ level: 4 }).run();
-      }
-      if (cmd === "fontSizePx") chain.setMark("textStyle", { fontSize: `${value}px` }).run();
-      if (cmd === "textColor") chain.setColor(value).run();
-      if (cmd === "textBackgroundColor") chain.toggleHighlight({ color: value }).run();
-      control.value = "";
-    };
+      toolbar.onchange = (ev) => {
+        const control = ev.target.closest("select[data-cmd]");
+        if (!control || !publicationEditor) return;
+        const cmd = control.dataset.cmd;
+        const value = control.value;
+        if (!value) return;
+        const chain = publicationEditor.chain().focus();
+        if (cmd === "formatBlock") {
+          if (value === "P") chain.setParagraph().run();
+          if (value === "H2") chain.setHeading({ level: 2 }).run();
+          if (value === "H3") chain.setHeading({ level: 3 }).run();
+          if (value === "H4") chain.setHeading({ level: 4 }).run();
+        }
+        if (cmd === "fontSizePx") chain.setMark("textStyle", { fontSize: `${value}px` }).run();
+        if (cmd === "textColor") chain.setColor(value).run();
+        if (cmd === "textBackgroundColor") chain.toggleHighlight({ color: value }).run();
+        control.value = "";
+      };
 
-    if (textarea) textarea.value = publicationEditor.getHTML();
-    return publicationEditor;
+      if (textarea) textarea.value = publicationEditor.getHTML();
+      return publicationEditor;
+    } catch (err) {
+      console.error("TipTap failed, falling back to legacy editor", err);
+      editorEl.innerHTML = initialHtml || "";
+      setupRichEditor("pub-content-toolbar", "pub-content-editor");
+      if (textarea) textarea.value = serializeEditorContent(editorEl);
+      return null;
+    }
   }
 
   // Publicaciones: eventos del UI
