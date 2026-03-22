@@ -1,5 +1,4 @@
 .hero.hero-single {
-  --hero-min-height: 360px;
   position: relative;
   min-height: var(--hero-min-height);
   height: var(--hero-min-height);
@@ -77,10 +76,6 @@
 }
 
 @media (max-width: 1023px) {
-  .hero.hero-single {
-    --hero-min-height: 320px;
-  }
-
   .hero.hero-single .hero-content {
     width: min(100% - 56px, 960px);
     padding: 3.6rem 0 2rem;
@@ -93,10 +88,6 @@
 }
 
 @media (max-width: 767px) {
-  .hero.hero-single {
-    --hero-min-height: 280px;
-  }
-
   .hero.hero-single .hero-content {
     width: min(100% - 32px, 720px);
     padding: 3.1rem 0 1.5rem;
