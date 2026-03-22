@@ -48,7 +48,7 @@
   background: var(--brand-blue);
   color: #fff;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 300;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -75,6 +75,11 @@
 .hero.hero-single .hero-text,
 .hero.hero-single .hero-dots {
   display: none;
+}
+
+.post-body-shell {
+  width: 100%;
+  background: #fff;
 }
 
 @media (max-width: 1023px) {
