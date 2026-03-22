@@ -170,8 +170,10 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 .editor-toolbar button:hover { border-color: var(--blue); color: var(--blue); }
 .editor-toolbar select { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; cursor: pointer; font-weight: 700; color: #233656; min-width: 96px; }
 .editor-toolbar select:focus { outline: 2px solid rgba(11, 59, 145, 0.2); border-color: var(--blue); }
-.editor-palette-select { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.75rem; cursor: pointer; font-weight: 700; color: #233656; min-width: 128px; }
-.editor-palette-select:focus { outline: 2px solid rgba(11, 59, 145, 0.2); border-color: var(--blue); }
+.editor-palette-group { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.42rem 0.6rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+.editor-palette-group span { font-size: 0.82rem; font-weight: 700; color: #233656; }
+.editor-color-swatch { min-width: 0 !important; width: 20px; height: 20px; padding: 0 !important; border: 1px solid rgba(35, 54, 86, 0.2) !important; border-radius: 999px !important; background: var(--swatch); }
+.editor-color-swatch.light { border-color: rgba(35, 54, 86, 0.28) !important; }
 .editor-surface { min-height: 160px; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; background: #fff; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
 .editor-surface:focus { outline: 2px solid rgba(11, 59, 145, 0.2); border-color: var(--blue); }
 .service-card-admin textarea { min-height: 90px; }

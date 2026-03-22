@@ -793,22 +793,22 @@
                   <option value="28">28 px</option>
                   <option value="32">32 px</option>
                 </select>
-                <select class="editor-palette-select" data-cmd="textColor">
-                  <option value="">Color texto</option>
-                  <option value="#0b3b91">Azul marca</option>
-                  <option value="#b07d2f">Dorado marca</option>
-                  <option value="#233656">Azul oscuro</option>
-                  <option value="#4b5563">Gris</option>
-                  <option value="#111111">Negro</option>
-                </select>
-                <select class="editor-palette-select" data-cmd="textBackgroundColor">
-                  <option value="">Resaltado</option>
-                  <option value="#fff4bf">Amarillo suave</option>
-                  <option value="#dbeafe">Azul suave</option>
-                  <option value="#dcfce7">Verde suave</option>
-                  <option value="#fee2e2">Rojo suave</option>
-                  <option value="#f3e8ff">Lila suave</option>
-                </select>
+                <div class="editor-palette-group">
+                  <span>Color</span>
+                  <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#0b3b91" style="--swatch:#0b3b91" title="Azul marca"></button>
+                  <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#b07d2f" style="--swatch:#b07d2f" title="Dorado marca"></button>
+                  <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#233656" style="--swatch:#233656" title="Azul oscuro"></button>
+                  <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#4b5563" style="--swatch:#4b5563" title="Gris"></button>
+                  <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#111111" style="--swatch:#111111" title="Negro"></button>
+                </div>
+                <div class="editor-palette-group">
+                  <span>Resaltado</span>
+                  <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#fff4bf" style="--swatch:#fff4bf" title="Amarillo suave"></button>
+                  <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#dbeafe" style="--swatch:#dbeafe" title="Azul suave"></button>
+                  <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#dcfce7" style="--swatch:#dcfce7" title="Verde suave"></button>
+                  <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#fee2e2" style="--swatch:#fee2e2" title="Rojo suave"></button>
+                  <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#f3e8ff" style="--swatch:#f3e8ff" title="Lila suave"></button>
+                </div>
                 <button type="button" data-cmd="insertUnorderedList">Lista</button>
                 <button type="button" data-cmd="insertOrderedList">1. Lista</button>
                 <button type="button" data-cmd="blockquote">Cita</button>

@@ -2664,6 +2664,7 @@ let currentAdminUserId = null;
     linkEnsurers[editorId] = ensureLinkTargets;
 
     toolbar.addEventListener("click", (ev) => {
+      if (ev.target.closest("button[data-cmd]")) ev.preventDefault();
       const btn = ev.target.closest("button[data-cmd]");
       if (!btn) return;
       const cmd = btn.dataset.cmd;
@@ -3011,11 +3012,13 @@ let currentAdminUserId = null;
         },
       });
 
-      toolbar.onclick = (ev) => {
-        const btn = ev.target.closest("button[data-cmd]");
-        if (!btn || !publicationEditor) return;
-        const cmd = btn.dataset.cmd;
-        const chain = publicationEditor.chain().focus();
+    toolbar.onclick = (ev) => {
+      if (ev.target.closest("button[data-cmd]")) ev.preventDefault();
+      const btn = ev.target.closest("button[data-cmd]");
+      if (!btn || !publicationEditor) return;
+      const cmd = btn.dataset.cmd;
+      const value = btn.dataset.value;
+      const chain = publicationEditor.chain().focus();
 
         if (cmd === "undo") return publicationEditor.commands.undo();
         if (cmd === "redo") return publicationEditor.commands.redo();
@@ -3037,11 +3040,13 @@ let currentAdminUserId = null;
         if (cmd === "textAlignLeft") return chain.setTextAlign("left").run();
         if (cmd === "textAlignCenter") return chain.setTextAlign("center").run();
         if (cmd === "textAlignRight") return chain.setTextAlign("right").run();
-        if (cmd === "insertTable") return chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-        if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
-        if (cmd === "styleTitle") return chain.setHeading({ level: 2 }).run();
-        if (cmd === "styleSubtitle") return chain.setHeading({ level: 3 }).run();
-      };
+      if (cmd === "insertTable") return chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+      if (cmd === "removeFormat") return chain.unsetAllMarks().clearNodes().run();
+      if (cmd === "styleTitle") return chain.setHeading({ level: 2 }).run();
+      if (cmd === "styleSubtitle") return chain.setHeading({ level: 3 }).run();
+      if (cmd === "textColor" && value) return chain.setColor(value).run();
+      if (cmd === "textBackgroundColor" && value) return chain.toggleHighlight({ color: value }).run();
+    };
 
       toolbar.onchange = (ev) => {
         const control = ev.target.closest("select[data-cmd]");
