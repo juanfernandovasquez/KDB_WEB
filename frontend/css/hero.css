@@ -51,6 +51,15 @@
   min-height: var(--hero-min-height);
   object-fit: cover;
   display: block;
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity 0.45s ease-out, transform 0.7s ease-out;
+  will-change: opacity, transform;
+}
+
+.hero-slide img.is-loaded {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .hero-content {

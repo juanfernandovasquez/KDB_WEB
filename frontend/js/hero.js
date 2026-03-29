@@ -24,6 +24,18 @@ async function loadHero() {
   initHero(pageData);
 }
 
+function revealHeroImage(img) {
+  if (!img) return;
+  const show = () => img.classList.add('is-loaded');
+  img.classList.remove('is-loaded');
+  if (img.complete && img.naturalWidth > 0) {
+    requestAnimationFrame(show);
+    return;
+  }
+  img.addEventListener('load', () => requestAnimationFrame(show), { once: true });
+  img.addEventListener('error', show, { once: true });
+}
+
 async function fetchPageData(page) {
   try {
     if (window.apiClient?.getPage) {
@@ -91,6 +103,7 @@ function initHero(pageData) {
     const img = document.createElement('img');
     img.src = slide.image_url || '';
     img.alt = slide.title || '';
+    revealHeroImage(img);
     slideEl.appendChild(img);
     track.appendChild(slideEl);
     if (slidesData.length > 1) {

@@ -10,6 +10,18 @@
     return;
   }
 
+  function revealHeroImage(imgEl) {
+    if (!imgEl) return;
+    const show = () => imgEl.classList.add('is-loaded');
+    imgEl.classList.remove('is-loaded');
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      requestAnimationFrame(show);
+      return;
+    }
+    imgEl.addEventListener('load', () => requestAnimationFrame(show), { once: true });
+    imgEl.addEventListener('error', show, { once: true });
+  }
+
   function setHero(data) {
     const imgEl = document.getElementById("post-hero-image");
     const titleEl = document.getElementById("post-hero-title");
@@ -24,6 +36,7 @@
     if (imgEl && bg) {
       imgEl.src = bg;
       imgEl.alt = data.title || "";
+      revealHeroImage(imgEl);
     }
     if (titleEl) titleEl.textContent = data.title || "";
     if (dateEl && data.published_at) {
