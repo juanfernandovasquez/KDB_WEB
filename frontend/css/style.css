@@ -1473,6 +1473,44 @@ body.cookie-banner-visible {
   }
 }
 
+/* ── Page reveal ──────────────────────────────────── */
+body {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+body.page-ready {
+  opacity: 1;
+}
+@media (scripting: none) {
+  body { opacity: 1; }
+}
+
+/* ── Hero skeleton ────────────────────────────────── */
+#site-hero {
+  min-height: 100dvh;
+  background: var(--brand-blue, #071331);
+  overflow: hidden;
+  position: relative;
+}
+#site-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: hero-shimmer 2s linear infinite;
+  pointer-events: none;
+}
+@keyframes hero-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 img,
 .image-reveal {
   opacity: 0;
