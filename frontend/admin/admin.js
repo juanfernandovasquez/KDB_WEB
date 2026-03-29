@@ -902,6 +902,33 @@ let adminUsers = [];
 let currentAdminUserId = null;
   let adminInitialized = false;
 
+  const HERO_PAGES = [
+    { value: '', label: '— Sin enlace —' },
+    { value: 'index.html', label: 'Inicio' },
+    { value: 'nosotros.html', label: 'Nosotros' },
+    { value: 'servicios.html', label: 'Servicios' },
+    { value: 'publicaciones.html', label: 'Publicaciones' },
+    { value: 'kdbweb.html', label: 'KDBWEB' },
+    { value: 'contacto.html', label: 'Contacto' },
+  ];
+
+  function heroHrefField(fieldName, currentValue) {
+    const cv = (currentValue || '').trim();
+    const knownPage = HERO_PAGES.find(p => p.value !== '' && p.value === cv);
+    const isCustom = cv !== '' && !knownPage;
+    const options = HERO_PAGES.map(p =>
+      `<option value="${p.value}"${(!isCustom && cv === p.value) ? ' selected' : ''}>${safe(p.label)}</option>`
+    ).join('');
+    return `
+      <select class="hero-href-select" data-href-field="${fieldName}">
+        ${options}
+        <option value="__custom__"${isCustom ? ' selected' : ''}>Otro (URL personalizada)</option>
+      </select>
+      <input type="text" data-field="${fieldName}" value="${safe(cv)}"
+             class="hero-href-custom" style="${isCustom ? '' : 'display:none;'}"
+             placeholder="https://...">`;
+  }
+
   const heroCard = (slide = {}, idx = 0) => {
     const val = (field) => safe(slide[field]);
     return `
@@ -914,9 +941,9 @@ let currentAdminUserId = null;
         <label>Texto</label><textarea data-field="description" placeholder="${val("description")}">${val("description")}</textarea>
         <div class="grid-2">
           <div><label>Boton primario</label><input type="text" data-field="primary_label" value="${val("primary_label")}" placeholder="${val("primary_label")}"></div>
-          <div><label>Enlace primario</label><input type="text" data-field="primary_href" value="${val("primary_href")}" placeholder="${val("primary_href")}"></div>
+          <div><label>Enlace primario</label>${heroHrefField('primary_href', slide.primary_href)}</div>
           <div><label>Boton secundario</label><input type="text" data-field="secondary_label" value="${val("secondary_label")}" placeholder="${val("secondary_label")}"></div>
-          <div><label>Enlace secundario</label><input type="text" data-field="secondary_href" value="${val("secondary_href")}" placeholder="${val("secondary_href")}"></div>
+          <div><label>Enlace secundario</label>${heroHrefField('secondary_href', slide.secondary_href)}</div>
         </div>
         <label>Imagen (URL)</label>
         <div class="row media-input-row">
@@ -3257,6 +3284,24 @@ let currentAdminUserId = null;
   }
 
   // Publicaciones: eventos del UI
+  document.addEventListener('change', (ev) => {
+    const select = ev.target.closest('.hero-href-select');
+    if (!select) return;
+    const fieldName = select.dataset.hrefField;
+    const card = select.closest('.hero-card');
+    if (!card || !fieldName) return;
+    const input = card.querySelector(`input[data-field="${fieldName}"]`);
+    if (!input) return;
+    if (select.value === '__custom__') {
+      input.style.display = '';
+      input.value = '';
+      input.focus();
+    } else {
+      input.style.display = 'none';
+      input.value = select.value;
+    }
+  });
+
   document.addEventListener('click', (ev) => {
     const actionTarget = ev.target.closest('[data-action]');
     if (!actionTarget) return;
