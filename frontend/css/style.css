@@ -28,9 +28,9 @@ html, body {
   overscroll-behavior-y: none;
 }
 
-/* Escala tipográfica centralizada */
+/* Escala tipogrï¿½fica centralizada */
 :root {
-  /* Tipografía */
+  /* Tipografï¿½a */
   --font-family-base: 'Montserrat', sans-serif;
   /* Colores institucionales */
   --brand-blue: #06186d; /* PANTONE 288 C */
@@ -915,7 +915,7 @@ p, .p  { font-size: var(--p);  line-height: var(--line-height-base); margin: 0 0
   }
 }
 
-/* Publicación individual */
+/* Publicaciï¿½n individual */
 .post-hero {
   position: relative;
   min-height: 280px;
@@ -1193,7 +1193,7 @@ p, .p  { font-size: var(--p);  line-height: var(--line-height-base); margin: 0 0
   box-sizing: border-box;
   overflow-wrap: anywhere;
   word-break: break-word;
-  overflow: hidden; /* contener floats de imágenes */
+  overflow: hidden; /* contener floats de imï¿½genes */
 }
 .post-content::after { content: ""; display: block; clear: both; }
 .post-content img {
@@ -1471,4 +1471,18 @@ body.cookie-banner-visible {
   .cookie-accept {
     width: 100%;
   }
+}
+
+img,
+.image-reveal {
+  opacity: 0;
+  transform: scale(1.01);
+  transition: opacity 0.38s ease-out, transform 0.55s ease-out;
+  will-change: opacity, transform;
+}
+
+img.is-loaded,
+.image-reveal.is-loaded {
+  opacity: 1;
+  transform: scale(1);
 }
