@@ -225,8 +225,12 @@ function applyHomeIntro(about) {
       introContent.innerHTML = lines.map((line) => `<p>${escapeHtml(line)}</p>`).join('');
     }
   }
-  setAttr('intro-image', 'src', about.image_url);
-  setAttr('intro-image', 'alt', about.title || 'Imagen de la empresa');
+  const introImg = document.getElementById('intro-image');
+  if (introImg && about.image_url) {
+    introImg.src = about.image_url;
+    introImg.alt = about.title || 'Imagen de la empresa';
+    introImg.style.display = '';
+  }
   const primaryBtn = document.getElementById('intro-primary-btn');
   const secondaryBtn = document.getElementById('intro-secondary-btn');
   const actions = document.querySelector('.intro-actions');
