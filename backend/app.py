@@ -32,6 +32,7 @@ from models import (
     replace_team,
     save_about,
     save_company,
+    set_brochure_url,
     save_contact_message,
     save_services_meta,
     save_story,
@@ -513,9 +514,7 @@ def brochure_upload():
     dest = os.path.join(upload_dir, "brochure.pdf")
     f.save(dest)
     public_url = "/assets/brochure.pdf"
-    company = fetch_company()
-    company["brochure_url"] = public_url
-    save_company(company)
+    set_brochure_url(public_url)
     return jsonify(url=public_url), 200
 
 
@@ -530,9 +529,7 @@ def brochure_delete():
             os.remove(dest)
     except Exception:
         pass
-    company = fetch_company()
-    company["brochure_url"] = ""
-    save_company(company)
+    set_brochure_url("")
     return jsonify(message="Brochure eliminado"), 200
 
 

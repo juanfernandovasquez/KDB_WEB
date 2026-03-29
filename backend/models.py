@@ -146,6 +146,16 @@ def save_company(payload):
     conn.close()
 
 
+def set_brochure_url(url):
+    conn = get_conn()
+    with conn:
+        conn.execute(
+            "UPDATE company_info SET brochure_url = ? WHERE id = 1",
+            (url or None,),
+        )
+    conn.close()
+
+
 def fetch_hero(page):
     conn = get_conn()
     rows = conn.execute(
