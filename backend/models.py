@@ -116,8 +116,8 @@ def save_company(payload):
     with conn:
         conn.execute(
             """
-            INSERT INTO company_info (id, name, tagline, phone, email, address, logo_url, favicon_url, brochure_url, linkedin, facebook, instagram)
-            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO company_info (id, name, tagline, phone, email, address, logo_url, favicon_url, linkedin, facebook, instagram)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               name=excluded.name,
               tagline=excluded.tagline,
@@ -126,7 +126,6 @@ def save_company(payload):
               address=excluded.address,
               logo_url=excluded.logo_url,
               favicon_url=excluded.favicon_url,
-              brochure_url=excluded.brochure_url,
               linkedin=excluded.linkedin,
               facebook=excluded.facebook,
               instagram=excluded.instagram
@@ -139,7 +138,6 @@ def save_company(payload):
                 payload.get("address"),
                 payload.get("logo_url"),
                 payload.get("favicon_url"),
-                payload.get("brochure_url"),
                 payload.get("linkedin"),
                 payload.get("facebook"),
                 payload.get("instagram"),
