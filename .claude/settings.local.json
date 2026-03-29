@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ssh root@104.131.189.133 \"cd /var/www/kdbweb && git pull origin master\")",
+      "Bash(ssh root@104.131.189.133 \"cd /var/www/kdbweb && git pull origin master && systemctl restart kdbweb\")",
+      "Bash(ssh root@104.131.189.133 \"systemctl restart kdbweb && sleep 2 && systemctl status kdbweb --no-pager\")",
+      "Bash(ssh root@104.131.189.133 \"cd /var/www/kdbweb && git pull origin master && systemctl restart kdbweb && sleep 2 && systemctl is-active kdbweb\")",
+      "Bash(ssh root@104.131.189.133 \"journalctl -u kdbweb -n 50 --no-pager\")",
+      "Bash(python3:*)"
+    ]
+  }
+}

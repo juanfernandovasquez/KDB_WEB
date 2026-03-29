@@ -18,6 +18,7 @@ async function loadHeader() {
   await updateKdbwebMenu();
   initSearch();
   initHeaderScrollState();
+  setupGlobalImageReveal(document);
 }
 
 function initHeaderEvents() {
@@ -446,6 +447,37 @@ function initSearch() {
       });
     }, 180);
   });
+}
+
+function setupGlobalImageReveal(root = document) {
+  const revealImage = (img) => {
+    if (!img || img.dataset.revealBound === '1') return;
+    img.dataset.revealBound = '1';
+    img.classList.add('image-reveal');
+    const show = () => img.classList.add('is-loaded');
+    if (img.complete && img.naturalWidth > 0) {
+      requestAnimationFrame(show);
+      return;
+    }
+    img.addEventListener('load', () => requestAnimationFrame(show), { once: true });
+    img.addEventListener('error', show, { once: true });
+  };
+
+  root.querySelectorAll('img').forEach(revealImage);
+
+  if (document.body && !document.body.__imageRevealObserver) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) return;
+          if (node.tagName === 'IMG') revealImage(node);
+          node.querySelectorAll?.('img').forEach(revealImage);
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.body.__imageRevealObserver = observer;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', loadHeader);
