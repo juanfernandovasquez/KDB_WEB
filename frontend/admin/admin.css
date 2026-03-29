@@ -538,6 +538,20 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
   display: none;
 }
 
+.hero-href-select {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.hero-href-select:focus {
+  outline: 2px solid rgba(11, 59, 145, 0.2);
+  border-color: var(--blue);
+}
 .hero-href-custom {
   margin-top: 0.4rem;
 }
