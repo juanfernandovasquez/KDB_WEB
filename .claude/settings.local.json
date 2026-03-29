@@ -9,7 +9,8 @@
       "Bash(ssh root@104.131.189.133 \"systemctl restart kdbweb && sleep 2 && systemctl status kdbweb --no-pager\")",
       "Bash(ssh root@104.131.189.133 \"cd /var/www/kdbweb && git pull origin master && systemctl restart kdbweb && sleep 2 && systemctl is-active kdbweb\")",
       "Bash(ssh root@104.131.189.133 \"journalctl -u kdbweb -n 50 --no-pager\")",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(ssh root@104.131.189.133 \"cat /var/www/kdbweb/backend/.env 2>/dev/null || echo ''NO .ENV FILE''\")"
     ]
   }
 }
