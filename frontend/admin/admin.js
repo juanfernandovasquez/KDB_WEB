@@ -1056,7 +1056,8 @@ let currentAdminUserId = null;
     setLogoPreview(data.logo_url);
     setVal("c-favicon-url", data.favicon_url);
     setFaviconPreview(data.favicon_url);
-    setVal("c-brochure-url", data.brochure_url);
+    const brochureDisplay = q("c-brochure-display");
+    if (brochureDisplay) brochureDisplay.textContent = data.brochure_url ? "brochure.pdf" : "Sin archivo";
   }
 
   const setLogoPreview = (url) => {
@@ -1113,7 +1114,6 @@ let currentAdminUserId = null;
       address: getVal("c-address"),
       logo_url: getVal("c-logo-url"),
       favicon_url: getVal("c-favicon-url"),
-      brochure_url: getVal("c-brochure-url"),
       linkedin: getVal("c-linkedin"),
       facebook: getVal("c-facebook"),
       instagram: getVal("c-instagram"),
@@ -3508,6 +3508,35 @@ let currentAdminUserId = null;
       setVal("c-favicon-url", "");
       setFaviconPreview("");
     });
+    bind("brochure-upload-btn", () => { const fi = q("c-brochure-file"); if (fi) fi.click(); });
+    bind("brochure-clear-btn", async () => {
+      const status = q("status-brochure");
+      if (status) status.textContent = "Eliminando...";
+      const res = await apiFetch("/api/brochure/delete", { method: "POST" });
+      if (status) status.textContent = res.ok ? "Brochure eliminado" : "Error al eliminar";
+      const display = q("c-brochure-display");
+      if (display && res.ok) display.textContent = "Sin archivo";
+    });
+    const brochureFileInput = q("c-brochure-file");
+    if (brochureFileInput) {
+      brochureFileInput.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const status = q("status-brochure");
+        if (status) status.textContent = "Subiendo...";
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await apiFetch("/api/brochure/upload", { method: "POST", body: formData });
+        if (res.ok) {
+          if (status) status.textContent = "Subido correctamente";
+          const display = q("c-brochure-display");
+          if (display) display.textContent = "brochure.pdf";
+        } else {
+          if (status) status.textContent = "Error al subir el archivo";
+        }
+        brochureFileInput.value = "";
+      });
+    }
     bind("save-page-visibility", savePageVisibility);
     bind("save-page", savePage);
     bind("legal-save", saveLegalPage);

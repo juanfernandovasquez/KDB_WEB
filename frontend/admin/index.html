@@ -104,15 +104,21 @@
           <div class="section-head spaced">
             <div>
               <h3>Brochure descargable</h3>
-              <p class="small">URL del PDF que se descarga al hacer clic en el botón del footer.</p>
+              <p class="small">PDF que se descarga al hacer clic en el botón del footer.</p>
             </div>
           </div>
-          <div class="grid-2">
-            <div class="full">
-              <label>URL del PDF</label>
-              <input id="c-brochure-url" type="url" placeholder="https://...">
+          <div class="logo-picker">
+            <div class="logo-actions">
+              <label>Archivo actual</label>
+              <div class="logo-url" id="c-brochure-display">Sin archivo</div>
+              <div class="row row-space-top">
+                <button class="secondary small-btn" id="brochure-upload-btn">Subir PDF</button>
+                <button class="secondary small-btn" id="brochure-clear-btn">Quitar brochure</button>
+              </div>
+              <input type="file" id="c-brochure-file" accept=".pdf,application/pdf" style="display:none;">
             </div>
           </div>
+          <span class="status" id="status-brochure"></span>
         </div>
 
         <div class="section-card">

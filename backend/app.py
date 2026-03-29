@@ -498,6 +498,44 @@ def company_config():
     return jsonify(fetch_company())
 
 
+@app.route("/api/brochure/upload", methods=["POST"])
+@require_admin()
+def brochure_upload():
+    ensure_db()
+    if "file" not in request.files:
+        return jsonify(error="No se encontró archivo"), 400
+    f = request.files["file"]
+    if not f.filename or not f.filename.lower().endswith(".pdf"):
+        return jsonify(error="Solo se permiten archivos PDF"), 400
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    upload_dir = os.path.join(base_dir, "..", "frontend", "assets")
+    os.makedirs(upload_dir, exist_ok=True)
+    dest = os.path.join(upload_dir, "brochure.pdf")
+    f.save(dest)
+    public_url = "/assets/brochure.pdf"
+    company = fetch_company()
+    company["brochure_url"] = public_url
+    save_company(company)
+    return jsonify(url=public_url), 200
+
+
+@app.route("/api/brochure/delete", methods=["POST"])
+@require_admin()
+def brochure_delete():
+    ensure_db()
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    dest = os.path.join(base_dir, "..", "frontend", "assets", "brochure.pdf")
+    try:
+        if os.path.exists(dest):
+            os.remove(dest)
+    except Exception:
+        pass
+    company = fetch_company()
+    company["brochure_url"] = ""
+    save_company(company)
+    return jsonify(message="Brochure eliminado"), 200
+
+
 @app.route("/config/page/<page>", methods=["GET", "POST"])
 @require_admin()
 def page_config(page):
