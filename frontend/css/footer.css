@@ -216,9 +216,10 @@ footer {
   align-items: center;
   gap: 0.45rem;
   padding: 0.42rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--brand-gold);
   border-radius: 5px;
-  color: rgba(255, 255, 255, 0.9) !important;
+  background: var(--brand-gold);
+  color: #fff !important;
   font-size: 0.82rem !important;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -228,9 +229,9 @@ footer {
 }
 
 .footer-pdf-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.75);
-  color: #fff !important;
+  background: transparent;
+  border-color: var(--brand-gold);
+  color: var(--brand-gold) !important;
 }
 
 .footer-bottom {
