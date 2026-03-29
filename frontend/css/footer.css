@@ -229,9 +229,9 @@ footer {
 }
 
 .footer-pdf-btn:hover {
-  background: transparent;
-  border-color: var(--brand-gold);
-  color: var(--brand-gold) !important;
+  background: #8f6425;
+  border-color: #8f6425;
+  color: #fff !important;
 }
 
 .footer-bottom {
