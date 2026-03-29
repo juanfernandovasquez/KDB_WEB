@@ -63,6 +63,7 @@ def init_db():
               address TEXT,
               logo_url TEXT,
               favicon_url TEXT,
+              brochure_url TEXT,
               linkedin TEXT,
               facebook TEXT,
               instagram TEXT
@@ -380,6 +381,11 @@ def init_db():
         # Legacy DBs: add favicon_url to company info
         try:
             conn.execute("ALTER TABLE company_info ADD COLUMN favicon_url TEXT")
+        except Exception:
+            pass
+        # Legacy DBs: add brochure_url to company info
+        try:
+            conn.execute("ALTER TABLE company_info ADD COLUMN brochure_url TEXT")
         except Exception:
             pass
         # Legacy DBs: add image_url to page_story

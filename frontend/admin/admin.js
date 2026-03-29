@@ -1056,6 +1056,7 @@ let currentAdminUserId = null;
     setLogoPreview(data.logo_url);
     setVal("c-favicon-url", data.favicon_url);
     setFaviconPreview(data.favicon_url);
+    setVal("c-brochure-url", data.brochure_url);
   }
 
   const setLogoPreview = (url) => {
@@ -1112,6 +1113,7 @@ let currentAdminUserId = null;
       address: getVal("c-address"),
       logo_url: getVal("c-logo-url"),
       favicon_url: getVal("c-favicon-url"),
+      brochure_url: getVal("c-brochure-url"),
       linkedin: getVal("c-linkedin"),
       facebook: getVal("c-facebook"),
       instagram: getVal("c-instagram"),

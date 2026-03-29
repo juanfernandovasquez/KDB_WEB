@@ -43,6 +43,16 @@ async function populateFooter() {
   setLink('footer-facebook', info.facebook);
   setLink('footer-instagram', info.instagram);
   setLogo(info.logo_url);
+
+  const brochureBtn = document.getElementById('footer-brochure-btn');
+  if (brochureBtn) {
+    if (info.brochure_url) {
+      brochureBtn.href = info.brochure_url;
+      brochureBtn.style.display = '';
+    } else {
+      brochureBtn.style.display = 'none';
+    }
+  }
 }
 
 async function fetchCompanyData() {
