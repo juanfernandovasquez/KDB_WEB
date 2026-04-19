@@ -51,6 +51,8 @@ from models import (
     fetch_page_settings,
     is_page_enabled,
     replace_kdbweb_entries,
+    fetch_katweb_boletines,
+    replace_katweb_boletines,
     save_page_settings,
     authenticate_admin,
     admins_exist,
@@ -680,6 +682,28 @@ def api_kdbweb_save():
         return jsonify(error="Formato invalido"), 400
     replace_kdbweb_entries(entries)
     return jsonify(message="KDBWEB actualizado"), 200
+
+
+# ─── KATWeb Boletines (Tribunal Fiscal) ──────────────────────────────────────
+
+@app.route("/api/katweb/boletines", methods=["GET"])
+def api_katweb_boletines_get():
+    ensure_db()
+    boletines = fetch_katweb_boletines()
+    return jsonify(boletines)
+
+
+@app.route("/api/katweb/boletines", methods=["POST"])
+@require_admin()
+def api_katweb_boletines_save():
+    ensure_db()
+    payload = request.get_json(silent=True) or {}
+    boletines = payload.get("boletines") or []
+    if not isinstance(boletines, list):
+        return jsonify(error="Formato invalido"), 400
+    replace_katweb_boletines(boletines)
+    saved = fetch_katweb_boletines()
+    return jsonify(message="Boletines actualizados", boletines=saved), 200
 
 
 @app.route("/api/publications", methods=["POST"])

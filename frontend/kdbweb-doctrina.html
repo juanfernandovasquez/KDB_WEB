@@ -3,40 +3,102 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Doctrina | Katarzyna Legal & Tributario</title>
+  <title>Doctrina | KATWeb — Katarzyna Legal & Tributario</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
-  <link rel="stylesheet" href="./css/hero.css" />
   <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/katweb.css" />
 </head>
-<body data-page="kdbweb-detail" data-kdbweb="doctrina">
+<body data-page="kdbweb-detail" data-kdbweb="doctrina" data-katweb-type="doctrina">
   <div id="site-header"></div>
 
-  <main>
-    <section class="hero hero-single" id="kdbweb-hero">
-      <div class="hero-track">
-        <div class="hero-slide">
-          <img id="kdbweb-hero-image" src="" alt="">
+  <main class="kw-page-wrap">
+
+    <!-- Breadcrumb -->
+    <nav class="kw-breadcrumb" aria-label="Ruta de navegación">
+      <a href="kdbweb.html">KAT Web</a>
+      <span aria-hidden="true"> › </span>
+      <span>Doctrina</span>
+    </nav>
+
+    <!-- ═══ BANNER IMAGEN CON OVERLAY ════════════════════ -->
+    <div class="kw-banner-full" id="kw-banner">
+      <img id="kw-banner-image"
+        src="https://images.unsplash.com/photo-1521790367000-9662a79b43c5?auto=format&fit=crop&w=1200&q=80"
+        alt="Doctrina" />
+      <div class="kw-banner-full-content">
+        <h1 class="kw-banner-full-title" id="kw-banner-title">Doctrina</h1>
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN DOS COLUMNAS ══════════════════════════ -->
+    <section class="kw-two-col-section">
+      <div class="kw-two-col-inner">
+
+        <div>
+          <h2 class="kw-col-title" id="kw-left-title">
+            ¿Qué es y<br>por qué importa?
+          </h2>
         </div>
+
+        <div class="kw-col-body" id="kw-right-content">
+          <p>La doctrina reúne el trabajo de especialistas, académicos y profesionales
+          del derecho tributario que ayudan a entender cómo se interpreta y aplica
+          la normativa tributaria en la práctica.</p>
+
+          <p>A diferencia de la ley o la jurisprudencia, la doctrina no es vinculante — pero
+          es una herramienta esencial para comprender los fundamentos teóricos del
+          sistema tributario, anticipar criterios interpretativos y construir argumentos
+          sólidos ante la Administración Tributaria o los tribunales.</p>
+        </div>
+
       </div>
-      <div class="hero-content">
-        <p class="hero-kicker" id="kdbweb-hero-kicker"></p>
-        <h1 class="hero-title" id="kdbweb-hero-title"></h1>
-        <p class="hero-text" id="kdbweb-hero-subtitle"></p>
-      </div>
-      <div class="hero-dots"></div>
     </section>
 
-    <section class="post-content-section">
-      <div class="post-meta">
-        <a class="back-link" href="kdbweb.html">&larr; Volver a KDBWEB</a>
+    <!-- ═══ SECCIÓN 4 TARJETAS DE CATEGORÍAS ════════════ -->
+    <section class="kw-doctrina-section">
+      <div class="kw-doctrina-inner">
+
+        <div class="kw-doctrina-cards" id="kw-doctrina-cards">
+          <!-- Tarjeta 1 -->
+          <div class="kw-doctrina-card">
+            <div class="kw-doctrina-card-icon-placeholder">📄</div>
+            <p class="kw-doctrina-card-title">Artículos académicos</p>
+            <p class="kw-doctrina-card-desc">Estudios especializados en derecho tributario, elaborados por expertos.</p>
+          </div>
+          <!-- Tarjeta 2 -->
+          <div class="kw-doctrina-card">
+            <div class="kw-doctrina-card-icon-placeholder">⚖️</div>
+            <p class="kw-doctrina-card-title">Comentarios jurisprudenciales</p>
+            <p class="kw-doctrina-card-desc">Análisis de resoluciones del Tribunal Fiscal, Poder Judicial y Tribunal Constitucional.</p>
+          </div>
+          <!-- Tarjeta 3 -->
+          <div class="kw-doctrina-card">
+            <div class="kw-doctrina-card-icon-placeholder">📊</div>
+            <p class="kw-doctrina-card-title">Informes técnicos</p>
+            <p class="kw-doctrina-card-desc">Documentos que explican aspectos prácticos de la normativa tributaria y aduanera.</p>
+          </div>
+          <!-- Tarjeta 4 -->
+          <div class="kw-doctrina-card">
+            <div class="kw-doctrina-card-icon-placeholder">📚</div>
+            <p class="kw-doctrina-card-title">Materiales de estudio</p>
+            <p class="kw-doctrina-card-desc">Recursos de formación y consulta para estudiantes y profesionales del área tributaria.</p>
+          </div>
+        </div>
+
+        <!-- CTA de acceso a la biblioteca -->
+        <div class="kw-doctrina-cta">
+          <div class="kw-doctrina-cta-box" id="kw-doctrina-cta-box">
+            <span id="kw-doctrina-cta-label">Acceder para ver el contenido disponible:</span>
+            <a href="#" class="kw-access-btn" id="kw-doctrina-cta-btn" target="_blank" rel="noopener">
+              Accede a la biblioteca
+            </a>
+          </div>
+        </div>
+
       </div>
-      <article id="kdbweb-content" class="post-content"></article>
     </section>
 
-    <section class="publications-section" id="kdbweb-children-section" hidden>
-      <div id="kdbweb-children-list" class="publications-list"></div>
-    </section>
   </main>
 
   <div id="site-footer"></div>
@@ -45,8 +107,8 @@
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
   <script src="./js/kdbweb.js"></script>
+  <script src="./js/katweb-pages.js"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
 </html>
-

@@ -430,6 +430,26 @@ def init_db():
                 conn.execute(f"ALTER TABLE kdbweb_entries ADD COLUMN {col} TEXT")
             except Exception:
                 pass
+        # KATWeb structured data (meta_json for page-type specific content)
+        try:
+            conn.execute("ALTER TABLE kdbweb_entries ADD COLUMN meta_json TEXT")
+        except Exception:
+            pass
+
+        # KATWeb: tabla de boletines de jurisprudencia (Tribunal Fiscal)
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS katweb_boletines (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              year INTEGER NOT NULL,
+              month_label TEXT NOT NULL,
+              pdf_url TEXT,
+              position INTEGER NOT NULL DEFAULT 0,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """
+        )
 
         # Seed default categories if empty
         cat_exists = conn.execute("SELECT COUNT(*) AS c FROM categories").fetchone()["c"]

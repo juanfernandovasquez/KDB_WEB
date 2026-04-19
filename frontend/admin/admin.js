@@ -13,6 +13,9 @@
   const getAuthToken = () => adminToken || "";
   const setAuthToken = (token) => {
     adminToken = token || "";
+    // Expose token to katweb-admin.js (same origin, no security issue)
+    window.__katwebAdminToken__ = adminToken;
+    document.dispatchEvent(new CustomEvent("katweb:token-ready", { detail: adminToken }));
   };
   const apiFetch = (path, options = {}) => {
     const token = getAuthToken();
@@ -1737,6 +1740,8 @@ let currentAdminUserId = null;
       ensureResizableImages(editor);
     }
     kdbwebEditingSlug = entry.slug || null;
+    // Notify katweb-admin.js so it can show slug-specific meta editors
+    document.dispatchEvent(new CustomEvent("katweb:open-form", { detail: entry }));
   }
 
   function closeKdbwebForm() {
@@ -1759,6 +1764,8 @@ let currentAdminUserId = null;
     entry.hero_subtitle = entry.summary;
     entry.hero_kicker = "KDBWEB";
     entry.content_html = serializeEditorContent(q("kdbweb-content-editor"));
+    // Let katweb-admin.js populate entry.meta_json from active structured editor
+    document.dispatchEvent(new CustomEvent("katweb:collect-meta", { detail: entry }));
     renderKdbwebTree();
     if (!silent) setText("status-kdbweb-edit", "Cambios listos para guardar.");
   }

@@ -3,25 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KDBWEB | Katarzyna Legal & Tributario</title>
+  <title>KATWeb | Katarzyna Legal & Tributario</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
-  <link rel="stylesheet" href="./css/hero.css" />
   <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/katweb.css" />
 </head>
 <body data-page="kdbweb">
   <div id="site-header"></div>
 
-  <main>
-    <div id="site-hero"></div>
+  <main class="kw-page-wrap">
 
-    <section class="publications-section" id="kdbweb-cards">
-      <div class="publications-header">
-        <h2>KDBWEB</h2>
-        <p>Biblioteca de recursos tributarios, legales y constitucionales.</p>
+    <!-- ═══ HERO KATWeb ═══════════════════════════════════ -->
+    <section class="katweb-hero" id="katweb-hero">
+      <div class="katweb-hero-left">
+        <h1 class="katweb-hero-title" id="kw-hero-title">KAT WEB</h1>
+        <p class="katweb-hero-subtitle" id="kw-hero-subtitle">
+          Tu biblioteca legal, siempre al alcance.
+          Encuentra <strong>leyes, resoluciones y análisis
+          tributarios del Perú en un solo lugar.</strong>,
+          organizados para que encuentres lo que necesitas sin complicaciones
+        </p>
+        <form class="katweb-hero-search" role="search" onsubmit="return false;">
+          <input type="search" placeholder="Busca una norma, resolución o concepto"
+                 aria-label="Buscar en KATWeb" id="kw-search-input" />
+          <button type="submit" aria-label="Buscar">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </form>
       </div>
-      <div id="kdbweb-list" class="publications-list"></div>
+      <div class="katweb-hero-right">
+        <img id="kw-hero-image"
+          src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=80"
+          alt="Biblioteca legal digital" />
+      </div>
     </section>
+
+    <!-- ═══ SECCIÓN "EXPLORA POR CATEGORÍA" ═══════════════ -->
+    <section class="katweb-explore" id="katweb-explore">
+      <div class="katweb-explore-header">
+        <h2 class="katweb-explore-title">
+          Explora por <em>categoría</em>
+        </h2>
+        <p class="katweb-explore-desc" id="kw-explore-desc">
+          Selecciona el área que necesitas y accede<br>
+          directamente a la información relevante.
+        </p>
+      </div>
+
+      <!-- Contenedor de 5 tarjetas – renderizado por katweb-pages.js -->
+      <div id="katweb-cards-container"></div>
+    </section>
+
   </main>
 
   <div id="site-footer"></div>
@@ -30,8 +65,8 @@
   <script src="./js/api.js"></script>
   <script src="./js/content.js"></script>
   <script src="./js/header.js"></script>
-  <script src="./js/hero.js"></script>
   <script src="./js/kdbweb.js"></script>
+  <script src="./js/katweb-pages.js"></script>
   <script src="./js/footer.js"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>

@@ -3,40 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Constitucion | Katarzyna Legal & Tributario</title>
+  <title>Constitución | KATWeb — Katarzyna Legal & Tributario</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
-  <link rel="stylesheet" href="./css/hero.css" />
   <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/katweb.css" />
 </head>
-<body data-page="kdbweb-detail" data-kdbweb="constitucion">
+<body data-page="kdbweb-detail" data-kdbweb="constitucion" data-katweb-type="constitucion">
   <div id="site-header"></div>
 
-  <main>
-    <section class="hero hero-single" id="kdbweb-hero">
-      <div class="hero-track">
-        <div class="hero-slide">
-          <img id="kdbweb-hero-image" src="" alt="">
+  <main class="kw-page-wrap">
+
+    <!-- Breadcrumb -->
+    <nav class="kw-breadcrumb" aria-label="Ruta de navegación">
+      <a href="kdbweb.html">KAT Web</a>
+      <span aria-hidden="true"> › </span>
+      <span>Constitución</span>
+    </nav>
+
+    <!-- ═══ BANNER SPLIT ══════════════════════════════════ -->
+    <div class="kw-banner" id="kw-banner">
+      <div class="kw-banner-left">
+        <p class="kw-banner-kicker" id="kw-banner-kicker">KATWeb</p>
+        <h1 class="kw-banner-title" id="kw-banner-title">
+          Constitución<br>Política del Perú
+        </h1>
+      </div>
+      <div class="kw-banner-right">
+        <img id="kw-banner-image"
+          src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=900&q=80"
+          alt="Constitución Política del Perú" />
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN DOS COLUMNAS ══════════════════════════ -->
+    <section class="kw-two-col-section">
+      <div class="kw-two-col-inner">
+
+        <!-- Columna izquierda: título grande en dorado -->
+        <div>
+          <h2 class="kw-col-title" id="kw-left-title">
+            ¿Qué es y<br>por qué importa?
+          </h2>
         </div>
+
+        <!-- Columna derecha: texto + caja de acceso con botón -->
+        <div class="kw-col-body">
+          <div id="kw-right-content">
+            <p>La Constitución Política del Perú constituye la norma suprema del
+            ordenamiento jurídico, estableciendo los principios y límites fundamentales del
+            sistema tributario, así como las competencias del Estado en materia fiscal.</p>
+
+            <p>En el ámbito tributario, la Constitución regula aspectos esenciales como el
+            principio de legalidad tributaria, la capacidad contributiva, la igualdad ante los
+            tributos, la no confiscatoriedad y las garantías del debido procedimiento
+            administrativo y jurisdiccional.</p>
+
+            <p>A través del siguiente enlace es posible acceder al texto actualizado de la
+            Constitución Política del Perú, disponible en el Sistema Peruano de
+            Información Jurídica (SPIJ).</p>
+          </div>
+
+          <!-- Caja de acceso con botón -->
+          <div class="kw-access-box" id="kw-access-box">
+            <span class="kw-access-box-label" id="kw-access-label">
+              Acceder al texto de la Constitución Política del Perú:
+            </span>
+            <a href="#" class="kw-access-btn" id="kw-access-btn" target="_blank" rel="noopener">
+              Accede al texto
+            </a>
+          </div>
+        </div>
+
       </div>
-      <div class="hero-content">
-        <p class="hero-kicker" id="kdbweb-hero-kicker"></p>
-        <h1 class="hero-title" id="kdbweb-hero-title"></h1>
-        <p class="hero-text" id="kdbweb-hero-subtitle"></p>
-      </div>
-      <div class="hero-dots"></div>
     </section>
 
-    <section class="post-content-section">
-      <div class="post-meta">
-        <a class="back-link" href="kdbweb.html">&larr; Volver a KDBWEB</a>
-      </div>
-      <article id="kdbweb-content" class="post-content"></article>
-    </section>
-
-    <section class="publications-section" id="kdbweb-children-section" hidden>
-      <div id="kdbweb-children-list" class="publications-list"></div>
-    </section>
   </main>
 
   <div id="site-footer"></div>
@@ -45,8 +86,8 @@
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
   <script src="./js/kdbweb.js"></script>
+  <script src="./js/katweb-pages.js"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
 </html>
-

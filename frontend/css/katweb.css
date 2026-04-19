@@ -1,0 +1,1177 @@
+/* ============================================================
+   KATWEB — Estilos específicos para la sección KATWeb
+   Complementa style.css / hero.css / header.css / footer.css
+   ============================================================ */
+
+/* ─── Variables locales ──────────────────────────────────── */
+:root {
+  --kw-blue: #06186d;
+  --kw-gold: #b07d2f;
+  --kw-gray-bg: #f6f6f6;
+  --kw-white: #ffffff;
+  --kw-text: #2b2b2b;
+  --kw-text-muted: #555;
+  --kw-border: #ddd;
+  --kw-card-radius: 10px;
+  --kw-section-padding: 4rem 1.5rem;
+}
+
+/* ─── PÁGINA PRINCIPAL KATWeb ────────────────────────────── */
+
+/* Hero KATWeb — split layout */
+.katweb-hero {
+  position: relative;
+  min-height: 480px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--kw-blue);
+  overflow: hidden;
+}
+
+.katweb-hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 3rem 4rem 5vw;
+  position: relative;
+  z-index: 2;
+}
+
+.katweb-hero-left::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -60px;
+  bottom: 0;
+  width: 120px;
+  background: linear-gradient(to right, var(--kw-blue), transparent);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.katweb-hero-title {
+  font-size: clamp(3rem, 7vw, 5rem);
+  font-weight: 800;
+  color: var(--kw-gold);
+  margin: 0 0 1rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.katweb-hero-subtitle {
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+  color: rgba(255,255,255,0.9);
+  line-height: 1.65;
+  margin: 0 0 2rem;
+  max-width: 480px;
+}
+
+.katweb-hero-subtitle strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.katweb-hero-search {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 420px;
+}
+
+.katweb-hero-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  color: #333;
+  font-family: inherit;
+}
+
+.katweb-hero-search button {
+  background: none;
+  border: none;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.katweb-hero-search button svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--kw-blue);
+  fill: none;
+}
+
+.katweb-hero-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.katweb-hero-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+
+.katweb-hero-right::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, var(--kw-blue) 0%, transparent 40%);
+  z-index: 1;
+}
+
+/* Sección "Explora por categoría" */
+.katweb-explore {
+  padding: var(--kw-section-padding);
+  background: var(--kw-white);
+}
+
+.katweb-explore-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem 3rem;
+  align-items: start;
+  margin-bottom: 3rem;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.katweb-explore-title {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--kw-text);
+  margin: 0;
+}
+
+.katweb-explore-title em {
+  font-style: normal;
+  color: var(--kw-gold);
+}
+
+.katweb-explore-desc {
+  font-size: 1rem;
+  color: var(--kw-text-muted);
+  line-height: 1.6;
+  margin: 0;
+  padding-top: 0.4rem;
+}
+
+/* Grid de tarjetas de categorías */
+.katweb-cards-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.katweb-cards-row2 {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  max-width: calc(66.66% + 0.83rem);
+  margin: 0 auto;
+}
+
+.katweb-cat-card {
+  position: relative;
+  border-radius: var(--kw-card-radius);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  display: block;
+  text-decoration: none;
+  background: #1a2a5a;
+}
+
+.katweb-cat-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.katweb-cat-card:hover img {
+  transform: scale(1.04);
+}
+
+.katweb-cat-card-body {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(to top, rgba(6,24,109,0.92) 60%, transparent);
+  color: #fff;
+}
+
+.katweb-cat-card-title {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+  line-height: 1.2;
+}
+
+.katweb-cat-card-desc {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.85);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ─── BANNER SPLIT (compartido por Constitución, Tratados, Legislación) ─ */
+.kw-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.5rem auto;
+  max-width: 1100px;
+}
+
+.kw-banner-left {
+  background: var(--kw-blue);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 2.5rem 3rem 3rem;
+  position: relative;
+}
+
+.kw-banner-left::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -50px;
+  bottom: 0;
+  width: 100px;
+  background: linear-gradient(to right, var(--kw-blue), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.kw-banner-kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.kw-banner-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--kw-gold);
+  margin: 0;
+  line-height: 1.15;
+}
+
+.kw-banner-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.kw-banner-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.kw-banner-right::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, var(--kw-blue) 0%, transparent 35%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Banner sin split (Jurisprudencia style – imagen con overlay) */
+.kw-banner-full {
+  position: relative;
+  min-height: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.5rem auto;
+  max-width: 1100px;
+}
+
+.kw-banner-full img {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.kw-banner-full::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(6,24,109,0.85) 0%, rgba(6,24,109,0.5) 50%, rgba(6,24,109,0.2) 100%);
+  z-index: 1;
+}
+
+.kw-banner-full-content {
+  position: absolute;
+  inset: auto auto 0 0;
+  padding: 2.5rem 3rem;
+  z-index: 2;
+}
+
+.kw-banner-full-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  color: var(--kw-gold);
+  margin: 0;
+  line-height: 1.15;
+}
+
+.kw-banner-full-subtitle {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.85);
+  margin: 0.4rem 0 0;
+}
+
+/* Breadcrumb */
+.kw-breadcrumb {
+  font-size: 0.82rem;
+  color: var(--kw-text-muted);
+  margin: 1rem auto;
+  max-width: 1100px;
+  padding: 0 1.5rem;
+}
+
+.kw-breadcrumb a {
+  color: var(--kw-text-muted);
+  text-decoration: none;
+}
+
+.kw-breadcrumb a:hover { color: var(--kw-blue); }
+
+.kw-breadcrumb span { margin: 0 0.4rem; }
+
+/* ─── SECCIÓN DOS COLUMNAS (compartida) ─────────────────── */
+.kw-two-col-section {
+  background: var(--kw-gray-bg);
+  padding: var(--kw-section-padding);
+}
+
+.kw-two-col-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.kw-col-title {
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 800;
+  color: var(--kw-gold);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.kw-col-body {
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: var(--kw-text);
+}
+
+.kw-col-body p {
+  margin: 0 0 1rem;
+}
+
+.kw-col-body strong {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Caja de acceso (botón + texto descriptor) */
+.kw-access-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--kw-blue);
+  color: #fff;
+  padding: 1.1rem 1.5rem;
+  border-radius: 6px;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.kw-access-box-label {
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.kw-access-btn {
+  display: inline-block;
+  background: #fff;
+  color: var(--kw-blue);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 3px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.kw-access-btn:hover {
+  background: var(--kw-gold);
+  color: #fff;
+}
+
+/* ─── SECCIÓN DESCRICIÓN CENTRADA (Jurisprudencia) ──────── */
+.kw-centered-desc {
+  background: var(--kw-gray-bg);
+  padding: var(--kw-section-padding);
+  text-align: center;
+}
+
+.kw-centered-desc p {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: var(--kw-text);
+}
+
+/* ─── TARJETAS DE IMAGEN (Jurisprudencia 3 cards) ───────── */
+.kw-img-cards-section {
+  background: var(--kw-gray-bg);
+  padding: 0 1.5rem 4rem;
+}
+
+.kw-img-cards-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.kw-img-card {
+  position: relative;
+  border-radius: var(--kw-card-radius);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  display: block;
+  text-decoration: none;
+  background: #1a2a5a;
+}
+
+.kw-img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.kw-img-card:hover img {
+  transform: scale(1.04);
+}
+
+.kw-img-card-body {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(to top, rgba(6,24,109,0.92) 60%, transparent);
+  color: #fff;
+}
+
+.kw-img-card-title {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+  line-height: 1.2;
+}
+
+.kw-img-card-desc {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.85);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ─── SECCIÓN CONTENEDOR AZUL (Tratados / Legislación) ──── */
+.kw-content-section {
+  background: var(--kw-gray-bg);
+  padding: var(--kw-section-padding);
+}
+
+.kw-content-container {
+  max-width: 820px;
+  margin: 0 auto;
+  background: var(--kw-white);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.kw-content-header {
+  background: var(--kw-blue);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.kw-content-body {
+  padding: 0.5rem 0;
+}
+
+/* Entrada de Tratado */
+.kw-treaty-entry {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--kw-border);
+}
+
+.kw-treaty-entry:last-child {
+  border-bottom: none;
+}
+
+.kw-treaty-main {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.kw-treaty-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.kw-treaty-icon-placeholder {
+  width: 40px;
+  height: 40px;
+  background: var(--kw-gray-bg);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.kw-treaty-info {}
+
+.kw-treaty-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--kw-text);
+  margin: 0 0 0.15rem;
+}
+
+.kw-treaty-date {
+  font-size: 0.8rem;
+  color: var(--kw-text-muted);
+  margin: 0;
+}
+
+.kw-treaty-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #4a5568;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.45rem 0.8rem;
+  border-radius: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.kw-treaty-btn:hover { background: var(--kw-blue); }
+
+.kw-treaty-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Sub-entrada de tratado */
+.kw-treaty-sub {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--kw-border);
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.kw-treaty-sub-spacer {
+  /* Espacio alineado con el icono */
+}
+
+.kw-treaty-sub-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--kw-text);
+  margin: 0;
+}
+
+/* ─── LEGISLACIÓN — Tabs + Categorías ───────────────────── */
+
+/* Selector de tabs */
+.kw-tabs-selector {
+  max-width: 820px;
+  margin: 0 auto 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--kw-blue);
+}
+
+.kw-tab-btn {
+  padding: 0.85rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+  font-family: inherit;
+  background: var(--kw-white);
+  color: var(--kw-blue);
+  border-bottom: 2px solid transparent;
+}
+
+.kw-tab-btn.is-active {
+  background: var(--kw-blue);
+  color: var(--kw-white);
+  text-decoration: underline;
+}
+
+.kw-tab-panel {
+  display: none;
+}
+
+.kw-tab-panel.is-active {
+  display: block;
+}
+
+/* Categoría de legislación */
+.kw-leg-category {
+  border-bottom: 1px solid var(--kw-border);
+}
+
+.kw-leg-category:last-child {
+  border-bottom: none;
+}
+
+.kw-leg-cat-header {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1.1rem 1.5rem;
+  cursor: pointer;
+}
+
+.kw-leg-cat-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.kw-leg-cat-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--kw-text);
+  margin: 0 0 0.2rem;
+}
+
+.kw-leg-cat-subtitle {
+  font-size: 0.8rem;
+  color: var(--kw-text-muted);
+  margin: 0;
+}
+
+.kw-norms-badge {
+  background: var(--kw-gray-bg);
+  color: var(--kw-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.kw-leg-norms {
+  display: none;
+  padding: 0 1.5rem 0.5rem;
+  background: #fafafa;
+  border-top: 1px solid #eee;
+}
+
+.kw-leg-category.is-open .kw-leg-norms {
+  display: block;
+}
+
+/* Grupo de normas */
+.kw-norm-group-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--kw-text-muted);
+  background: #f0f0f0;
+  padding: 0.4rem 0.75rem;
+  margin: 0.5rem -0.5rem 0;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Norma individual */
+.kw-norm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--kw-border);
+}
+
+.kw-norm-row:last-child {
+  border-bottom: none;
+}
+
+.kw-norm-title {
+  font-size: 0.88rem;
+  color: var(--kw-text);
+  flex: 1;
+}
+
+.kw-norm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #4a5568;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.kw-norm-btn:hover { background: var(--kw-blue); }
+
+.kw-norm-btn svg {
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* ─── DOCTRINA — 4 tarjetas de categoría ───────────────── */
+.kw-doctrina-section {
+  background: var(--kw-gray-bg);
+  padding: var(--kw-section-padding);
+}
+
+.kw-doctrina-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.kw-doctrina-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kw-doctrina-card {
+  background: var(--kw-white);
+  border-radius: 8px;
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kw-doctrina-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.kw-doctrina-card-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+.kw-doctrina-card-icon-placeholder {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.kw-doctrina-card-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--kw-text);
+  margin: 0 0 0.4rem;
+}
+
+.kw-doctrina-card-desc {
+  font-size: 0.8rem;
+  color: var(--kw-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.kw-doctrina-cta {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.kw-doctrina-cta-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--kw-blue);
+  color: #fff;
+  padding: 1rem 1.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ─── JURISPRUDENCIA — Buscadores / Boletines ─────────── */
+.kw-juris-section {
+  background: var(--kw-gray-bg);
+  padding: var(--kw-section-padding);
+}
+
+.kw-juris-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.kw-juris-block-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--kw-gold);
+  margin: 0 0 0.4rem;
+}
+
+.kw-juris-block-desc {
+  font-size: 0.9rem;
+  color: var(--kw-text-muted);
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+/* Tarjetas de herramientas (buscadores) */
+.kw-tool-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.kw-tool-card {
+  background: var(--kw-white);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.kw-tool-card-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+.kw-tool-card-icon-placeholder {
+  font-size: 2.2rem;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.kw-tool-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--kw-text);
+  margin: 0;
+}
+
+.kw-tool-card-desc {
+  font-size: 0.82rem;
+  color: var(--kw-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Acordeón de boletines por año */
+.kw-boletines {}
+
+.kw-year-block {
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+  border: 1px solid #ddd;
+}
+
+.kw-year-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--kw-blue);
+  color: #fff;
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  list-style: none;
+}
+
+.kw-year-badge {
+  background: rgba(255,255,255,0.2);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  margin-left: 0.75rem;
+  font-weight: 500;
+}
+
+.kw-year-toggle {
+  transition: transform 0.3s;
+}
+
+.kw-year-block.is-open .kw-year-toggle {
+  transform: rotate(180deg);
+}
+
+.kw-year-body {
+  display: none;
+  background: var(--kw-white);
+  padding: 0.25rem 0;
+}
+
+.kw-year-block.is-open .kw-year-body {
+  display: block;
+}
+
+.kw-boletin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--kw-border);
+  font-size: 0.88rem;
+}
+
+.kw-boletin-row:last-child { border-bottom: none; }
+
+.kw-boletin-name { color: var(--kw-text); }
+
+/* Caja sugerencia de búsqueda */
+.kw-suggestion-box {
+  background: var(--kw-white);
+  border-radius: 8px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-top: 1.5rem;
+}
+
+.kw-suggestion-box-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--kw-text);
+}
+
+.kw-suggestion-box-title svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--kw-text-muted);
+  fill: none;
+  flex-shrink: 0;
+}
+
+.kw-suggestion-item {
+  font-size: 0.88rem;
+  color: var(--kw-text-muted);
+  padding: 0.3rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.kw-suggestion-item::before {
+  content: "›";
+  color: var(--kw-blue);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─── CONTENEDOR GENERAL de página ─────────────────────── */
+.kw-page-wrap {
+  padding-bottom: 0;
+}
+
+.kw-page-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .katweb-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .katweb-hero-right {
+    height: 240px;
+  }
+  .katweb-hero-right::before {
+    background: linear-gradient(to bottom, var(--kw-blue) 0%, transparent 40%);
+  }
+  .katweb-hero-left::after { display: none; }
+
+  .katweb-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .katweb-cards-row2 {
+    max-width: 100%;
+  }
+
+  .katweb-explore-header {
+    grid-template-columns: 1fr;
+  }
+
+  .kw-banner {
+    grid-template-columns: 1fr;
+    border-radius: 8px;
+  }
+  .kw-banner-right {
+    height: 200px;
+  }
+  .kw-banner-left::after { display: none; }
+
+  .kw-two-col-inner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .kw-img-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kw-doctrina-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .kw-tool-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .kw-treaty-main {
+    grid-template-columns: 40px 1fr;
+  }
+  .kw-treaty-main .kw-treaty-btn {
+    grid-column: 2;
+  }
+  .kw-treaty-sub {
+    grid-template-columns: 40px 1fr;
+  }
+  .kw-treaty-sub .kw-treaty-btn {
+    grid-column: 2;
+  }
+
+  .kw-leg-cat-header {
+    grid-template-columns: 44px 1fr;
+  }
+  .kw-norms-badge {
+    grid-column: 2;
+  }
+
+  .kw-tabs-selector {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .katweb-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .katweb-cards-row2 {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  .kw-doctrina-cards {
+    grid-template-columns: 1fr;
+  }
+  .katweb-hero-left {
+    padding: 2.5rem 1.5rem;
+  }
+  .kw-banner-left {
+    padding: 2rem 1.5rem;
+  }
+  .kw-two-col-section {
+    padding: 2rem 1rem;
+  }
+  .kw-content-section {
+    padding: 2rem 1rem;
+  }
+  .kw-doctrina-section {
+    padding: 2rem 1rem;
+  }
+}

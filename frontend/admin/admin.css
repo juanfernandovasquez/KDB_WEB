@@ -311,6 +311,16 @@ button.danger { background: #fff; color: #b00020; border: 1px solid #b00020; bor
 .logo-folder-item:hover { background: #f0f3f8; }
 .logo-folder-item.back { font-weight: 600; }
 
+/* ── KATWeb admin structured editors ──────────────────────────────── */
+.kw-meta-tab-btn { transition: background 0.15s, color 0.15s; }
+.kw-meta-tab-btn.active { background: var(--blue) !important; color: #fff !important; border-color: var(--blue) !important; }
+.kw-admin-treaty-card input,
+.kw-admin-leg-cat input { padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; }
+.kw-admin-treaty-card label,
+.kw-admin-leg-cat label { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 0.15rem; display: block; }
+#kdbweb-meta-section h4 { font-size: 1rem; margin: 0 0 0.5rem 0; color: var(--text); }
+#kdbweb-form-meta-json { padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; width: 100%; }
+
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; transform: translateX(-110%); transition: transform 0.2s ease; z-index: 11; }

@@ -620,11 +620,113 @@
               <div id="kdbweb-content-editor" class="editor-surface" contenteditable="true"></div>
               <textarea id="kdbweb-form-content" class="hidden"></textarea>
             </div>
+            <!-- ══ DATOS ESTRUCTURADOS (meta_json) ══════════════════════ -->
+            <div id="kdbweb-meta-section" class="section-card hidden" style="margin-top:1rem;">
+              <div class="section-head spaced">
+                <div>
+                  <h4>Datos estructurados</h4>
+                  <p class="small" id="kdbweb-meta-desc">Configura el contenido específico de esta subpágina.</p>
+                </div>
+              </div>
+
+              <!-- Simple: URL de acceso (constitucion, casaciones, sentencias-del-tc, doctrina) -->
+              <div id="kdbweb-meta-access" class="hidden">
+                <div class="grid-2">
+                  <div class="full">
+                    <label>URL de acceso (botón principal)</label>
+                    <input type="url" id="kdbweb-meta-access-url" placeholder="https://...">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tribunal Fiscal: tool card URLs -->
+              <div id="kdbweb-meta-tf" class="hidden">
+                <div class="grid-2">
+                  <div><label>Título tarjeta 1</label><input type="text" id="kdbweb-meta-tf-title1" placeholder="Buscador del Tribunal Fiscal"></div>
+                  <div><label>URL tarjeta 1</label><input type="url" id="kdbweb-meta-tf-url1" placeholder="https://..."></div>
+                  <div><label>Título tarjeta 2</label><input type="text" id="kdbweb-meta-tf-title2" placeholder="Portal de Resoluciones SUNAT"></div>
+                  <div><label>URL tarjeta 2</label><input type="url" id="kdbweb-meta-tf-url2" placeholder="https://..."></div>
+                </div>
+              </div>
+
+              <!-- Tratados Internacionales: treaty list builder -->
+              <div id="kdbweb-meta-tratados" class="hidden">
+                <div class="row" style="justify-content:flex-end;margin-bottom:0.75rem;">
+                  <button type="button" class="secondary small-btn" id="kw-treaty-add">+ Agregar tratado</button>
+                </div>
+                <div id="kw-treaties-admin"></div>
+              </div>
+
+              <!-- Legislación: two-tab category/norm builder -->
+              <div id="kdbweb-meta-legislacion" class="hidden">
+                <div class="kw-admin-tabs" style="display:flex;gap:0.5rem;margin-bottom:1rem;border-bottom:1px solid #e5e7eb;padding-bottom:0.5rem;">
+                  <button type="button" class="kw-meta-tab-btn secondary small-btn active" data-tab="tributaria">Tributaria</button>
+                  <button type="button" class="kw-meta-tab-btn secondary small-btn" data-tab="aduanera">Aduanera</button>
+                </div>
+                <div id="kw-leg-tributaria-admin" class="kw-meta-tab-panel">
+                  <div class="row" style="justify-content:flex-end;margin-bottom:0.75rem;">
+                    <button type="button" class="secondary small-btn" data-leg-tab="tributaria" id="kw-leg-add-cat-tributaria">+ Agregar categoría</button>
+                  </div>
+                  <div id="kw-leg-cats-tributaria"></div>
+                </div>
+                <div id="kw-leg-aduanera-admin" class="kw-meta-tab-panel hidden">
+                  <div class="row" style="justify-content:flex-end;margin-bottom:0.75rem;">
+                    <button type="button" class="secondary small-btn" data-leg-tab="aduanera" id="kw-leg-add-cat-aduanera">+ Agregar categoría</button>
+                  </div>
+                  <div id="kw-leg-cats-aduanera"></div>
+                </div>
+              </div>
+
+              <!-- Fallback: raw JSON textarea -->
+              <div id="kdbweb-meta-raw" class="hidden">
+                <label>Datos JSON (edición directa)</label>
+                <textarea id="kdbweb-form-meta-json" rows="8" placeholder='{"key": "value"}' style="font-family:monospace;font-size:0.82rem;width:100%;resize:vertical;"></textarea>
+              </div>
+
+              <details style="margin-top:0.5rem;">
+                <summary class="small" style="cursor:pointer;color:#6b7280;">Ver JSON guardado</summary>
+                <pre id="kdbweb-meta-json-preview" style="background:#f8f9fa;padding:0.5rem;font-size:0.75rem;overflow:auto;max-height:200px;border-radius:4px;"></pre>
+              </details>
+            </div>
+
             <div class="row">
               <button class="secondary" id="kdbweb-cancel-edit">Cancelar</button>
               <button class="cta" id="kdbweb-save-edit">Guardar cambios</button>
             </div>
             <div class="status" id="status-kdbweb-edit"></div>
+          </div>
+        </div>
+
+        <!-- ══ BOLETINES DEL TRIBUNAL FISCAL ════════════════════════ -->
+        <div class="card" id="kdbweb-boletines-card">
+          <div class="section-head spaced">
+            <div>
+              <h3>Boletines del Tribunal Fiscal</h3>
+              <p class="small">PDFs de boletines mensuales, organizados por año.</p>
+            </div>
+            <button class="collapse-btn" data-collapse-target="kdbweb-boletines-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="kdbweb-boletines-body">
+            <div class="section-head spaced" style="margin-top:0;">
+              <h4>Agregar nuevo boletín</h4>
+            </div>
+            <div class="grid-2" style="margin-bottom:0.75rem;">
+              <div><label>Año</label><input type="number" id="kw-bol-year" min="2000" max="2050" placeholder="2025"></div>
+              <div><label>Etiqueta del mes (ej: Enero 2025)</label><input type="text" id="kw-bol-month" placeholder="Enero 2025"></div>
+              <div class="full">
+                <label>URL del PDF</label>
+                <div class="row media-input-row">
+                  <input type="url" id="kw-bol-url" placeholder="https://...">
+                  <button type="button" class="cta small-btn" id="kw-bol-add">Agregar</button>
+                </div>
+              </div>
+            </div>
+            <div id="kw-boletines-list-admin" style="margin-top:0.5rem;"></div>
+            <div class="row row-space-top">
+              <button class="cta small-btn" id="kw-save-boletines">Guardar boletines</button>
+              <button class="secondary small-btn" id="kw-reload-boletines">Revertir</button>
+              <span class="status" id="status-boletines"></span>
+            </div>
           </div>
         </div>
 
@@ -935,6 +1037,7 @@
   </div>
   <script src="../js/config.js"></script>
   <script type="module" src="./main.js?v=20260202"></script>
+  <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");
   </script>

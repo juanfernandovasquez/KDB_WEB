@@ -755,7 +755,7 @@ def fetch_kdbweb_entries():
         """
         SELECT id, position, slug, parent_slug, title, card_title, summary, hero_kicker, hero_title, hero_subtitle,
                hero_image_url, hero_primary_label, hero_primary_href, hero_secondary_label,
-               hero_secondary_href, content_html
+               hero_secondary_href, content_html, meta_json
         FROM kdbweb_entries
         ORDER BY position
         """,
@@ -770,7 +770,7 @@ def fetch_kdbweb_entry_by_slug(slug):
         """
         SELECT id, position, slug, parent_slug, title, card_title, summary, hero_kicker, hero_title, hero_subtitle,
                hero_image_url, hero_primary_label, hero_primary_href, hero_secondary_label,
-               hero_secondary_href, content_html
+               hero_secondary_href, content_html, meta_json
         FROM kdbweb_entries
         WHERE slug = ?
         """,
@@ -799,6 +799,14 @@ def replace_kdbweb_entries(entries):
                 )
             except Exception:
                 content = content_raw
+            # meta_json: store as raw JSON string (validated to be valid JSON if present)
+            meta_raw = entry.get("meta_json") or None
+            if meta_raw:
+                try:
+                    import json as _json
+                    _json.loads(meta_raw)  # validate JSON
+                except Exception:
+                    meta_raw = None
             conn.execute(
                 """
                 INSERT INTO kdbweb_entries (
@@ -817,10 +825,11 @@ def replace_kdbweb_entries(entries):
                   hero_secondary_label,
                   hero_secondary_href,
                   content_html,
+                  meta_json,
                   created_at,
                   updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     pos,
@@ -838,12 +847,51 @@ def replace_kdbweb_entries(entries):
                     entry.get("hero_secondary_label"),
                     entry.get("hero_secondary_href"),
                     content,
+                    meta_raw,
                     now,
                     now,
                 ),
             )
     conn.close()
     return len(entries or [])
+
+
+# --- KATWeb Boletines (Tribunal Fiscal) ---
+def fetch_katweb_boletines():
+    conn = get_conn()
+    rows = conn.execute(
+        """
+        SELECT id, year, month_label, pdf_url, position
+        FROM katweb_boletines
+        ORDER BY year DESC, position ASC
+        """,
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def replace_katweb_boletines(boletines):
+    now = datetime.utcnow().isoformat()
+    conn = get_conn()
+    with conn:
+        conn.execute("DELETE FROM katweb_boletines")
+        for pos, b in enumerate(boletines or []):
+            conn.execute(
+                """
+                INSERT INTO katweb_boletines (year, month_label, pdf_url, position, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    b.get("year"),
+                    b.get("month_label"),
+                    b.get("pdf_url"),
+                    pos,
+                    now,
+                    now,
+                ),
+            )
+    conn.close()
+    return len(boletines or [])
 
 
 def delete_publication(pub_id):

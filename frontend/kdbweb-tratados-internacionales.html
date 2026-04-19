@@ -3,40 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tratados internacionales | Katarzyna Legal & Tributario</title>
+  <title>Tratados Internacionales | KATWeb — Katarzyna Legal & Tributario</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
-  <link rel="stylesheet" href="./css/hero.css" />
   <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/katweb.css" />
 </head>
-<body data-page="kdbweb-detail" data-kdbweb="tratados-internacionales">
+<body data-page="kdbweb-detail" data-kdbweb="tratados-internacionales" data-katweb-type="tratados">
   <div id="site-header"></div>
 
-  <main>
-    <section class="hero hero-single" id="kdbweb-hero">
-      <div class="hero-track">
-        <div class="hero-slide">
-          <img id="kdbweb-hero-image" src="" alt="">
+  <main class="kw-page-wrap">
+
+    <!-- Breadcrumb -->
+    <nav class="kw-breadcrumb" aria-label="Ruta de navegación">
+      <a href="kdbweb.html">KAT Web</a>
+      <span aria-hidden="true"> › </span>
+      <span>Tratados Internacionales</span>
+    </nav>
+
+    <!-- ═══ BANNER SPLIT ══════════════════════════════════ -->
+    <div class="kw-banner" id="kw-banner">
+      <div class="kw-banner-left">
+        <p class="kw-banner-kicker" id="kw-banner-kicker">KATWeb</p>
+        <h1 class="kw-banner-title" id="kw-banner-title">
+          Tratados<br>Internacionales
+        </h1>
+      </div>
+      <div class="kw-banner-right">
+        <img id="kw-banner-image"
+          src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=900&q=80"
+          alt="Tratados Internacionales" />
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN DOS COLUMNAS ══════════════════════════ -->
+    <section class="kw-two-col-section">
+      <div class="kw-two-col-inner">
+
+        <div>
+          <h2 class="kw-col-title" id="kw-left-title">
+            ¿Qué es y<br>por qué importa?
+          </h2>
+        </div>
+
+        <div class="kw-col-body" id="kw-right-content">
+          <p>En este apartado se recopilan y comentan los principales tratados internacionales con impacto
+          en materia tributaria, incluyendo convenios para evitar la doble imposición y otros
+          instrumentos relevantes.</p>
+
+          <strong>Convenios para evitar la doble Imposición tributaria</strong>
+
+          <p>La doble o múltiple tributación se presenta cuando dos o más países consideran que les
+          pertenece el derecho de gravar una determinada renta. En esos casos, una misma ganancia
+          puede resultar gravada por más de un Estado.</p>
+
+          <p>Los Estados para enfrentar y resolver los casos de doble imposición internacional celebran
+          acuerdos o convenios para regular esta situación. Estos convenios contemplan no sólo las
+          reglas que usarán para gravar las ganancias sino también los mecanismos para que se dé
+          la colaboración entre las Administraciones Tributarias a fin de detectar casos de evasión fiscal.</p>
+
+          <p>Mediante el uso de los convenios, los Estados firmantes renuncian a gravar determinadas
+          ganancias y acuerdan que sea sólo uno de los Estados el que cobre el impuesto o, en todo caso,
+          que se realice una imposición compartida, es decir, que ambos Estados recauden parte del
+          impuesto total que debe pagar el sujeto.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ SECCIÓN CONVENIOS (lista estructurada) ════════ -->
+    <section class="kw-content-section">
+      <div class="kw-content-container" id="kw-treaties-container">
+        <div class="kw-content-header" id="kw-treaties-header">
+          Convenios para evitar la doble Imposición en vigor:
+        </div>
+        <div class="kw-content-body" id="kw-treaties-list">
+          <!-- Renderizado dinámicamente por katweb-pages.js -->
+          <div style="padding:2rem;text-align:center;color:#999;font-size:0.9rem;">
+            Cargando convenios...
+          </div>
         </div>
       </div>
-      <div class="hero-content">
-        <p class="hero-kicker" id="kdbweb-hero-kicker"></p>
-        <h1 class="hero-title" id="kdbweb-hero-title"></h1>
-        <p class="hero-text" id="kdbweb-hero-subtitle"></p>
-      </div>
-      <div class="hero-dots"></div>
     </section>
 
-    <section class="post-content-section">
-      <div class="post-meta">
-        <a class="back-link" href="kdbweb.html">&larr; Volver a KDBWEB</a>
-      </div>
-      <article id="kdbweb-content" class="post-content"></article>
-    </section>
-
-    <section class="publications-section" id="kdbweb-children-section" hidden>
-      <div id="kdbweb-children-list" class="publications-list"></div>
-    </section>
   </main>
 
   <div id="site-footer"></div>
@@ -45,8 +94,8 @@
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
   <script src="./js/kdbweb.js"></script>
+  <script src="./js/katweb-pages.js"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
 </html>
-

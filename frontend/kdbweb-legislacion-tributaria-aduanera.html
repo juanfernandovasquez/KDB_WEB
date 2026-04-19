@@ -3,40 +3,106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legislacion tributaria y aduanera | Katarzyna Legal & Tributario</title>
+  <title>Legislación Tributaria y Aduanera | KATWeb — Katarzyna Legal & Tributario</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
-  <link rel="stylesheet" href="./css/hero.css" />
   <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/katweb.css" />
 </head>
-<body data-page="kdbweb-detail" data-kdbweb="legislacion-tributaria-aduanera">
+<body data-page="kdbweb-detail" data-kdbweb="legislacion-tributaria-aduanera" data-katweb-type="legislacion">
   <div id="site-header"></div>
 
-  <main>
-    <section class="hero hero-single" id="kdbweb-hero">
-      <div class="hero-track">
-        <div class="hero-slide">
-          <img id="kdbweb-hero-image" src="" alt="">
+  <main class="kw-page-wrap">
+
+    <!-- Breadcrumb -->
+    <nav class="kw-breadcrumb" aria-label="Ruta de navegación">
+      <a href="kdbweb.html">KAT Web</a>
+      <span aria-hidden="true"> › </span>
+      <span>Legislación Tributaria y Aduanera</span>
+    </nav>
+
+    <!-- ═══ BANNER SPLIT ══════════════════════════════════ -->
+    <div class="kw-banner" id="kw-banner">
+      <div class="kw-banner-left">
+        <p class="kw-banner-kicker" id="kw-banner-kicker">KATWeb</p>
+        <h1 class="kw-banner-title" id="kw-banner-title">
+          Legislación<br>Tributaria y<br>Aduanera
+        </h1>
+      </div>
+      <div class="kw-banner-right">
+        <img id="kw-banner-image"
+          src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=900&q=80"
+          alt="Legislación Tributaria y Aduanera" />
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN DOS COLUMNAS ══════════════════════════ -->
+    <section class="kw-two-col-section">
+      <div class="kw-two-col-inner">
+
+        <div>
+          <h2 class="kw-col-title" id="kw-left-title">
+            ¿Qué es y<br>por qué importa?
+          </h2>
         </div>
+
+        <div class="kw-col-body" id="kw-right-content">
+          <p>La normativa tributaria y aduanera establece las reglas del sistema fiscal
+          peruano: qué se grava, cómo se calcula y qué obligaciones tienen los
+          contribuyentes. Esta sección reúne y organiza las principales normas vigentes
+          — desde el Código Tributario hasta los procedimientos aduaneros — con
+          énfasis en su aplicación práctica y en los criterios más relevantes emitidos
+          por la Administración Tributaria.</p>
+        </div>
+
       </div>
-      <div class="hero-content">
-        <p class="hero-kicker" id="kdbweb-hero-kicker"></p>
-        <h1 class="hero-title" id="kdbweb-hero-title"></h1>
-        <p class="hero-text" id="kdbweb-hero-subtitle"></p>
-      </div>
-      <div class="hero-dots"></div>
     </section>
 
-    <section class="post-content-section">
-      <div class="post-meta">
-        <a class="back-link" href="kdbweb.html">&larr; Volver a KDBWEB</a>
+    <!-- ═══ SECCIÓN CON TABS: Tributaria / Aduanera ══════ -->
+    <section class="kw-content-section">
+      <div style="max-width:820px;margin:0 auto;">
+
+        <!-- Selector de tabs -->
+        <div class="kw-tabs-selector" role="tablist" id="kw-tabs-selector">
+          <button type="button" class="kw-tab-btn is-active"
+                  role="tab" aria-selected="true"
+                  data-tab="tributaria" id="tab-btn-tributaria">
+            Legislación Tributaria
+          </button>
+          <button type="button" class="kw-tab-btn"
+                  role="tab" aria-selected="false"
+                  data-tab="aduanera" id="tab-btn-aduanera">
+            Legislación Aduanera
+          </button>
+        </div>
+
+        <!-- Contenedor de las categorías (renderizado por JS) -->
+        <div class="kw-content-container" style="margin:0;">
+          <div class="kw-content-body">
+            <!-- Tab Tributaria -->
+            <div class="kw-tab-panel is-active" id="kw-tab-tributaria"
+                 role="tabpanel" aria-labelledby="tab-btn-tributaria">
+              <div id="kw-leg-tributaria-list">
+                <div style="padding:2rem;text-align:center;color:#999;font-size:0.9rem;">
+                  Cargando legislación tributaria...
+                </div>
+              </div>
+            </div>
+            <!-- Tab Aduanera -->
+            <div class="kw-tab-panel" id="kw-tab-aduanera"
+                 role="tabpanel" aria-labelledby="tab-btn-aduanera">
+              <div id="kw-leg-aduanera-list">
+                <div style="padding:2rem;text-align:center;color:#999;font-size:0.9rem;">
+                  Cargando legislación aduanera...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <article id="kdbweb-content" class="post-content"></article>
     </section>
 
-    <section class="publications-section" id="kdbweb-children-section" hidden>
-      <div id="kdbweb-children-list" class="publications-list"></div>
-    </section>
   </main>
 
   <div id="site-footer"></div>
@@ -45,8 +111,8 @@
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
   <script src="./js/kdbweb.js"></script>
+  <script src="./js/katweb-pages.js"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
 </html>
-

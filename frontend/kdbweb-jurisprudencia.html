@@ -3,40 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jurisprudencia | Katarzyna Legal & Tributario</title>
+  <title>Jurisprudencia | KATWeb — Katarzyna Legal & Tributario</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
-  <link rel="stylesheet" href="./css/hero.css" />
   <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/katweb.css" />
 </head>
-<body data-page="kdbweb-detail" data-kdbweb="jurisprudencia">
+<body data-page="kdbweb-detail" data-kdbweb="jurisprudencia" data-katweb-type="jurisprudencia">
   <div id="site-header"></div>
 
-  <main>
-    <section class="hero hero-single" id="kdbweb-hero">
-      <div class="hero-track">
-        <div class="hero-slide">
-          <img id="kdbweb-hero-image" src="" alt="">
-        </div>
+  <main class="kw-page-wrap">
+
+    <!-- Breadcrumb -->
+    <nav class="kw-breadcrumb" aria-label="Ruta de navegación">
+      <a href="kdbweb.html">KAT Web</a>
+      <span aria-hidden="true"> › </span>
+      <span>Jurisprudencia</span>
+    </nav>
+
+    <!-- ═══ BANNER IMAGEN CON OVERLAY ════════════════════ -->
+    <div class="kw-banner-full" id="kw-banner">
+      <img id="kw-banner-image"
+        src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80"
+        alt="Jurisprudencia" />
+      <div class="kw-banner-full-content">
+        <h1 class="kw-banner-full-title" id="kw-banner-title">Jurisprudencia</h1>
       </div>
-      <div class="hero-content">
-        <p class="hero-kicker" id="kdbweb-hero-kicker"></p>
-        <h1 class="hero-title" id="kdbweb-hero-title"></h1>
-        <p class="hero-text" id="kdbweb-hero-subtitle"></p>
-      </div>
-      <div class="hero-dots"></div>
+    </div>
+
+    <!-- ═══ DESCRIPCIÓN CENTRADA ══════════════════════════ -->
+    <section class="kw-centered-desc">
+      <p id="kw-juris-desc">
+        En esta sección se recopilan y sistematizan los principales criterios jurisprudenciales emitidos en materia tributaria y
+        aduanera por el Tribunal Fiscal, el Poder Judicial y el Tribunal Constitucional, así como herramientas de consulta que
+        permiten acceder directamente a las resoluciones emitidas por dichas instancias.
+      </p>
     </section>
 
-    <section class="post-content-section">
-      <div class="post-meta">
-        <a class="back-link" href="kdbweb.html">&larr; Volver a KDBWEB</a>
+    <!-- ═══ TARJETAS DE LAS 3 INSTITUCIONES ══════════════ -->
+    <section class="kw-img-cards-section">
+      <div class="kw-img-cards-grid" id="kw-juris-cards">
+        <!-- Tarjeta 1: Tribunal Fiscal -->
+        <a href="kdbweb-tribunal-fiscal.html" class="kw-img-card">
+          <img src="https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=600&q=80"
+               alt="Tribunal Fiscal" />
+          <div class="kw-img-card-body">
+            <p class="kw-img-card-title">Tribunal Fiscal</p>
+            <p class="kw-img-card-desc">Resoluciones y criterios del Tribunal Fiscal para casos tributarios.</p>
+          </div>
+        </a>
+        <!-- Tarjeta 2: Casaciones Corte Suprema -->
+        <a href="kdbweb-casaciones-de-la-corte-suprema.html" class="kw-img-card">
+          <img src="https://images.unsplash.com/photo-1569234044014-e7f9b0ec5c08?auto=format&fit=crop&w=600&q=80"
+               alt="Casaciones de la Corte Suprema" />
+          <div class="kw-img-card-body">
+            <p class="kw-img-card-title">Casaciones de la<br>Corte Suprema</p>
+            <p class="kw-img-card-desc">Criterios y precedentes de la Corte Suprema en materia tributaria.</p>
+          </div>
+        </a>
+        <!-- Tarjeta 3: Sentencias del TC -->
+        <a href="kdbweb-sentencias-del-tc.html" class="kw-img-card">
+          <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80"
+               alt="Sentencias del TC" />
+          <div class="kw-img-card-body">
+            <p class="kw-img-card-title">Sentencias del TC</p>
+            <p class="kw-img-card-desc">Pronunciamiento del Tribunal Constitucional con impacto tributario.</p>
+          </div>
+        </a>
       </div>
-      <article id="kdbweb-content" class="post-content"></article>
     </section>
 
-    <section class="publications-section" id="kdbweb-children-section" hidden>
-      <div id="kdbweb-children-list" class="publications-list"></div>
-    </section>
   </main>
 
   <div id="site-footer"></div>
@@ -45,8 +81,8 @@
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
   <script src="./js/kdbweb.js"></script>
+  <script src="./js/katweb-pages.js"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
 </html>
-
