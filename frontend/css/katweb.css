@@ -28,13 +28,22 @@
   overflow: hidden;
 }
 
+/* ── TODAS las páginas KATWeb: header siempre en azul oscuro ─
+   Selector [data-page^="kdbweb"] cubre kdbweb + kdbweb-detail
+   ───────────────────────────────────────────────────────────── */
+[data-page^="kdbweb"] .header-container {
+  background: var(--brand-blue, #06186d) !important;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.18) !important;
+}
+
 /* ── MAIN INDEX only: hero como tarjeta contenida ────────────
    Scoped a [data-page="kdbweb"] para NO afectar páginas internas
    (kdbweb-jurisprudencia, kdbweb-doctrina, etc.)
    ───────────────────────────────────────────────────────────── */
 [data-page="kdbweb"] .kw-page-wrap {
   background: #ffffff;
-  padding: 2.5rem 1.5rem 0;
+  /* header fijo (88px) + espacio blanco visible antes del hero */
+  padding: calc(var(--header-height, 88px) + 2.5rem) 1.5rem 0;
 }
 
 [data-page="kdbweb"] .katweb-hero {
@@ -43,6 +52,11 @@
   margin: 0 auto;
   min-height: 440px;
   box-shadow: 0 8px 32px rgba(6, 24, 109, 0.10);
+}
+
+/* ── Páginas interiores KATWeb: empujar bajo el header fijo ── */
+[data-page="kdbweb-detail"] .kw-page-wrap {
+  padding-top: calc(var(--header-height, 88px) + 1rem);
 }
 
 .katweb-hero-left {
