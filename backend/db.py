@@ -458,6 +458,49 @@ def init_db():
                     (new_url, slug, f"%{pat}%"),
                 )
 
+        # Migration: reorder root KATWeb categories to match design mockup
+        # and update placeholder images with more appropriate ones.
+        # Positions are always updated; images only if they still hold the
+        # original seeded value (to avoid overwriting admin-set custom images).
+        _root_reorder = [
+            # (slug, new_position, old_img_pattern, new_image_url)
+            (
+                "constitucion", 0,
+                "1522202176988",  # friends-laughing placeholder
+                "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=1600&q=80",
+            ),
+            (
+                "tratados-internacionales", 1,
+                "1520607162513",  # generic placeholder
+                "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80",
+            ),
+            (
+                "legislacion-tributaria-aduanera", 2,
+                "1489515217757",  # rainy-bus-stop placeholder
+                "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1600&q=80",
+            ),
+            (
+                "jurisprudencia", 3,
+                "1497366754035",  # office-corridor placeholder
+                "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80",
+            ),
+            (
+                "doctrina", 4,
+                "1521791136064",  # handshake placeholder
+                "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1600&q=80",
+            ),
+        ]
+        for slug, new_pos, old_pat, new_img in _root_reorder:
+            conn.execute(
+                "UPDATE kdbweb_entries SET position = ? WHERE slug = ? AND parent_slug IS NULL",
+                (new_pos, slug),
+            )
+            conn.execute(
+                "UPDATE kdbweb_entries SET hero_image_url = ? "
+                "WHERE slug = ? AND hero_image_url LIKE ?",
+                (new_img, slug, f"%{old_pat}%"),
+            )
+
         # KATWeb: tabla de boletines de jurisprudencia (Tribunal Fiscal)
         conn.execute(
             """
