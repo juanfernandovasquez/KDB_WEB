@@ -436,6 +436,28 @@ def init_db():
         except Exception:
             pass
 
+        # Migration: replace known placeholder/broken images in jurisprudencia child entries
+        # Only updates entries that still have one of the old wrong default images
+        _img_fixes = [
+            (
+                "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=80",
+                "tribunal-fiscal",
+                ["1605792657660", "1507679799987"],  # crypto chart or generic man-in-suit
+            ),
+            (
+                "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1600&q=80",
+                "casaciones-de-la-corte-suprema",
+                ["1498050108023", "1569234044014"],  # laptop / broken image
+            ),
+        ]
+        for new_url, slug, bad_patterns in _img_fixes:
+            for pat in bad_patterns:
+                conn.execute(
+                    "UPDATE kdbweb_entries SET hero_image_url = ? "
+                    "WHERE slug = ? AND hero_image_url LIKE ?",
+                    (new_url, slug, f"%{pat}%"),
+                )
+
         # KATWeb: tabla de boletines de jurisprudencia (Tribunal Fiscal)
         conn.execute(
             """
@@ -633,7 +655,7 @@ def init_db():
                 "KDBWEB",
                 "Tribunal Fiscal",
                 "Resoluciones y criterios del Tribunal Fiscal para casos tributarios.",
-                "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1600&q=80",
+                "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=80",
                 "",
                 "",
                 "",
@@ -652,7 +674,7 @@ def init_db():
                 "KDBWEB",
                 "Casaciones de la corte suprema",
                 "Criterios y precedentes de la Corte Suprema en materia tributaria.",
-                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80",
+                "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1600&q=80",
                 "",
                 "",
                 "",

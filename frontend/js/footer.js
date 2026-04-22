@@ -19,7 +19,10 @@ async function populateFooter() {
   };
   const setLink = (id, href) => {
     const el = document.getElementById(id);
-    if (el && href) el.href = href;
+    if (el && href) {
+      el.href = href;
+      el.style.display = '';  // show the element when it has a URL
+    }
   };
   const setLogo = (url) => {
     footer.querySelectorAll('[data-logo-role]').forEach((img) => {
