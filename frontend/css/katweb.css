@@ -28,6 +28,23 @@
   overflow: hidden;
 }
 
+/* ── MAIN INDEX only: hero como tarjeta contenida ────────────
+   Scoped a [data-page="kdbweb"] para NO afectar páginas internas
+   (kdbweb-jurisprudencia, kdbweb-doctrina, etc.)
+   ───────────────────────────────────────────────────────────── */
+[data-page="kdbweb"] .kw-page-wrap {
+  background: #ffffff;
+  padding: 2.5rem 1.5rem 0;
+}
+
+[data-page="kdbweb"] .katweb-hero {
+  border-radius: 20px;
+  max-width: 1140px;
+  margin: 0 auto;
+  min-height: 440px;
+  box-shadow: 0 8px 32px rgba(6, 24, 109, 0.10);
+}
+
 .katweb-hero-left {
   display: flex;
   flex-direction: column;
@@ -75,7 +92,7 @@
   display: flex;
   align-items: center;
   background: #fff;
-  border-radius: 4px;
+  border-radius: 50px;
   overflow: hidden;
   max-width: 420px;
 }
