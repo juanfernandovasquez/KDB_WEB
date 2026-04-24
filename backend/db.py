@@ -510,6 +510,92 @@ def init_db():
             ("https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80",),
         )
 
+        # Migration: provisional treaty data for Tratados Internacionales.
+        # Only inserts if meta_json is NULL or empty (won't overwrite admin edits).
+        _tratados_meta = json.dumps({
+            "section_title": "Convenios para evitar la doble Imposición en vigor:",
+            "entries": [
+                {
+                    "title": "Alianza del Pacífico — Convención de Homologación",
+                    "date": "Aplicable desde el 1 de enero de 2024",
+                    "icon_emoji": "🤝",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con Chile",
+                    "date": "Aplicable desde el 1 de enero de 2004",
+                    "icon_emoji": "🇨🇱",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con Canadá",
+                    "date": "Aplicable desde el 1 de enero de 2024",
+                    "icon_emoji": "🇨🇦",
+                    "button_url": "#",
+                    "button_label": "Ver convenio en español",
+                    "sub_entries": [
+                        {"button_url": "#", "button_label": "Ver convenio en inglés", "title": ""}
+                    ]
+                },
+                {
+                    "title": "Convenio con la Comunidad Andina",
+                    "date": "Aplicable desde el 1 de enero de 2005",
+                    "icon_emoji": "🌐",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con Brasil",
+                    "date": "Aplicable desde el 1 de enero de 2010",
+                    "icon_emoji": "🇧🇷",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con los Estados Unidos de Norteamérica",
+                    "date": "Aplicable desde el 1 de enero de 2015",
+                    "icon_emoji": "🇺🇸",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con España",
+                    "date": "Aplicable desde el 1 de enero de 2008",
+                    "icon_emoji": "🇪🇸",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con México",
+                    "date": "Aplicable desde el 1 de enero de 2015",
+                    "icon_emoji": "🇲🇽",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con Portugal",
+                    "date": "Aplicable desde el 1 de enero de 2015",
+                    "icon_emoji": "🇵🇹",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                },
+                {
+                    "title": "Convenio con Corea del Sur",
+                    "date": "Aplicable desde el 1 de enero de 2015",
+                    "icon_emoji": "🇰🇷",
+                    "button_url": "#",
+                    "button_label": "Ver convenio"
+                }
+            ]
+        }, ensure_ascii=False)
+        conn.execute(
+            "UPDATE kdbweb_entries SET meta_json = ? "
+            "WHERE slug = 'tratados-internacionales' AND (meta_json IS NULL OR meta_json = '')",
+            (_tratados_meta,),
+        )
+
         # KATWeb: tabla de boletines de jurisprudencia (Tribunal Fiscal)
         conn.execute(
             """
