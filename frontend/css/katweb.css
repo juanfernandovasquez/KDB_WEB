@@ -209,8 +209,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
-  max-width: calc(66.66% + 0.83rem);
-  margin: 0 auto;
+  /* sin max-width: las 2 tarjetas de abajo abarcan el grid completo */
 }
 
 .katweb-cat-card {
@@ -246,6 +245,7 @@
 .katweb-cat-card-title {
   font-size: clamp(1rem, 1.5vw, 1.15rem);
   font-weight: 700;
+  color: #fff;          /* explícito: evita override de reglas globales */
   margin: 0 0 0.3rem;
   line-height: 1.2;
 }
