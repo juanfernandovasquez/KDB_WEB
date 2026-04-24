@@ -219,7 +219,9 @@
   position: relative;
   border-radius: var(--kw-card-radius);
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  /* Altura fija: todas las tarjetas (fila 1 y 2) tienen la misma altura
+     independientemente del ancho — igual que el mockup */
+  height: clamp(220px, 22vw, 300px);
   display: block;
   text-decoration: none;
   background: #1a2a5a;

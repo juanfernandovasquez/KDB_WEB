@@ -501,6 +501,15 @@ def init_db():
                 (new_img, slug, f"%{old_pat}%"),
             )
 
+        # Migration: fix Constitución hero image — photo-1589829085413 turned
+        # out to be a book cover ("How Innovation Works"), not scales of justice.
+        # Replace with photo-1554224155-6726b3ff858f (classic scales of justice).
+        conn.execute(
+            "UPDATE kdbweb_entries SET hero_image_url = ? "
+            "WHERE slug = 'constitucion' AND hero_image_url LIKE '%1589829085413%'",
+            ("https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80",),
+        )
+
         # KATWeb: tabla de boletines de jurisprudencia (Tribunal Fiscal)
         conn.execute(
             """
