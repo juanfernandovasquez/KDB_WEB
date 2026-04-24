@@ -178,12 +178,12 @@
 .katweb-explore-title {
   font-size: clamp(1.8rem, 3vw, 2.4rem);
   font-weight: 700;
-  color: var(--kw-text);
+  color: var(--kw-blue);   /* navy igual que el mockup */
   margin: 0;
 }
 
 .katweb-explore-title em {
-  font-style: normal;
+  font-style: italic;        /* cursiva como en el mockup */
   color: var(--kw-gold);
 }
 
@@ -209,7 +209,10 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
-  /* sin max-width: las 2 tarjetas de abajo abarcan el grid completo */
+  /* Cada tarjeta de fila 2 = mismo ancho que fila 1 (1/3 del grid).
+     2 tarjetas + 1 gap = 2*(grid-2g)/3 + g = (2*grid - g) / 3 ≈ 66.6% + 0.42rem */
+  max-width: calc(66.67% + 0.42rem);
+  margin: 0 auto;
 }
 
 .katweb-cat-card {
