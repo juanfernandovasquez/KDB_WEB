@@ -169,43 +169,48 @@
   /* ══════════════════════════════════════════════════════════
      TRATADOS INTERNACIONALES — lista de convenios
   ══════════════════════════════════════════════════════════ */
+  /* Datos provisionales — se usan cuando la DB aún no tiene meta_json */
+  var _TRATADOS_FALLBACK = {
+    section_title: 'Convenios para evitar la doble Imposición en vigor:',
+    entries: [
+      { title: 'Alianza del Pacífico — Convención de Homologación', date: 'Aplicable desde el 1 de enero de 2024', icon_emoji: '🤝', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con Chile', date: 'Aplicable desde el 1 de enero de 2004', icon_emoji: '🇨🇱', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con Canadá', date: 'Aplicable desde el 1 de enero de 2024', icon_emoji: '🇨🇦', button_url: '#', button_label: 'Ver convenio en español', sub_entries: [{ title: '', button_url: '#', button_label: 'Ver convenio en inglés' }] },
+      { title: 'Convenio con la Comunidad Andina', date: 'Aplicable desde el 1 de enero de 2005', icon_emoji: '🌐', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con Brasil', date: 'Aplicable desde el 1 de enero de 2010', icon_emoji: '🇧🇷', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con los Estados Unidos de Norteamérica', date: 'Aplicable desde el 1 de enero de 2015', icon_emoji: '🇺🇸', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con España', date: 'Aplicable desde el 1 de enero de 2008', icon_emoji: '🇪🇸', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con México', date: 'Aplicable desde el 1 de enero de 2015', icon_emoji: '🇲🇽', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con Portugal', date: 'Aplicable desde el 1 de enero de 2015', icon_emoji: '🇵🇹', button_url: '#', button_label: 'Ver convenio' },
+      { title: 'Convenio con Corea del Sur', date: 'Aplicable desde el 1 de enero de 2015', icon_emoji: '🇰🇷', button_url: '#', button_label: 'Ver convenio' }
+    ]
+  };
+
   async function initTratados() {
     const entry = await fetchKdbwebEntry('tratados-internacionales');
-    if (!entry) return;
 
     // Banner
-    setIfFound('kw-banner-title', entry.hero_title || 'Tratados Internacionales', 'innerHTML');
-    setIfFound('kw-banner-image', entry.hero_image_url, 'src');
+    setIfFound('kw-banner-title', (entry && entry.hero_title) || 'Tratados Internacionales', 'innerHTML');
+    if (entry) setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
-    // Dos columnas
-    const meta = parseMeta(entry);
-    if (meta) {
-      if (meta.left_title) {
-        const el = document.getElementById('kw-left-title');
-        if (el) el.innerHTML = meta.left_title;
-      }
-      if (meta.right_content) {
-        const el = document.getElementById('kw-right-content');
-        if (el) el.innerHTML = meta.right_content;
-      }
-      if (meta.section_title) {
-        const h = document.getElementById('kw-treaties-header');
-        if (h) h.textContent = meta.section_title;
-      }
-      // Render treaty entries
-      renderTreaties(meta.entries || []);
-    } else if (entry.content_html) {
-      const el = document.getElementById('kw-right-content');
-      if (el) el.innerHTML = entry.content_html;
-      // No treaties in content_html fallback
-      const list = document.getElementById('kw-treaties-list');
-      if (list) list.innerHTML = '<p style="padding:2rem;text-align:center;color:#999;">Sin convenios cargados. Configura los convenios desde el panel de administración.</p>';
-    } else {
-      const list = document.getElementById('kw-treaties-list');
-      if (list) list.innerHTML = '<p style="padding:2rem;text-align:center;color:#999;">Sin convenios cargados.</p>';
+    // Prefer DB meta_json; fall back to hardcoded provisional data
+    const meta = (entry && parseMeta(entry)) || _TRATADOS_FALLBACK;
+
+    if (meta.left_title) {
+      const el = document.getElementById('kw-left-title');
+      if (el) el.innerHTML = meta.left_title;
     }
+    if (meta.right_content) {
+      const el = document.getElementById('kw-right-content');
+      if (el) el.innerHTML = meta.right_content;
+    }
+    if (meta.section_title) {
+      const h = document.getElementById('kw-treaties-header');
+      if (h) h.textContent = meta.section_title;
+    }
+    renderTreaties(meta.entries || []);
 
-    document.title = (entry.title || 'Tratados Internacionales') + ' | KATWeb';
+    document.title = ((entry && entry.title) || 'Tratados Internacionales') + ' | KATWeb';
   }
 
   function renderTreaties(entries) {

@@ -590,9 +590,13 @@ def init_db():
                 }
             ]
         }, ensure_ascii=False)
+        # Always overwrite — no admin panel exists yet for this field,
+        # so there are no real edits to protect. The prior condition
+        # (meta_json IS NULL OR meta_json = '') was silently skipping
+        # rows that already had any value, even an empty object.
         conn.execute(
             "UPDATE kdbweb_entries SET meta_json = ? "
-            "WHERE slug = 'tratados-internacionales' AND (meta_json IS NULL OR meta_json = '')",
+            "WHERE slug = 'tratados-internacionales'",
             (_tratados_meta,),
         )
 
