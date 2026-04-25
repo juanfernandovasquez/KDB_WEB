@@ -1731,14 +1731,6 @@ let currentAdminUserId = null;
     setVal("kdbweb-form-slug", entry.slug || "");
     setVal("kdbweb-form-summary", entry.summary || "");
     setVal("kdbweb-form-hero-image", entry.hero_image_url || "");
-    const editor = q("kdbweb-content-editor");
-    if (editor) {
-      editor.innerHTML = entry.content_html || "";
-      if (typeof linkEnsurers["kdbweb-content-editor"] === "function") {
-        linkEnsurers["kdbweb-content-editor"](editor);
-      }
-      ensureResizableImages(editor);
-    }
     kdbwebEditingSlug = entry.slug || null;
     // Notify katweb-admin.js so it can show slug-specific meta editors
     document.dispatchEvent(new CustomEvent("katweb:open-form", { detail: entry }));
@@ -1763,7 +1755,7 @@ let currentAdminUserId = null;
     entry.hero_title = entry.title;
     entry.hero_subtitle = entry.summary;
     entry.hero_kicker = "KDBWEB";
-    entry.content_html = serializeEditorContent(q("kdbweb-content-editor"));
+    entry.content_html = "";
     // Let katweb-admin.js populate entry.meta_json from active structured editor
     document.dispatchEvent(new CustomEvent("katweb:collect-meta", { detail: entry }));
     renderKdbwebTree();
@@ -3598,7 +3590,6 @@ let currentAdminUserId = null;
       setupRichEditor("about-toolbar", "about-content-editor");
       setupRichEditor("story-title-toolbar", "story-title-editor");
       setupRichEditor("story-toolbar", "story-content-editor");
-      setupRichEditor("kdbweb-content-toolbar", "kdbweb-content-editor");
       setupRichEditor("kw-tratados-right-toolbar", "kw-tratados-right-editor");
     setupRichEditor("legal-content-toolbar", "legal-content-editor");
     const legalSelect = q("legal-page-select");
