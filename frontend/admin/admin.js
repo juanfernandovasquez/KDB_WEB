@@ -3599,6 +3599,7 @@ let currentAdminUserId = null;
       setupRichEditor("story-title-toolbar", "story-title-editor");
       setupRichEditor("story-toolbar", "story-content-editor");
       setupRichEditor("kdbweb-content-toolbar", "kdbweb-content-editor");
+      setupRichEditor("kw-tratados-right-toolbar", "kw-tratados-right-editor");
     setupRichEditor("legal-content-toolbar", "legal-content-editor");
     const legalSelect = q("legal-page-select");
     if (legalSelect) {
