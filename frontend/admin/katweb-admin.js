@@ -61,7 +61,7 @@
   /* ─── Slug → editor type mapping ──────────────────────────────────────── */
 
   const SLUG_TYPE = {
-    "constitucion": "access",
+    "constitucion": "constitucion",
     "casaciones-de-la-corte-suprema": "access",
     "sentencias-del-tc": "access",
     "doctrina": "doctrina_access",   // uses cta_url, not access_url
@@ -83,7 +83,7 @@
     if (!section) return;
 
     // Hide all sub-editors first
-    ["kdbweb-meta-access", "kdbweb-meta-tf",
+    ["kdbweb-meta-constitucion", "kdbweb-meta-access", "kdbweb-meta-tf",
      "kdbweb-meta-tratados", "kdbweb-meta-legislacion",
      "kdbweb-meta-raw"].forEach((id) => {
       const el = q(id);
@@ -98,7 +98,17 @@
 
     section.classList.remove("hidden");
 
-    if (type === "access" || type === "doctrina_access") {
+    if (type === "constitucion") {
+      const el = q("kdbweb-meta-constitucion");
+      if (el) el.classList.remove("hidden");
+      const setf = (id, val) => { const e = q(id); if (e) e.value = val || ""; };
+      setf("kw-const-left-title",       meta.left_title       || "¿Qué es y por qué importa?");
+      setf("kw-const-access-label",     meta.access_label     || "Acceder al texto de la Constitución Política del Perú:");
+      setf("kw-const-access-btn-label", meta.access_btn_label || "Accede al texto");
+      setf("kw-const-access-url",       meta.access_url       || "");
+      const rightEditor = q("kw-const-right-editor");
+      if (rightEditor) rightEditor.innerHTML = meta.right_content || "";
+    } else if (type === "access" || type === "doctrina_access") {
       const el = q("kdbweb-meta-access");
       if (el) el.classList.remove("hidden");
       const key = ACCESS_KEY[type] || "access_url";
@@ -157,7 +167,14 @@
     }
 
     let meta = {};
-    if (type === "access" || type === "doctrina_access") {
+    if (type === "constitucion") {
+      const trim = (id) => (q(id)?.value || "").trim();
+      meta.left_title       = trim("kw-const-left-title");
+      meta.right_content    = (q("kw-const-right-editor")?.innerHTML || "").trim();
+      meta.access_label     = trim("kw-const-access-label");
+      meta.access_btn_label = trim("kw-const-access-btn-label");
+      meta.access_url       = trim("kw-const-access-url");
+    } else if (type === "access" || type === "doctrina_access") {
       const key = ACCESS_KEY[type] || "access_url";
       meta[key] = (q("kdbweb-meta-access-url")?.value || "").trim();
     } else if (type === "tf") {
