@@ -781,7 +781,8 @@
     }
 
     if (page === 'kdbweb-detail') {
-      const type = document.body?.dataset?.katweb;
+      // data-kdbweb (not data-katweb) is the attribute used in all inner-page HTML files
+      const type = document.body?.dataset?.kdbweb;
       const kwType = document.body?.dataset?.katwayType || type;
 
       switch (type) {
