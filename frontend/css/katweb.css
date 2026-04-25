@@ -581,17 +581,23 @@
 .kw-treaty-entry {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--kw-border);
+  display: flex;
+  align-items: center;  /* centra el ícono verticalmente sobre todas las filas */
+  gap: 0.75rem;
 }
 
 .kw-treaty-entry:last-child {
   border-bottom: none;
 }
 
-.kw-treaty-main {
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 0.75rem;
+/* Columna izquierda: solo el ícono, se estira para cubrir toda la altura */
+.kw-treaty-icon-col {
+  flex-shrink: 0;
+  width: 48px;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  align-self: center;
 }
 
 .kw-treaty-icon {
@@ -599,7 +605,6 @@
   height: 40px;
   object-fit: contain;
   border-radius: 4px;
-  flex-shrink: 0;
 }
 
 .kw-treaty-icon-placeholder {
@@ -611,10 +616,24 @@
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  flex-shrink: 0;
 }
 
-.kw-treaty-info {}
+/* Columna derecha: fila principal + sub-entradas apiladas */
+.kw-treaty-rows {
+  flex: 1;
+  min-width: 0;
+}
+
+.kw-treaty-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.kw-treaty-info {
+  flex: 1;
+  min-width: 0;
+}
 
 .kw-treaty-title {
   font-size: 0.92rem;
@@ -642,6 +661,7 @@
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .kw-treaty-btn:hover { background: var(--kw-blue); }
@@ -655,22 +675,18 @@
 
 /* Sub-entrada de tratado */
 .kw-treaty-sub {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
   border-top: 1px solid var(--kw-border);
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 0.75rem;
+  display: flex;
   align-items: center;
-}
-
-.kw-treaty-sub-spacer {
-  /* Espacio alineado con el icono */
+  gap: 0.75rem;
 }
 
 .kw-treaty-sub-title {
+  flex: 1;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;  /* bold */
   color: var(--kw-text);
   margin: 0;
 }
@@ -1159,17 +1175,20 @@
     grid-template-columns: 1fr;
   }
 
+  .kw-treaty-entry {
+    align-items: flex-start;
+  }
   .kw-treaty-main {
-    grid-template-columns: 40px 1fr;
+    flex-wrap: wrap;
   }
   .kw-treaty-main .kw-treaty-btn {
-    grid-column: 2;
+    margin-top: 0.35rem;
   }
   .kw-treaty-sub {
-    grid-template-columns: 40px 1fr;
+    flex-wrap: wrap;
   }
   .kw-treaty-sub .kw-treaty-btn {
-    grid-column: 2;
+    margin-top: 0.25rem;
   }
 
   .kw-leg-cat-header {

@@ -224,10 +224,9 @@
     let html = '';
     entries.forEach((entry) => {
       html += '<div class="kw-treaty-entry">';
-      // Fila principal: icon + info + botón
-      html += '<div class="kw-treaty-main">';
 
-      // Icon
+      // Ícono — columna izquierda, se centra verticalmente sobre main + subs
+      html += '<div class="kw-treaty-icon-col">';
       if (entry.icon_url) {
         html += `<img class="kw-treaty-icon" src="${esc(entry.icon_url)}" alt="${esc(entry.title)}" loading="lazy" />`;
       } else if (entry.icon_emoji) {
@@ -235,16 +234,19 @@
       } else {
         html += `<span class="kw-treaty-icon-placeholder">🌐</span>`;
       }
+      html += '</div>'; // kw-treaty-icon-col
 
-      // Info
+      // Columna derecha: fila principal + sub-entradas apiladas
+      html += '<div class="kw-treaty-rows">';
+
+      // Fila principal: info + botón
+      html += '<div class="kw-treaty-main">';
       html += '<div class="kw-treaty-info">';
       html += `<p class="kw-treaty-title">${esc(entry.title || '')}</p>`;
       if (entry.date) {
         html += `<p class="kw-treaty-date">${esc(entry.date)}</p>`;
       }
       html += '</div>';
-
-      // Botón principal
       if (entry.button_url) {
         html += `<a href="${esc(entry.button_url)}" class="kw-treaty-btn" target="_blank" rel="noopener">${esc(entry.button_label || 'Ver convenio')} ${SVG_EXT_LINK}</a>`;
       } else {
@@ -256,17 +258,17 @@
       if (entry.sub_entries && entry.sub_entries.length) {
         entry.sub_entries.forEach((sub) => {
           html += '<div class="kw-treaty-sub">';
-          html += '<span class="kw-treaty-sub-spacer"></span>';
           html += `<p class="kw-treaty-sub-title">${esc(sub.title || '')}</p>`;
           if (sub.button_url) {
             html += `<a href="${esc(sub.button_url)}" class="kw-treaty-btn" target="_blank" rel="noopener">${esc(sub.button_label || 'Ver cláusula')} ${SVG_EXT_LINK}</a>`;
           } else {
             html += '<span></span>';
           }
-          html += '</div>';
+          html += '</div>'; // kw-treaty-sub
         });
       }
 
+      html += '</div>'; // kw-treaty-rows
       html += '</div>'; // kw-treaty-entry
     });
 
