@@ -649,8 +649,29 @@
                 </div>
               </div>
 
-              <!-- Tratados Internacionales: treaty list builder -->
+              <!-- Tratados Internacionales: texts + treaty list builder -->
               <div id="kdbweb-meta-tratados" class="hidden">
+
+                <!-- Título columna izquierda -->
+                <div style="margin-bottom:1rem;">
+                  <label>Título de la columna izquierda <span style="color:#9ca3af;font-size:0.8rem;">(ej. "¿Qué es y por qué importa?")</span></label>
+                  <input type="text" id="kw-tratados-left-title" placeholder="¿Qué es y por qué importa?" style="width:100%;">
+                </div>
+
+                <!-- Cuerpo columna derecha -->
+                <div style="margin-bottom:1rem;">
+                  <label>Texto explicativo <span style="color:#9ca3af;font-size:0.8rem;">(acepta HTML básico: &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;)</span></label>
+                  <textarea id="kw-tratados-right-content" rows="8" style="width:100%;font-family:monospace;font-size:0.82rem;resize:vertical;" placeholder="&lt;p&gt;Texto de introducción...&lt;/p&gt;"></textarea>
+                </div>
+
+                <!-- Título de la tabla de convenios -->
+                <div style="margin-bottom:1.25rem;">
+                  <label>Encabezado de la tabla de convenios</label>
+                  <input type="text" id="kw-tratados-section-title" placeholder="Convenios para evitar la doble Imposición en vigor:" style="width:100%;">
+                </div>
+
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin-bottom:1.25rem;">
+
                 <div class="row" style="justify-content:flex-end;margin-bottom:0.75rem;">
                   <button type="button" class="secondary small-btn" id="kw-treaty-add">+ Agregar tratado</button>
                 </div>

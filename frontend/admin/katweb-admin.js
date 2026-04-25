@@ -119,6 +119,14 @@
     } else if (type === "tratados") {
       const el = q("kdbweb-meta-tratados");
       if (el) el.classList.remove("hidden");
+      // Textos de la sección izquierda/derecha
+      const leftInp = q("kw-tratados-left-title");
+      if (leftInp) leftInp.value = meta.left_title || "¿Qué es y\npor qué importa?";
+      const rightTa = q("kw-tratados-right-content");
+      if (rightTa) rightTa.value = meta.right_content || "";
+      const secInp = q("kw-tratados-section-title");
+      if (secInp) secInp.value = meta.section_title || "";
+      // Lista de convenios
       renderTreatiesAdmin(meta.entries || []);
     } else if (type === "legislacion") {
       const el = q("kdbweb-meta-legislacion");
@@ -165,6 +173,12 @@
         },
       ];
     } else if (type === "tratados") {
+      const leftVal = (q("kw-tratados-left-title")?.value  || "").trim();
+      const rightVal = (q("kw-tratados-right-content")?.value || "").trim();
+      const secVal  = (q("kw-tratados-section-title")?.value || "").trim();
+      if (leftVal)  meta.left_title     = leftVal;
+      if (rightVal) meta.right_content  = rightVal;
+      if (secVal)   meta.section_title  = secVal;
       meta.entries = collectTreatiesFromDom();
     } else if (type === "legislacion") {
       meta.tributaria = collectLegislacionFromDom("tributaria");
