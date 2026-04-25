@@ -199,50 +199,102 @@
     div.style.cssText =
       "border:1px solid #e5e7eb;border-radius:6px;padding:0.75rem 1rem;margin-bottom:0.75rem;background:#fafafa;";
 
+    // Backward-compat: field was saved as "icon" in old format, now "icon_emoji"
+    const iconEmoji = entry.icon_emoji || entry.icon || "";
+    const iconUrl   = entry.icon_url   || "";
+    // Backward-compat: field was saved as "url" in old format, now "button_url"
+    const buttonUrl   = entry.button_url   || entry.url   || "";
+    const buttonLabel = entry.button_label || "Ver convenio";
+
     const subHtml = (entry.sub_entries || [])
       .map(
         (s, si) => `
-      <div class="kw-treaty-sub-row" data-sub="${si}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;">
-        <input type="text" class="kw-sub-title" value="${safe(s.title || "")}" placeholder="Título sub-cláusula" style="flex:1;">
-        <input type="url"  class="kw-sub-url"   value="${safe(s.url   || "")}" placeholder="URL" style="flex:1;">
+      <div class="kw-treaty-sub-row" data-sub="${si}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;flex-wrap:wrap;">
+        <input type="text" class="kw-sub-title"       value="${safe(s.title        || "")}" placeholder="Título (opcional)" style="flex:1;min-width:120px;">
+        <input type="text" class="kw-sub-btn-label"   value="${safe(s.button_label || s.label || "Ver convenio")}" placeholder="Texto del botón" style="flex:0 0 130px;">
+        <input type="url"  class="kw-sub-url"         value="${safe(s.button_url   || s.url   || "")}" placeholder="URL" style="flex:1;min-width:120px;">
         <button type="button" class="secondary small-btn kw-sub-remove" style="flex-shrink:0;">✕</button>
       </div>`
       )
       .join("");
 
+    const iconPreview = iconUrl
+      ? `<img src="${safe(iconUrl)}" alt="ícono" style="height:32px;width:32px;object-fit:contain;border-radius:4px;border:1px solid #e5e7eb;margin-top:4px;">`
+      : "";
+
     div.innerHTML = `
       <div style="display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
-        <div style="flex:0 0 90px;">
-          <label class="small">Ícono / emoji</label>
-          <input type="text" class="kw-treaty-icon" value="${safe(entry.icon || "")}" placeholder="🇵🇪 ó URL" style="width:100%;">
+
+        <!-- Emoji -->
+        <div style="flex:0 0 80px;">
+          <label class="small">Emoji</label>
+          <input type="text" class="kw-treaty-icon-emoji" value="${safe(iconEmoji)}" placeholder="🇵🇪" style="width:100%;">
         </div>
+
+        <!-- Imagen del ícono -->
+        <div style="flex:0 0 200px;">
+          <label class="small">Imagen del ícono <span style="color:#9ca3af;">(reemplaza emoji)</span></label>
+          <div class="media-input-row" style="display:flex;gap:0.4rem;align-items:center;">
+            <input type="url" class="kw-treaty-icon-url" value="${safe(iconUrl)}" placeholder="https://..." style="flex:1;min-width:0;">
+            <button type="button" class="secondary small-btn media-picker-btn" title="Elegir desde biblioteca">📁</button>
+          </div>
+          <div class="kw-treaty-icon-preview" style="min-height:36px;">${iconPreview}</div>
+        </div>
+
+        <!-- Título -->
         <div style="flex:1;min-width:160px;">
           <label class="small">Título del tratado</label>
           <input type="text" class="kw-treaty-title" value="${safe(entry.title || "")}" placeholder="Nombre del convenio" style="width:100%;">
         </div>
-        <div style="flex:0 0 100px;">
-          <label class="small">Fecha / año</label>
-          <input type="text" class="kw-treaty-date" value="${safe(entry.date || "")}" placeholder="2001" style="width:100%;">
+
+        <!-- Fecha -->
+        <div style="flex:0 0 110px;">
+          <label class="small">Fecha / vigencia</label>
+          <input type="text" class="kw-treaty-date" value="${safe(entry.date || "")}" placeholder="Aplicable desde..." style="width:100%;">
         </div>
+
+        <!-- Botón: texto -->
+        <div style="flex:0 0 120px;">
+          <label class="small">Texto del botón</label>
+          <input type="text" class="kw-treaty-btn-label" value="${safe(buttonLabel)}" placeholder="Ver convenio" style="width:100%;">
+        </div>
+
+        <!-- Botón: URL -->
         <div style="flex:1;min-width:160px;">
           <label class="small">URL del documento</label>
-          <input type="url" class="kw-treaty-url" value="${safe(entry.url || "")}" placeholder="https://..." style="width:100%;">
+          <input type="url" class="kw-treaty-url" value="${safe(buttonUrl)}" placeholder="https://..." style="width:100%;">
         </div>
+
+        <!-- Acciones -->
         <div style="flex:0 0 auto;display:flex;gap:0.35rem;align-items:flex-end;padding-bottom:2px;">
           <button type="button" class="secondary small-btn kw-treaty-move-up" title="Subir">↑</button>
           <button type="button" class="secondary small-btn kw-treaty-move-down" title="Bajar">↓</button>
           <button type="button" class="secondary small-btn danger kw-treaty-remove" title="Eliminar">✕</button>
         </div>
       </div>
+
       <details style="margin-top:0.5rem;">
-        <summary class="small" style="cursor:pointer;color:#6b7280;">Sub-cláusulas (${(entry.sub_entries || []).length})</summary>
+        <summary class="small" style="cursor:pointer;color:#6b7280;">Sub-cláusulas / botones adicionales (${(entry.sub_entries || []).length})</summary>
         <div class="kw-treaty-subs" style="padding-left:0.5rem;margin-top:0.5rem;">
           ${subHtml}
           <button type="button" class="secondary small-btn kw-sub-add" style="margin-top:0.35rem;">+ Sub-cláusula</button>
         </div>
       </details>`;
 
-    // Buttons
+    // Live preview: update icon preview when URL input changes
+    const iconUrlInput = div.querySelector(".kw-treaty-icon-url");
+    const iconPreviewEl = div.querySelector(".kw-treaty-icon-preview");
+    iconUrlInput.addEventListener("input", () => {
+      const val = iconUrlInput.value.trim();
+      iconPreviewEl.innerHTML = val
+        ? `<img src="${val}" alt="ícono" style="height:32px;width:32px;object-fit:contain;border-radius:4px;border:1px solid #e5e7eb;margin-top:4px;">`
+        : "";
+    });
+    // Also update preview when media modal sets the value (fires "input" event automatically
+    // through the global media-picker-btn handler in admin.js which sets input.value + dispatches input)
+    iconUrlInput.addEventListener("change", () => iconUrlInput.dispatchEvent(new Event("input")));
+
+    // Action buttons
     div.querySelector(".kw-treaty-remove").addEventListener("click", () => {
       div.remove();
       updateTreatyIndexes();
@@ -260,10 +312,11 @@
       const addBtn = subsDiv.querySelector(".kw-sub-add");
       const row = document.createElement("div");
       row.className = "kw-treaty-sub-row";
-      row.style.cssText = "display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;";
+      row.style.cssText = "display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;flex-wrap:wrap;";
       row.innerHTML = `
-        <input type="text" class="kw-sub-title" placeholder="Título sub-cláusula" style="flex:1;">
-        <input type="url"  class="kw-sub-url"   placeholder="URL" style="flex:1;">
+        <input type="text" class="kw-sub-title"     placeholder="Título (opcional)" style="flex:1;min-width:120px;">
+        <input type="text" class="kw-sub-btn-label" placeholder="Texto del botón"   value="Ver convenio" style="flex:0 0 130px;">
+        <input type="url"  class="kw-sub-url"       placeholder="URL"               style="flex:1;min-width:120px;">
         <button type="button" class="secondary small-btn kw-sub-remove" style="flex-shrink:0;">✕</button>`;
       row.querySelector(".kw-sub-remove").addEventListener("click", () => row.remove());
       subsDiv.insertBefore(row, addBtn);
@@ -288,15 +341,18 @@
     if (!cont) return [];
     return Array.from(cont.querySelectorAll(".kw-admin-treaty-card")).map((card) => {
       const subs = Array.from(card.querySelectorAll(".kw-treaty-sub-row")).map((row) => ({
-        title: (row.querySelector(".kw-sub-title")?.value || "").trim(),
-        url:   (row.querySelector(".kw-sub-url")?.value   || "").trim(),
-      })).filter((s) => s.title || s.url);
+        title:        (row.querySelector(".kw-sub-title")?.value     || "").trim(),
+        button_label: (row.querySelector(".kw-sub-btn-label")?.value || "Ver convenio").trim(),
+        button_url:   (row.querySelector(".kw-sub-url")?.value       || "").trim(),
+      })).filter((s) => s.title || s.button_url);
       return {
-        icon:        (card.querySelector(".kw-treaty-icon")?.value  || "").trim(),
-        title:       (card.querySelector(".kw-treaty-title")?.value || "").trim(),
-        date:        (card.querySelector(".kw-treaty-date")?.value  || "").trim(),
-        url:         (card.querySelector(".kw-treaty-url")?.value   || "").trim(),
-        sub_entries: subs,
+        icon_emoji:   (card.querySelector(".kw-treaty-icon-emoji")?.value || "").trim(),
+        icon_url:     (card.querySelector(".kw-treaty-icon-url")?.value   || "").trim(),
+        title:        (card.querySelector(".kw-treaty-title")?.value      || "").trim(),
+        date:         (card.querySelector(".kw-treaty-date")?.value       || "").trim(),
+        button_label: (card.querySelector(".kw-treaty-btn-label")?.value  || "Ver convenio").trim(),
+        button_url:   (card.querySelector(".kw-treaty-url")?.value        || "").trim(),
+        sub_entries:  subs,
       };
     });
   }
