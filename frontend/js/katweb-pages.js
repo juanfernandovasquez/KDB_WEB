@@ -297,10 +297,13 @@
         const el = document.getElementById('kw-right-content');
         if (el) el.innerHTML = meta.right_content;
       }
-      // Renderizar tabs
+      // Renderizar tabs (soporta formato nuevo {tabs:{tributaria:{categories:[]}}} y formato viejo {tributaria:[...]})
       if (meta.tabs) {
         renderLegislacionTab('tributaria', (meta.tabs.tributaria || {}).categories || []);
         renderLegislacionTab('aduanera', (meta.tabs.aduanera || {}).categories || []);
+      } else if (meta.tributaria || meta.aduanera) {
+        renderLegislacionTab('tributaria', meta.tributaria || []);
+        renderLegislacionTab('aduanera', meta.aduanera || []);
       }
     } else if (entry.content_html) {
       const el = document.getElementById('kw-right-content');
