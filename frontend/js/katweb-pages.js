@@ -327,6 +327,23 @@
     if (el) el.innerHTML = `<p style="padding:2rem;text-align:center;color:#999;">Sin contenido cargado para ${tab}. Configura desde el panel de administración.</p>`;
   }
 
+  // Normaliza una categoría al formato {title, groups:[{norms:[{title,button_url,button_label}]}]}
+  // soportando también el formato plano del admin {category_title, norms:[{title,url}]}
+  function normalizeLegCat(cat) {
+    const title = cat.title || cat.category_title || '';
+    let groups = cat.groups;
+    if (!groups) {
+      // formato plano del admin: norms directo en el objeto
+      const flatNorms = (cat.norms || []).map((n) => ({
+        title:        n.title       || '',
+        button_url:   n.button_url  || n.url || '',
+        button_label: n.button_label || n.label || 'Ver norma',
+      }));
+      groups = [{ norms: flatNorms }];
+    }
+    return { ...cat, title, groups };
+  }
+
   function renderLegislacionTab(tab, categories) {
     const el = document.getElementById(`kw-leg-${tab}-list`);
     if (!el) return;
@@ -336,7 +353,8 @@
     }
 
     let html = '';
-    categories.forEach((cat, catIdx) => {
+    categories.forEach((rawCat, catIdx) => {
+      const cat = normalizeLegCat(rawCat);
       const normCount = countNorms(cat);
       html += `<div class="kw-leg-category" id="kw-cat-${tab}-${catIdx}">`;
 
@@ -365,10 +383,11 @@
           html += `<p class="kw-norm-group-title">${esc(group.title)}</p>`;
         }
         (group.norms || []).forEach((norm) => {
+          const btnUrl = norm.button_url || norm.url || '';
           html += '<div class="kw-norm-row">';
           html += `<span class="kw-norm-title">${esc(norm.title || '')}</span>`;
-          if (norm.button_url) {
-            html += `<a href="${esc(norm.button_url)}" class="kw-norm-btn" target="_blank" rel="noopener">${esc(norm.button_label || 'Ver norma')} ${SVG_EXT_LINK}</a>`;
+          if (btnUrl) {
+            html += `<a href="${esc(btnUrl)}" class="kw-norm-btn" target="_blank" rel="noopener">${esc(norm.button_label || 'Ver norma')} ${SVG_EXT_LINK}</a>`;
           }
           html += '</div>';
         });
@@ -391,9 +410,13 @@
   }
 
   function countNorms(cat) {
-    let count = 0;
-    (cat.groups || []).forEach((g) => { count += (g.norms || []).length; });
-    return count;
+    if (cat.groups) {
+      let count = 0;
+      cat.groups.forEach((g) => { count += (g.norms || []).length; });
+      return count;
+    }
+    // formato plano del admin
+    return (cat.norms || []).length;
   }
 
   function initLegislacionTabs() {
