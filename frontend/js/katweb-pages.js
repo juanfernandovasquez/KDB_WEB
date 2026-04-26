@@ -380,9 +380,9 @@
       if (cat.icon_url) {
         html += `<img class="kw-leg-cat-icon" src="${esc(cat.icon_url)}" alt="${esc(cat.title)}" loading="lazy" />`;
       } else if (cat.icon_emoji) {
-        html += `<span class="kw-leg-cat-icon" style="font-size:1.6rem;display:flex;align-items:center;justify-content:center;">${esc(cat.icon_emoji)}</span>`;
+        html += `<span class="kw-leg-cat-icon" style="font-size:1.5rem;display:flex;align-items:center;justify-content:center;">${esc(cat.icon_emoji)}</span>`;
       } else {
-        html += `<span class="kw-leg-cat-icon" style="font-size:1.6rem;display:flex;align-items:center;justify-content:center;">📋</span>`;
+        html += `<span class="kw-leg-cat-icon" style="font-size:1.5rem;display:flex;align-items:center;justify-content:center;">📋</span>`;
       }
       html += '<div>';
       html += `<p class="kw-leg-cat-title">${esc(cat.title || '')}</p>`;
