@@ -327,6 +327,14 @@
     if (el) el.innerHTML = `<p style="padding:2rem;text-align:center;color:#999;">Sin contenido cargado para ${tab}. Configura desde el panel de administración.</p>`;
   }
 
+  // Asegura que una URL tenga protocolo (evita que se trate como ruta relativa)
+  function ensureAbsoluteUrl(url) {
+    if (!url) return '';
+    const s = url.trim();
+    if (/^https?:\/\//i.test(s)) return s;
+    return 'https://' + s;
+  }
+
   // Normaliza una categoría al formato {title, groups:[{norms:[{title,button_url,button_label}]}]}
   // soportando también el formato plano del admin {category_title, norms:[{title,url}]}
   function normalizeLegCat(cat) {
@@ -336,12 +344,21 @@
       // formato plano del admin: norms directo en el objeto
       const flatNorms = (cat.norms || []).map((n) => ({
         title:        n.title       || '',
-        button_url:   n.button_url  || n.url || '',
+        button_url:   ensureAbsoluteUrl(n.button_url || n.url || ''),
         button_label: n.button_label || n.label || 'Ver norma',
       }));
       groups = [{ norms: flatNorms }];
+    } else {
+      // formato nuevo: asegura URLs absolutas en cada norma de cada grupo
+      groups = groups.map((g) => ({
+        ...g,
+        norms: (g.norms || []).map((n) => ({
+          ...n,
+          button_url: ensureAbsoluteUrl(n.button_url || n.url || ''),
+        })),
+      }));
     }
-    return { ...cat, title, groups };
+    return { ...cat, title, groups, icon_emoji: cat.icon_emoji || '', icon_url: cat.icon_url || '' };
   }
 
   function renderLegislacionTab(tab, categories) {

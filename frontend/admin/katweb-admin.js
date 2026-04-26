@@ -418,34 +418,79 @@
     div.style.cssText =
       "border:1px solid #d1d5db;border-radius:6px;padding:0.75rem 1rem;margin-bottom:0.75rem;background:#f9fafb;";
 
+    // Backward-compat: norms can be flat array or inside groups
+    const flatNorms = cat.norms || (cat.groups && cat.groups[0] && cat.groups[0].norms) || [];
+
     // Build norms HTML
-    const normsHtml = (cat.norms || [])
+    const normsHtml = flatNorms
       .map(
         (n, ni) => `
       <div class="kw-norm-row" data-ni="${ni}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;">
         <input type="text" class="kw-norm-title" value="${safe(n.title || "")}" placeholder="Norma" style="flex:1;">
-        <input type="url"  class="kw-norm-url"   value="${safe(n.url   || "")}" placeholder="URL" style="flex:1;">
+        <input type="text" class="kw-norm-url"   value="${safe(n.url || n.button_url || "")}" placeholder="https://..." style="flex:1;">
         <button type="button" class="secondary small-btn kw-norm-remove">✕</button>
       </div>`
       )
       .join("");
 
+    const iconEmoji = cat.icon_emoji || "";
+    const iconUrl   = cat.icon_url   || "";
+    const iconPreview = iconUrl
+      ? `<img src="${safe(iconUrl)}" alt="" style="height:28px;width:28px;object-fit:contain;border-radius:3px;margin-top:4px;">`
+      : "";
+
     div.innerHTML = `
-      <div style="display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:0.5rem;">
-        <div style="flex:1;">
-          <label class="small">Categoría</label>
-          <input type="text" class="kw-leg-cat-title" value="${safe(cat.category_title || cat.title || "")}" placeholder="Nombre de categoría" style="width:100%;">
+      <div style="display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:0.75rem;flex-wrap:wrap;">
+
+        <!-- Emoji -->
+        <div style="flex:0 0 70px;">
+          <label class="small">Emoji</label>
+          <input type="text" class="kw-leg-cat-icon-emoji" value="${safe(iconEmoji)}" placeholder="📋" style="width:100%;">
         </div>
-        <div style="display:flex;gap:0.35rem;align-items:flex-end;">
+
+        <!-- Imagen -->
+        <div style="flex:0 0 180px;">
+          <label class="small">Imagen <span style="color:#9ca3af;">(reemplaza emoji)</span></label>
+          <div class="media-input-row" style="display:flex;gap:0.4rem;align-items:center;">
+            <input type="url" class="kw-leg-cat-icon-url" value="${safe(iconUrl)}" placeholder="https://..." style="flex:1;min-width:0;">
+            <button type="button" class="secondary small-btn media-picker-btn" title="Elegir desde biblioteca">📁</button>
+          </div>
+          <div class="kw-leg-cat-icon-preview" style="min-height:32px;">${iconPreview}</div>
+        </div>
+
+        <!-- Título -->
+        <div style="flex:1;min-width:160px;">
+          <label class="small">Nombre de categoría</label>
+          <input type="text" class="kw-leg-cat-title" value="${safe(cat.category_title || cat.title || "")}" placeholder="Ej: Marco Normativo" style="width:100%;">
+        </div>
+
+        <!-- Subtítulo -->
+        <div style="flex:1;min-width:160px;">
+          <label class="small">Subtítulo <span style="color:#9ca3af;">(opcional)</span></label>
+          <input type="text" class="kw-leg-cat-subtitle" value="${safe(cat.subtitle || "")}" placeholder="Descripción breve" style="width:100%;">
+        </div>
+
+        <!-- Acciones -->
+        <div style="display:flex;gap:0.35rem;align-items:flex-end;padding-bottom:2px;">
           <button type="button" class="secondary small-btn kw-cat-move-up" title="Subir">↑</button>
           <button type="button" class="secondary small-btn kw-cat-move-down" title="Bajar">↓</button>
-          <button type="button" class="secondary small-btn danger kw-cat-remove">✕ Eliminar cat.</button>
+          <button type="button" class="secondary small-btn danger kw-cat-remove">✕</button>
         </div>
       </div>
       <div class="kw-norms-list" style="padding-left:0.5rem;">
         ${normsHtml}
       </div>
       <button type="button" class="secondary small-btn kw-norm-add" style="margin-top:0.35rem;">+ Norma</button>`;
+
+    // Live preview del icono
+    const iconUrlInput = div.querySelector(".kw-leg-cat-icon-url");
+    const iconPreviewEl = div.querySelector(".kw-leg-cat-icon-preview");
+    iconUrlInput.addEventListener("input", () => {
+      const val = iconUrlInput.value.trim();
+      iconPreviewEl.innerHTML = val
+        ? `<img src="${val}" alt="" style="height:28px;width:28px;object-fit:contain;border-radius:3px;margin-top:4px;">`
+        : "";
+    });
 
     // Category actions
     div.querySelector(".kw-cat-remove").addEventListener("click", () => {
@@ -494,7 +539,10 @@
         url:   (row.querySelector(".kw-norm-url")?.value   || "").trim(),
       })).filter((n) => n.title || n.url);
       return {
-        category_title: (card.querySelector(".kw-leg-cat-title")?.value || "").trim(),
+        icon_emoji:     (card.querySelector(".kw-leg-cat-icon-emoji")?.value || "").trim(),
+        icon_url:       (card.querySelector(".kw-leg-cat-icon-url")?.value   || "").trim(),
+        category_title: (card.querySelector(".kw-leg-cat-title")?.value      || "").trim(),
+        subtitle:       (card.querySelector(".kw-leg-cat-subtitle")?.value   || "").trim(),
         norms,
       };
     });
