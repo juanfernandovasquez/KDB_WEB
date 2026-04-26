@@ -141,8 +141,12 @@
     } else if (type === "legislacion") {
       const el = q("kdbweb-meta-legislacion");
       if (el) el.classList.remove("hidden");
-      renderLegislacionAdmin("tributaria", meta.tributaria || []);
-      renderLegislacionAdmin("aduanera",   meta.aduanera   || []);
+      const leftInp = q("kw-leg-left-title");
+      if (leftInp) leftInp.value = meta.left_title || "¿Qué es y por qué importa?";
+      const rightEditor = q("kw-leg-right-editor");
+      if (rightEditor) rightEditor.innerHTML = meta.right_content || "";
+      renderLegislacionAdmin("tributaria", (meta.tabs?.tributaria || {}).categories || []);
+      renderLegislacionAdmin("aduanera",   (meta.tabs?.aduanera   || {}).categories || []);
     }
 
     // Update the JSON preview
@@ -198,8 +202,14 @@
       if (secVal)   meta.section_title = secVal;
       meta.entries = collectTreatiesFromDom();
     } else if (type === "legislacion") {
-      meta.tributaria = collectLegislacionFromDom("tributaria");
-      meta.aduanera   = collectLegislacionFromDom("aduanera");
+      const leftVal  = (q("kw-leg-left-title")?.value || "").trim();
+      const rightVal = (q("kw-leg-right-editor")?.innerHTML || "").trim();
+      if (leftVal)  meta.left_title    = leftVal;
+      if (rightVal) meta.right_content = rightVal;
+      meta.tabs = {
+        tributaria: { categories: collectLegislacionFromDom("tributaria") },
+        aduanera:   { categories: collectLegislacionFromDom("aduanera") },
+      };
     }
 
     entry.meta_json = JSON.stringify(meta);
