@@ -411,18 +411,15 @@
     });
   }
 
-  function buildLegCatCard(tab, cat, idx) {
-    const div = document.createElement("div");
-    div.className = "kw-admin-leg-cat";
-    div.dataset.idx = idx;
-    div.style.cssText =
-      "border:1px solid #d1d5db;border-radius:6px;padding:0.75rem 1rem;margin-bottom:0.75rem;background:#f9fafb;";
+  /* ── Group block builder (used inside each leg category card) ──────────── */
+  function buildLegGroupBlock(group, gi) {
+    const gdiv = document.createElement("div");
+    gdiv.className = "kw-admin-leg-group";
+    gdiv.dataset.gi = gi;
+    gdiv.style.cssText =
+      "border:1px solid #e5e7eb;border-radius:4px;padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:#fff;";
 
-    // Backward-compat: norms can be flat array or inside groups
-    const flatNorms = cat.norms || (cat.groups && cat.groups[0] && cat.groups[0].norms) || [];
-
-    // Build norms HTML
-    const normsHtml = flatNorms
+    const normsHtml = (group.norms || [])
       .map(
         (n, ni) => `
       <div class="kw-norm-row" data-ni="${ni}" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;">
@@ -432,6 +429,81 @@
       </div>`
       )
       .join("");
+
+    gdiv.innerHTML = `
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;">
+        <input type="text" class="kw-leg-group-title" value="${safe(group.title || "")}"
+               placeholder="Nombre del grupo (opcional — dejar vacío si es el único grupo)"
+               style="flex:1;font-weight:600;background:#f8fafc;">
+        <button type="button" class="secondary small-btn kw-group-move-up"   title="Subir grupo">↑</button>
+        <button type="button" class="secondary small-btn kw-group-move-down" title="Bajar grupo">↓</button>
+        <button type="button" class="secondary small-btn danger kw-group-remove" title="Eliminar grupo">✕</button>
+      </div>
+      <div class="kw-admin-leg-group-norms">
+        ${normsHtml}
+      </div>
+      <button type="button" class="secondary small-btn kw-norm-add" style="margin-top:0.25rem;font-size:0.8rem;">+ Norma</button>`;
+
+    // Wire: add norm
+    gdiv.querySelector(".kw-norm-add").addEventListener("click", () => {
+      const normsDiv = gdiv.querySelector(".kw-admin-leg-group-norms");
+      const row = document.createElement("div");
+      row.className = "kw-norm-row";
+      row.style.cssText = "display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;";
+      row.innerHTML = `
+        <input type="text" class="kw-norm-title" placeholder="Nombre de la norma" style="flex:1;">
+        <input type="url"  class="kw-norm-url"   placeholder="https://..." style="flex:1;">
+        <button type="button" class="secondary small-btn kw-norm-remove">✕</button>`;
+      row.querySelector(".kw-norm-remove").addEventListener("click", () => row.remove());
+      normsDiv.appendChild(row);
+    });
+
+    // Wire: existing norm removes
+    gdiv.querySelectorAll(".kw-norm-remove").forEach((btn) => {
+      btn.addEventListener("click", () => btn.closest(".kw-norm-row").remove());
+    });
+
+    // Wire: group move up/down/remove
+    gdiv.querySelector(".kw-group-remove").addEventListener("click", () => {
+      const siblings = gdiv.parentElement
+        ? gdiv.parentElement.querySelectorAll(".kw-admin-leg-group").length
+        : 1;
+      if (siblings <= 1) {
+        alert("Debe haber al menos un grupo. Si no quieres usar grupos, deja el título vacío.");
+        return;
+      }
+      gdiv.remove();
+    });
+    gdiv.querySelector(".kw-group-move-up").addEventListener("click", () => {
+      const prev = gdiv.previousElementSibling;
+      if (prev && prev.classList.contains("kw-admin-leg-group")) {
+        gdiv.parentNode.insertBefore(gdiv, prev);
+      }
+    });
+    gdiv.querySelector(".kw-group-move-down").addEventListener("click", () => {
+      const next = gdiv.nextElementSibling;
+      if (next && next.classList.contains("kw-admin-leg-group")) {
+        gdiv.parentNode.insertBefore(next, gdiv);
+      }
+    });
+
+    return gdiv;
+  }
+
+  function buildLegCatCard(tab, cat, idx) {
+    const div = document.createElement("div");
+    div.className = "kw-admin-leg-cat";
+    div.dataset.idx = idx;
+    div.style.cssText =
+      "border:1px solid #d1d5db;border-radius:6px;padding:0.75rem 1rem;margin-bottom:0.75rem;background:#f9fafb;";
+
+    // Normalize to groups: if cat has flat norms, wrap in one unnamed group
+    let groups;
+    if (cat.groups && cat.groups.length) {
+      groups = cat.groups;
+    } else {
+      groups = [{ title: "", norms: cat.norms || [] }];
+    }
 
     const iconEmoji = cat.icon_emoji || "";
     const iconUrl   = cat.icon_url   || "";
@@ -477,10 +549,10 @@
           <button type="button" class="secondary small-btn danger kw-cat-remove">✕</button>
         </div>
       </div>
-      <div class="kw-norms-list" style="padding-left:0.5rem;">
-        ${normsHtml}
-      </div>
-      <button type="button" class="secondary small-btn kw-norm-add" style="margin-top:0.35rem;">+ Norma</button>`;
+
+      <!-- Grupos de normas -->
+      <div class="kw-admin-leg-groups" style="margin-bottom:0.35rem;"></div>
+      <button type="button" class="secondary small-btn kw-group-add" style="font-size:0.8rem;">+ Grupo</button>`;
 
     // Live preview del icono
     const iconUrlInput = div.querySelector(".kw-leg-cat-icon-url");
@@ -490,6 +562,18 @@
       iconPreviewEl.innerHTML = val
         ? `<img src="${val}" alt="" style="height:28px;width:28px;object-fit:contain;border-radius:3px;margin-top:4px;">`
         : "";
+    });
+
+    // Render groups
+    const groupsContainer = div.querySelector(".kw-admin-leg-groups");
+    groups.forEach((g, gi) => {
+      groupsContainer.appendChild(buildLegGroupBlock(g, gi));
+    });
+
+    // Add group button
+    div.querySelector(".kw-group-add").addEventListener("click", () => {
+      const newGi = groupsContainer.querySelectorAll(".kw-admin-leg-group").length;
+      groupsContainer.appendChild(buildLegGroupBlock({ title: "", norms: [] }, newGi));
     });
 
     // Category actions
@@ -507,26 +591,6 @@
       if (next) div.parentNode.insertBefore(next, div);
     });
 
-    // Add norm
-    div.querySelector(".kw-norm-add").addEventListener("click", () => {
-      const list = div.querySelector(".kw-norms-list");
-      const addBtn = div.querySelector(".kw-norm-add");
-      const row = document.createElement("div");
-      row.className = "kw-norm-row";
-      row.style.cssText = "display:flex;gap:0.5rem;align-items:center;margin-bottom:0.35rem;";
-      row.innerHTML = `
-        <input type="text" class="kw-norm-title" placeholder="Nombre de la norma" style="flex:1;">
-        <input type="url"  class="kw-norm-url"   placeholder="https://..." style="flex:1;">
-        <button type="button" class="secondary small-btn kw-norm-remove">✕</button>`;
-      row.querySelector(".kw-norm-remove").addEventListener("click", () => row.remove());
-      list.appendChild(row);
-    });
-
-    // Existing norm remove buttons
-    div.querySelectorAll(".kw-norm-remove").forEach((btn) => {
-      btn.addEventListener("click", () => btn.closest(".kw-norm-row").remove());
-    });
-
     return div;
   }
 
@@ -534,16 +598,19 @@
     const cont = q(`kw-leg-cats-${tab}`);
     if (!cont) return [];
     return Array.from(cont.querySelectorAll(".kw-admin-leg-cat")).map((card) => {
-      const norms = Array.from(card.querySelectorAll(".kw-norm-row")).map((row) => ({
-        title: (row.querySelector(".kw-norm-title")?.value || "").trim(),
-        url:   (row.querySelector(".kw-norm-url")?.value   || "").trim(),
-      })).filter((n) => n.title || n.url);
+      const groups = Array.from(card.querySelectorAll(".kw-admin-leg-group")).map((groupEl) => ({
+        title: (groupEl.querySelector(".kw-leg-group-title")?.value || "").trim(),
+        norms: Array.from(groupEl.querySelectorAll(".kw-norm-row")).map((row) => ({
+          title: (row.querySelector(".kw-norm-title")?.value || "").trim(),
+          url:   (row.querySelector(".kw-norm-url")?.value   || "").trim(),
+        })).filter((n) => n.title || n.url),
+      })).filter((g) => g.norms.length > 0);
       return {
         icon_emoji:     (card.querySelector(".kw-leg-cat-icon-emoji")?.value || "").trim(),
         icon_url:       (card.querySelector(".kw-leg-cat-icon-url")?.value   || "").trim(),
         category_title: (card.querySelector(".kw-leg-cat-title")?.value      || "").trim(),
         subtitle:       (card.querySelector(".kw-leg-cat-subtitle")?.value   || "").trim(),
-        norms,
+        groups,
       };
     });
   }

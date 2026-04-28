@@ -843,7 +843,7 @@
 }
 
 .kw-leg-category.is-open .kw-leg-norms {
-  max-height: 800px;
+  max-height: 3000px;
   padding-bottom: 0.75rem;
   /* sin border-top — el separador entre header y normas lo hace el ::after de la categoría anterior */
 }
@@ -851,17 +851,18 @@
   background: #f8fafc;
 }
 
-/* Grupo de normas */
+/* Grupo de normas — barra gris de ancho completo */
 .kw-norm-group-title {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--kw-text-muted);
+  color: #475569;
   background: #f0f0f0;
-  padding: 0.4rem 0.75rem;
-  margin: 0.5rem -0.5rem 0;
-  border-radius: 3px;
+  /* Alinea el texto con el título de la categoría (igual que el padding-left de .kw-leg-norms)
+     pero extiende la barra hasta ambos bordes del contenedor */
+  padding: 0.45rem 1.5rem 0.45rem calc(1.5rem + 52px + 0.75rem);
+  margin: 0.5rem calc(-1 * 1.5rem) 0 calc(-1 * (1.5rem + 52px + 0.75rem));
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 /* Norma individual */
