@@ -145,8 +145,11 @@
       if (leftInp) leftInp.value = meta.left_title || "¿Qué es y por qué importa?";
       const rightEditor = q("kw-leg-right-editor");
       if (rightEditor) rightEditor.innerHTML = meta.right_content || "";
-      renderLegislacionAdmin("tributaria", (meta.tabs?.tributaria || {}).categories || []);
-      renderLegislacionAdmin("aduanera",   (meta.tabs?.aduanera   || {}).categories || []);
+      // Backward-compat: support both {tabs:{tributaria:{categories:[]}}} and {tributaria:[...]} (formato viejo)
+      const tribCats = (meta.tabs?.tributaria || {}).categories || meta.tributaria || [];
+      const adCats   = (meta.tabs?.aduanera   || {}).categories || meta.aduanera   || [];
+      renderLegislacionAdmin("tributaria", tribCats);
+      renderLegislacionAdmin("aduanera",   adCats);
     }
 
     // Update the JSON preview
