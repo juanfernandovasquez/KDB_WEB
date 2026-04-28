@@ -705,7 +705,8 @@
 .kw-leg-tabs-wrapper .kw-tabs-selector {
   margin: 0;
   border-radius: 0;
-  border-bottom: none;
+  border: none;                        /* quita el borde azul de los lados y arriba */
+  border-bottom: 1px solid #e5e7eb;   /* línea sutil de separación con el card */
 }
 .kw-leg-inner-container {
   border-radius: 0 !important;
@@ -838,13 +839,13 @@
   transition: max-height 0.12s ease;   /* 2.5× más rápido que el estándar 0.3s */
   /* Padding izquierdo alinea normas con el inicio del título, pasando el icono */
   padding: 0 1.5rem 0 calc(1.5rem + 52px + 0.75rem);
-  background: #fafafa;
+  background: #fff;
 }
 
 .kw-leg-category.is-open .kw-leg-norms {
   max-height: 800px;
   padding-bottom: 0.75rem;
-  border-top: 1px solid #b0bec5;
+  /* sin border-top — el separador entre header y normas lo hace el ::after de la categoría anterior */
 }
 .kw-leg-category.is-open .kw-leg-cat-header {
   background: #f8fafc;
