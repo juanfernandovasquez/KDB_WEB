@@ -851,18 +851,23 @@
   background: #f8fafc;
 }
 
-/* Grupo de normas — barra gris de ancho completo */
+/* Grupo de normas — etiqueta gris contenida en el área de contenido */
 .kw-norm-group-title {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #475569;
-  background: #f0f0f0;
-  /* Alinea el texto con el título de la categoría (igual que el padding-left de .kw-leg-norms)
-     pero extiende la barra hasta ambos bordes del contenedor */
-  padding: 0.45rem 1.5rem 0.45rem calc(1.5rem + 52px + 0.75rem);
-  margin: 0.5rem calc(-1 * 1.5rem) 0 calc(-1 * (1.5rem + 52px + 0.75rem));
+  background: #eef2f7;
+  padding: 0.35rem 0.75rem;
+  margin: 0.75rem 0 0 0;
+  border-radius: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  display: block;
+}
+
+/* Suprime el divisor de la norma cuando la siguiente fila es un título de grupo */
+.kw-norm-row:has(+ .kw-norm-group-title) {
+  border-bottom: none;
 }
 
 /* Norma individual */
