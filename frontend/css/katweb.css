@@ -312,6 +312,14 @@
   line-height: 1.15;
 }
 
+.kw-banner-subtitle {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0.45rem 0 0;
+  line-height: 1.2;
+}
+
 .kw-banner-right {
   position: relative;
   overflow: hidden;

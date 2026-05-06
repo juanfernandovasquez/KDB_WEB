@@ -462,14 +462,19 @@
      desde el API (por si el admin cambió títulos/imágenes)
   ══════════════════════════════════════════════════════════ */
   async function initJurisprudencia() {
-    const entry = await fetchKdbwebEntry('jurisprudencia');
+    const [entry, boletines, list] = await Promise.all([
+      fetchKdbwebEntry('jurisprudencia'),
+      fetchBoletines(),
+      fetchKdbwebList(),
+    ]);
+
     if (!entry) return;
 
-    // Banner split (igual que Legislación)
+    // Banner split
     setIfFound('kw-banner-title', entry.hero_title || 'Jurisprudencia', 'innerHTML');
     setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
-    // Dos columnas: título izquierdo + descripción derecha
+    // Sección 1: texto explicativo (dos columnas)
     const meta = parseMeta(entry);
     if (meta) {
       if (meta.left_title) {
@@ -479,16 +484,10 @@
       if (meta.right_content) {
         const el = document.getElementById('kw-right-content');
         if (el) el.innerHTML = meta.right_content;
-      } else if (meta.description) {
-        // backward compat: description guardada en meta anterior
-        const el = document.getElementById('kw-juris-desc');
-        if (el) el.innerHTML = meta.description;
       }
     }
 
-    // Las 3 tarjetas se leen de las entradas hijas (card_title, summary, hero_image_url)
-    // que se editan individualmente desde el panel de cada sub-entrada.
-    const list = await fetchKdbwebList();
+    // Sección 2: las 3 tarjetas de instituciones se leen de entradas hijas
     const children = (list || [])
       .filter((e) => e.parent_slug === 'jurisprudencia')
       .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
@@ -496,7 +495,6 @@
     if (children.length) {
       const grid = document.getElementById('kw-juris-cards');
       if (grid) {
-        // Fixed href map — los slugs de estas páginas nunca cambian
         const CARD_HREFS = {
           'tribunal-fiscal':                'kdbweb-tribunal-fiscal.html',
           'casaciones-de-la-corte-suprema': 'kdbweb-casaciones-de-la-corte-suprema.html',
@@ -520,6 +518,9 @@
         });
       }
     }
+
+    // Sección 3: boletines de jurisprudencia (mismo acordeón que Tribunal Fiscal)
+    renderBoletines(boletines || []);
 
     document.title = 'Jurisprudencia | KATWeb';
   }
@@ -610,8 +611,9 @@
     ]);
 
     if (entry) {
-      // Banner
-      setIfFound('kw-banner-title', entry.hero_title || 'Tribunal Fiscal', 'innerHTML');
+      // Banner: kw-banner-title es siempre "Jurisprudencia" (estático en HTML);
+      // kw-banner-subtitle muestra el nombre de esta sub-página desde la API.
+      setIfFound('kw-banner-subtitle', entry.hero_title || 'Tribunal Fiscal', 'innerHTML');
       setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
       const meta = parseMeta(entry);
@@ -720,7 +722,7 @@
     const entry = await fetchKdbwebEntry('casaciones-de-la-corte-suprema');
     if (!entry) return;
 
-    setIfFound('kw-banner-title', entry.hero_title || 'Casaciones de la Corte Suprema', 'innerHTML');
+    setIfFound('kw-banner-subtitle', entry.hero_title || 'Casaciones de la Corte Suprema', 'innerHTML');
     setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
     const meta = parseMeta(entry);
@@ -778,7 +780,7 @@
     const entry = await fetchKdbwebEntry('sentencias-del-tc');
     if (!entry) return;
 
-    setIfFound('kw-banner-title', entry.hero_title || 'Sentencia del TC', 'innerHTML');
+    setIfFound('kw-banner-subtitle', entry.hero_title || 'Sentencias del TC', 'innerHTML');
     setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
     const meta = parseMeta(entry);
