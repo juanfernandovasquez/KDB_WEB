@@ -462,9 +462,8 @@
      desde el API (por si el admin cambió títulos/imágenes)
   ══════════════════════════════════════════════════════════ */
   async function initJurisprudencia() {
-    const [entry, boletines, list] = await Promise.all([
+    const [entry, list] = await Promise.all([
       fetchKdbwebEntry('jurisprudencia'),
-      fetchBoletines(),
       fetchKdbwebList(),
     ]);
 
@@ -474,7 +473,7 @@
     setIfFound('kw-banner-title', entry.hero_title || 'Jurisprudencia', 'innerHTML');
     setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
-    // Sección 1: texto explicativo (dos columnas)
+    // Texto explicativo (dos columnas)
     const meta = parseMeta(entry);
     if (meta) {
       if (meta.left_title) {
@@ -487,7 +486,7 @@
       }
     }
 
-    // Sección 2: las 3 tarjetas de instituciones se leen de entradas hijas
+    // Las 3 tarjetas de instituciones se leen de las entradas hijas
     const children = (list || [])
       .filter((e) => e.parent_slug === 'jurisprudencia')
       .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
@@ -518,9 +517,6 @@
         });
       }
     }
-
-    // Sección 3: boletines de jurisprudencia (mismo acordeón que Tribunal Fiscal)
-    renderBoletines(boletines || []);
 
     document.title = 'Jurisprudencia | KATWeb';
   }
