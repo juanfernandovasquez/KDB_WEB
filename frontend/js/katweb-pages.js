@@ -486,56 +486,38 @@
       }
     }
 
-    // Las 3 tarjetas: si el admin guardó meta.cards lo usamos directamente;
-    // si no, consultamos los child entries (compatibilidad hacia atrás).
-    const grid = document.getElementById('kw-juris-cards');
-    if (grid) {
-      // Fixed href map — los slugs de estas páginas nunca cambian
-      const CARD_HREFS = {
-        'tribunal-fiscal':                'kdbweb-tribunal-fiscal.html',
-        'casaciones-de-la-corte-suprema': 'kdbweb-casaciones-de-la-corte-suprema.html',
-        'sentencias-del-tc':              'kdbweb-sentencias-del-tc.html',
-      };
+    // Las 3 tarjetas se leen de las entradas hijas (card_title, summary, hero_image_url)
+    // que se editan individualmente desde el panel de cada sub-entrada.
+    const list = await fetchKdbwebList();
+    const children = (list || [])
+      .filter((e) => e.parent_slug === 'jurisprudencia')
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
-      if (meta && meta.cards && meta.cards.length) {
-        // Render from admin-managed meta.cards
+    if (children.length) {
+      const grid = document.getElementById('kw-juris-cards');
+      if (grid) {
+        // Fixed href map — los slugs de estas páginas nunca cambian
+        const CARD_HREFS = {
+          'tribunal-fiscal':                'kdbweb-tribunal-fiscal.html',
+          'casaciones-de-la-corte-suprema': 'kdbweb-casaciones-de-la-corte-suprema.html',
+          'sentencias-del-tc':              'kdbweb-sentencias-del-tc.html',
+        };
         grid.innerHTML = '';
-        meta.cards.forEach((card) => {
-          const href = CARD_HREFS[card.slug] || `kdbweb-${esc(card.slug)}.html`;
-          const img  = card.image_url || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80';
+        children.forEach((child) => {
+          const slug  = child.slug || '';
+          const title = child.card_title || child.title || '';
+          const desc  = child.summary || '';
+          const img   = child.hero_image_url || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80';
+          const href  = CARD_HREFS[slug] || `kdbweb-${esc(slug)}.html`;
           grid.innerHTML += `
             <a href="${href}" class="katweb-cat-card">
-              <img src="${esc(img)}" alt="${esc(card.title)}" loading="lazy" />
+              <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" />
               <div class="katweb-cat-card-body">
-                <p class="katweb-cat-card-title">${esc(card.title)}</p>
-                ${card.desc ? `<p class="katweb-cat-card-desc">${esc(card.desc)}</p>` : ''}
+                <p class="katweb-cat-card-title">${esc(title)}</p>
+                ${desc ? `<p class="katweb-cat-card-desc">${esc(desc)}</p>` : ''}
               </div>
             </a>`;
         });
-      } else {
-        // Fallback: fetch child entries dynamically
-        const list = await fetchKdbwebList();
-        const children = (list || [])
-          .filter((e) => e.parent_slug === 'jurisprudencia')
-          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-        if (children.length) {
-          grid.innerHTML = '';
-          children.forEach((child) => {
-            const slug  = child.slug || '';
-            const title = child.card_title || child.title || '';
-            const desc  = child.summary || '';
-            const img   = child.hero_image_url || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80';
-            const href  = CARD_HREFS[slug] || `kdbweb-${esc(slug)}.html`;
-            grid.innerHTML += `
-              <a href="${href}" class="katweb-cat-card">
-                <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" />
-                <div class="katweb-cat-card-body">
-                  <p class="katweb-cat-card-title">${esc(title)}</p>
-                  ${desc ? `<p class="katweb-cat-card-desc">${esc(desc)}</p>` : ''}
-                </div>
-              </a>`;
-          });
-        }
       }
     }
 

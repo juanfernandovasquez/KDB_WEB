@@ -759,8 +759,13 @@
                 </div>
               </div>
 
-              <!-- Jurisprudencia: banner texts + 3 fixed institution cards -->
+              <!-- Jurisprudencia: solo textos de banner (las tarjetas se editan desde cada sub-entrada) -->
               <div id="kdbweb-meta-jurisprudencia" class="hidden">
+
+                <p class="small" style="color:#6b7280;margin:0 0 1rem;">
+                  Los títulos, descripciones e imágenes de las 3 tarjetas se editan directamente
+                  desde cada sub-entrada (Tribunal Fiscal, Casaciones, Sentencias del TC).
+                </p>
 
                 <!-- Título columna izquierda -->
                 <div style="margin-bottom:1rem;">
@@ -783,79 +788,6 @@
                       <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
                     </div>
                     <div id="kw-juris-right-editor" class="editor-surface" contenteditable="true"></div>
-                  </div>
-                </div>
-
-                <hr style="border:none;border-top:1px solid #e5e7eb;margin-bottom:1.25rem;">
-
-                <h5 style="margin:0 0 1rem;font-size:0.85rem;font-weight:600;color:#374151;">Tarjetas de instituciones</h5>
-
-                <!-- Tarjeta 0: Tribunal Fiscal -->
-                <div class="kw-admin-juris-card" style="border:1px solid #e5e7eb;border-radius:6px;padding:0.9rem 1rem;margin-bottom:0.9rem;background:#fafafa;">
-                  <p class="small" style="font-weight:600;color:#1e3a5f;margin:0 0 0.75rem;">📋 Tribunal Fiscal</p>
-                  <div class="grid-2">
-                    <div>
-                      <label class="small">Título</label>
-                      <input type="text" id="kw-juris-card-0-title" placeholder="Tribunal Fiscal" style="width:100%;">
-                    </div>
-                    <div>
-                      <label class="small">Descripción</label>
-                      <input type="text" id="kw-juris-card-0-desc" placeholder="Resoluciones y criterios del Tribunal Fiscal..." style="width:100%;">
-                    </div>
-                    <div class="full">
-                      <label class="small">Imagen</label>
-                      <div class="media-input-row" style="display:flex;gap:0.4rem;align-items:center;">
-                        <input type="url" id="kw-juris-card-0-img" placeholder="https://..." style="flex:1;min-width:0;">
-                        <button type="button" class="secondary small-btn media-picker-btn" title="Elegir desde biblioteca">📁</button>
-                      </div>
-                      <img id="kw-juris-card-0-img-preview" src="" alt="" style="display:none;height:60px;margin-top:6px;border-radius:4px;object-fit:cover;">
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Tarjeta 1: Casaciones de la Corte Suprema -->
-                <div class="kw-admin-juris-card" style="border:1px solid #e5e7eb;border-radius:6px;padding:0.9rem 1rem;margin-bottom:0.9rem;background:#fafafa;">
-                  <p class="small" style="font-weight:600;color:#1e3a5f;margin:0 0 0.75rem;">⚖️ Casaciones de la Corte Suprema</p>
-                  <div class="grid-2">
-                    <div>
-                      <label class="small">Título</label>
-                      <input type="text" id="kw-juris-card-1-title" placeholder="Casaciones de la Corte Suprema" style="width:100%;">
-                    </div>
-                    <div>
-                      <label class="small">Descripción</label>
-                      <input type="text" id="kw-juris-card-1-desc" placeholder="Criterios y precedentes de la Corte Suprema..." style="width:100%;">
-                    </div>
-                    <div class="full">
-                      <label class="small">Imagen</label>
-                      <div class="media-input-row" style="display:flex;gap:0.4rem;align-items:center;">
-                        <input type="url" id="kw-juris-card-1-img" placeholder="https://..." style="flex:1;min-width:0;">
-                        <button type="button" class="secondary small-btn media-picker-btn" title="Elegir desde biblioteca">📁</button>
-                      </div>
-                      <img id="kw-juris-card-1-img-preview" src="" alt="" style="display:none;height:60px;margin-top:6px;border-radius:4px;object-fit:cover;">
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Tarjeta 2: Sentencias del TC -->
-                <div class="kw-admin-juris-card" style="border:1px solid #e5e7eb;border-radius:6px;padding:0.9rem 1rem;margin-bottom:0.9rem;background:#fafafa;">
-                  <p class="small" style="font-weight:600;color:#1e3a5f;margin:0 0 0.75rem;">🏛️ Sentencias del TC</p>
-                  <div class="grid-2">
-                    <div>
-                      <label class="small">Título</label>
-                      <input type="text" id="kw-juris-card-2-title" placeholder="Sentencias del TC" style="width:100%;">
-                    </div>
-                    <div>
-                      <label class="small">Descripción</label>
-                      <input type="text" id="kw-juris-card-2-desc" placeholder="Pronunciamiento del Tribunal Constitucional..." style="width:100%;">
-                    </div>
-                    <div class="full">
-                      <label class="small">Imagen</label>
-                      <div class="media-input-row" style="display:flex;gap:0.4rem;align-items:center;">
-                        <input type="url" id="kw-juris-card-2-img" placeholder="https://..." style="flex:1;min-width:0;">
-                        <button type="button" class="secondary small-btn media-picker-btn" title="Elegir desde biblioteca">📁</button>
-                      </div>
-                      <img id="kw-juris-card-2-img-preview" src="" alt="" style="display:none;height:60px;margin-top:6px;border-radius:4px;object-fit:cover;">
-                    </div>
                   </div>
                 </div>
 

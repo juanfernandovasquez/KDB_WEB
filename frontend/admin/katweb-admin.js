@@ -155,44 +155,10 @@
     } else if (type === "jurisprudencia") {
       const el = q("kdbweb-meta-jurisprudencia");
       if (el) el.classList.remove("hidden");
-      const setf = (id, val) => { const e = q(id); if (e) e.value = val || ""; };
-      setf("kw-juris-left-title", meta.left_title || "¿Qué es y por qué importa?");
+      const leftInp = q("kw-juris-left-title");
+      if (leftInp) leftInp.value = meta.left_title || "¿Qué es y por qué importa?";
       const rightEditor = q("kw-juris-right-editor");
       if (rightEditor) rightEditor.innerHTML = meta.right_content || "";
-      // 3 fixed institution cards
-      const JURIS_CARDS = [
-        { slug: "tribunal-fiscal",                   defaultTitle: "Tribunal Fiscal" },
-        { slug: "casaciones-de-la-corte-suprema",    defaultTitle: "Casaciones de la Corte Suprema" },
-        { slug: "sentencias-del-tc",                 defaultTitle: "Sentencias del TC" },
-      ];
-      JURIS_CARDS.forEach((def, i) => {
-        const card = (meta.cards || []).find((c) => c.slug === def.slug) || {};
-        setf(`kw-juris-card-${i}-title`, card.title || def.defaultTitle);
-        setf(`kw-juris-card-${i}-desc`,  card.desc  || "");
-        setf(`kw-juris-card-${i}-img`,   card.image_url || "");
-        const preview = q(`kw-juris-card-${i}-img-preview`);
-        if (preview) {
-          if (card.image_url) {
-            preview.src = card.image_url;
-            preview.style.display = "block";
-          } else {
-            preview.src = "";
-            preview.style.display = "none";
-          }
-        }
-      });
-      // Live preview on image URL input
-      JURIS_CARDS.forEach((_, i) => {
-        const imgInput = q(`kw-juris-card-${i}-img`);
-        const preview  = q(`kw-juris-card-${i}-img-preview`);
-        if (imgInput && preview) {
-          imgInput.addEventListener("input", () => {
-            const val = imgInput.value.trim();
-            if (val) { preview.src = val; preview.style.display = "block"; }
-            else     { preview.src = ""; preview.style.display = "none"; }
-          });
-        }
-      });
     }
 
     // Update the JSON preview
@@ -257,22 +223,10 @@
         aduanera:   { categories: collectLegislacionFromDom("aduanera") },
       };
     } else if (type === "jurisprudencia") {
-      const trim = (id) => (q(id)?.value || "").trim();
-      const leftVal  = trim("kw-juris-left-title");
+      const leftVal  = (q("kw-juris-left-title")?.value || "").trim();
       const rightVal = (q("kw-juris-right-editor")?.innerHTML || "").trim();
       if (leftVal)  meta.left_title    = leftVal;
       if (rightVal) meta.right_content = rightVal;
-      const JURIS_CARDS = [
-        { slug: "tribunal-fiscal" },
-        { slug: "casaciones-de-la-corte-suprema" },
-        { slug: "sentencias-del-tc" },
-      ];
-      meta.cards = JURIS_CARDS.map((def, i) => ({
-        slug:      def.slug,
-        title:     trim(`kw-juris-card-${i}-title`),
-        desc:      trim(`kw-juris-card-${i}-desc`),
-        image_url: trim(`kw-juris-card-${i}-img`),
-      }));
     }
 
     entry.meta_json = JSON.stringify(meta);
