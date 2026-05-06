@@ -494,7 +494,7 @@
 /* ─── TARJETAS DE IMAGEN (Jurisprudencia 3 cards) ───────── */
 .kw-img-cards-section {
   background: var(--kw-gray-bg);
-  padding: 0 1.5rem 4rem;
+  padding: var(--kw-section-padding);
 }
 
 .kw-img-cards-grid {

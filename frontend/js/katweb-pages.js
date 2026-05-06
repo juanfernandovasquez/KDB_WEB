@@ -465,18 +465,29 @@
     const entry = await fetchKdbwebEntry('jurisprudencia');
     if (!entry) return;
 
-    // Banner
-    setIfFound('kw-banner-title', entry.hero_title || 'Jurisprudencia', 'textContent');
+    // Banner split (igual que Legislación)
+    setIfFound('kw-banner-title', entry.hero_title || 'Jurisprudencia', 'innerHTML');
     setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
-    // Descripción centrada
+    // Dos columnas: título izquierdo + descripción derecha
     const meta = parseMeta(entry);
-    if (meta && meta.description) {
-      const el = document.getElementById('kw-juris-desc');
-      if (el) el.innerHTML = meta.description;
+    if (meta) {
+      if (meta.left_title) {
+        const el = document.getElementById('kw-left-title');
+        if (el) el.innerHTML = meta.left_title;
+      }
+      if (meta.right_content) {
+        const el = document.getElementById('kw-right-content');
+        if (el) el.innerHTML = meta.right_content;
+      } else if (meta.description) {
+        // backward compat: description guardada en meta anterior
+        const el = document.getElementById('kw-juris-desc');
+        if (el) el.innerHTML = meta.description;
+      }
     }
 
-    // Las 3 tarjetas se pueden actualizar dinámicamente
+    // Las 3 tarjetas se actualizan dinámicamente — usan el mismo estilo
+    // que las tarjetas de la página principal KATWeb (katweb-cat-card)
     const list = await fetchKdbwebList();
     const children = (list || [])
       .filter((e) => e.parent_slug === 'jurisprudencia')
@@ -492,11 +503,11 @@
           const desc = child.summary || '';
           const img = child.hero_image_url || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80';
           grid.innerHTML += `
-            <a href="kdbweb-${esc(slug)}.html" class="kw-img-card">
+            <a href="kdbweb-${esc(slug)}.html" class="katweb-cat-card">
               <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" />
-              <div class="kw-img-card-body">
-                <p class="kw-img-card-title">${esc(title)}</p>
-                ${desc ? `<p class="kw-img-card-desc">${esc(desc)}</p>` : ''}
+              <div class="katweb-cat-card-body">
+                <p class="katweb-cat-card-title">${esc(title)}</p>
+                ${desc ? `<p class="katweb-cat-card-desc">${esc(desc)}</p>` : ''}
               </div>
             </a>`;
         });

@@ -21,55 +21,78 @@
       <span>Jurisprudencia</span>
     </nav>
 
-    <!-- ═══ BANNER IMAGEN CON OVERLAY ════════════════════ -->
-    <div class="kw-banner-full" id="kw-banner">
-      <img id="kw-banner-image"
-        src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80"
-        alt="Jurisprudencia" />
-      <div class="kw-banner-full-content">
-        <h1 class="kw-banner-full-title" id="kw-banner-title">Jurisprudencia</h1>
+    <!-- ═══ BANNER SPLIT (igual que Legislación / Constitución) ═════════ -->
+    <div class="kw-banner" id="kw-banner">
+      <div class="kw-banner-left">
+        <p class="kw-banner-kicker" id="kw-banner-kicker">KATWeb</p>
+        <h1 class="kw-banner-title" id="kw-banner-title">
+          Jurisprudencia
+        </h1>
+      </div>
+      <div class="kw-banner-right">
+        <img id="kw-banner-image"
+          src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=900&q=80"
+          alt="Jurisprudencia" />
       </div>
     </div>
 
-    <!-- ═══ DESCRIPCIÓN CENTRADA ══════════════════════════ -->
-    <section class="kw-centered-desc">
-      <p id="kw-juris-desc">
-        En esta sección se recopilan y sistematizan los principales criterios jurisprudenciales emitidos en materia tributaria y
-        aduanera por el Tribunal Fiscal, el Poder Judicial y el Tribunal Constitucional, así como herramientas de consulta que
-        permiten acceder directamente a las resoluciones emitidas por dichas instancias.
-      </p>
+    <!-- ═══ SECCIÓN DOS COLUMNAS ════════════════════════════════════════ -->
+    <section class="kw-two-col-section">
+      <div class="kw-two-col-inner">
+
+        <div>
+          <h2 class="kw-col-title" id="kw-left-title">
+            ¿Qué es y<br>por qué importa?
+          </h2>
+        </div>
+
+        <div class="kw-col-body" id="kw-right-content">
+          <p id="kw-juris-desc">
+            En esta sección se recopilan y sistematizan los principales criterios
+            jurisprudenciales emitidos en materia tributaria y aduanera por el
+            Tribunal Fiscal, el Poder Judicial y el Tribunal Constitucional, así
+            como herramientas de consulta que permiten acceder directamente a las
+            resoluciones emitidas por dichas instancias.
+          </p>
+        </div>
+
+      </div>
     </section>
 
-    <!-- ═══ TARJETAS DE LAS 3 INSTITUCIONES ══════════════ -->
+    <!-- ═══ TARJETAS DE LAS 3 INSTITUCIONES ════════════════════════════ -->
     <section class="kw-img-cards-section">
-      <div class="kw-img-cards-grid" id="kw-juris-cards">
+      <div class="katweb-cards-grid" id="kw-juris-cards">
+
         <!-- Tarjeta 1: Tribunal Fiscal -->
-        <a href="kdbweb-tribunal-fiscal.html" class="kw-img-card">
+        <a href="kdbweb-tribunal-fiscal.html" class="katweb-cat-card">
           <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80"
-               alt="Tribunal Fiscal" />
-          <div class="kw-img-card-body">
-            <p class="kw-img-card-title">Tribunal Fiscal</p>
-            <p class="kw-img-card-desc">Resoluciones y criterios del Tribunal Fiscal para casos tributarios.</p>
+               alt="Tribunal Fiscal" loading="lazy" />
+          <div class="katweb-cat-card-body">
+            <p class="katweb-cat-card-title">Tribunal Fiscal</p>
+            <p class="katweb-cat-card-desc">Resoluciones y criterios del Tribunal Fiscal para casos tributarios.</p>
           </div>
         </a>
+
         <!-- Tarjeta 2: Casaciones Corte Suprema -->
-        <a href="kdbweb-casaciones-de-la-corte-suprema.html" class="kw-img-card">
+        <a href="kdbweb-casaciones-de-la-corte-suprema.html" class="katweb-cat-card">
           <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80"
-               alt="Casaciones de la Corte Suprema" />
-          <div class="kw-img-card-body">
-            <p class="kw-img-card-title">Casaciones de la<br>Corte Suprema</p>
-            <p class="kw-img-card-desc">Criterios y precedentes de la Corte Suprema en materia tributaria.</p>
+               alt="Casaciones de la Corte Suprema" loading="lazy" />
+          <div class="katweb-cat-card-body">
+            <p class="katweb-cat-card-title">Casaciones de la<br>Corte Suprema</p>
+            <p class="katweb-cat-card-desc">Criterios y precedentes de la Corte Suprema en materia tributaria.</p>
           </div>
         </a>
+
         <!-- Tarjeta 3: Sentencias del TC -->
-        <a href="kdbweb-sentencias-del-tc.html" class="kw-img-card">
+        <a href="kdbweb-sentencias-del-tc.html" class="katweb-cat-card">
           <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80"
-               alt="Sentencias del TC" />
-          <div class="kw-img-card-body">
-            <p class="kw-img-card-title">Sentencias del TC</p>
-            <p class="kw-img-card-desc">Pronunciamiento del Tribunal Constitucional con impacto tributario.</p>
+               alt="Sentencias del TC" loading="lazy" />
+          <div class="katweb-cat-card-body">
+            <p class="katweb-cat-card-title">Sentencias del TC</p>
+            <p class="katweb-cat-card-desc">Pronunciamiento del Tribunal Constitucional con impacto tributario.</p>
           </div>
         </a>
+
       </div>
     </section>
 
