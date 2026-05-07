@@ -122,12 +122,20 @@
       const el = q("kdbweb-meta-tf");
       if (el) el.classList.remove("hidden");
       const setf = (id, val) => { const e = q(id); if (e) e.value = val || ""; };
-      // tools is an array: [{url, label}, {url, label}]
       const tools = meta.tools || [];
-      setf("kdbweb-meta-tf-title1", (tools[0] && tools[0].label) || "Buscador del Tribunal Fiscal");
-      setf("kdbweb-meta-tf-url1",   (tools[0] && tools[0].url)   || "");
-      setf("kdbweb-meta-tf-title2", (tools[1] && tools[1].label) || "Portal de Resoluciones SUNAT");
-      setf("kdbweb-meta-tf-url2",   (tools[1] && tools[1].url)   || "");
+      const t0 = tools[0] || {};
+      const t1 = tools[1] || {};
+      // Backward-compat: old format used "label" for button text; new format uses card_title + button_label
+      setf("kdbweb-meta-tf-icon1",      t0.icon         || "🔍");
+      setf("kdbweb-meta-tf-cardtitle1", t0.card_title   || t0.label || "Búsqueda por Contenido de Resoluciones del Tribunal Fiscal (RTF)");
+      setf("kdbweb-meta-tf-carddesc1",  t0.card_desc    || "");
+      setf("kdbweb-meta-tf-btnlabel1",  t0.button_label || (t0.card_title ? "Acceder al buscador" : t0.label) || "Acceder al buscador");
+      setf("kdbweb-meta-tf-url1",       t0.url          || "");
+      setf("kdbweb-meta-tf-icon2",      t1.icon         || "⚖️");
+      setf("kdbweb-meta-tf-cardtitle2", t1.card_title   || t1.label || "Búsqueda de Resoluciones del Tribunal Fiscal");
+      setf("kdbweb-meta-tf-carddesc2",  t1.card_desc    || "");
+      setf("kdbweb-meta-tf-btnlabel2",  t1.button_label || (t1.card_title ? "Acceder al buscador" : t1.label) || "Acceder al buscador");
+      setf("kdbweb-meta-tf-url2",       t1.url          || "");
     } else if (type === "tratados") {
       const el = q("kdbweb-meta-tratados");
       if (el) el.classList.remove("hidden");
@@ -194,15 +202,21 @@
       const key = ACCESS_KEY[type] || "access_url";
       meta[key] = (q("kdbweb-meta-access-url")?.value || "").trim();
     } else if (type === "tf") {
-      // Save as tools array to match katweb-pages.js format
+      const trim = (id) => (q(id)?.value || "").trim();
       meta.tools = [
         {
-          label: (q("kdbweb-meta-tf-title1")?.value || "").trim() || "Buscador del Tribunal Fiscal",
-          url:   (q("kdbweb-meta-tf-url1")?.value   || "").trim(),
+          icon:         trim("kdbweb-meta-tf-icon1")      || "🔍",
+          card_title:   trim("kdbweb-meta-tf-cardtitle1") || "Búsqueda por Contenido de Resoluciones del Tribunal Fiscal (RTF)",
+          card_desc:    trim("kdbweb-meta-tf-carddesc1"),
+          button_label: trim("kdbweb-meta-tf-btnlabel1")  || "Acceder al buscador",
+          url:          trim("kdbweb-meta-tf-url1"),
         },
         {
-          label: (q("kdbweb-meta-tf-title2")?.value || "").trim() || "Portal de Resoluciones SUNAT",
-          url:   (q("kdbweb-meta-tf-url2")?.value   || "").trim(),
+          icon:         trim("kdbweb-meta-tf-icon2")      || "⚖️",
+          card_title:   trim("kdbweb-meta-tf-cardtitle2") || "Búsqueda de Resoluciones del Tribunal Fiscal",
+          card_desc:    trim("kdbweb-meta-tf-carddesc2"),
+          button_label: trim("kdbweb-meta-tf-btnlabel2")  || "Acceder al buscador",
+          url:          trim("kdbweb-meta-tf-url2"),
         },
       ];
     } else if (type === "tratados") {

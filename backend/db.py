@@ -844,45 +844,14 @@ def init_db():
                 now,
                 now,
             ),
-            (
-                8,
-                "resoluciones",
-                "tribunal-fiscal",
-                "Resoluciones",
-                "Resoluciones",
-                "Resoluciones del Tribunal Fiscal clasificadas por tema.",
-                "KDBWEB",
-                "Resoluciones",
-                "Resoluciones del Tribunal Fiscal clasificadas por tema.",
-                "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=80",
-                "",
-                "",
-                "",
-                "",
-                "<p>Explora resoluciones relevantes para tus procesos tributarios.</p>",
-                now,
-                now,
-            ),
-            (
-                9,
-                "boletinas",
-                "tribunal-fiscal",
-                "Boletinas",
-                "Boletinas",
-                "Boletinas y reportes informativos del Tribunal Fiscal.",
-                "KDBWEB",
-                "Boletinas",
-                "Boletinas y reportes informativos del Tribunal Fiscal.",
-                "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80",
-                "",
-                "",
-                "",
-                "",
-                "<p>Boletinas y comunicados con actualizaciones del Tribunal Fiscal.</p>",
-                now,
-                now,
-            ),
         ]
+
+        # Migration: remove obsolete child entries of tribunal-fiscal
+        # (resoluciones and boletinas are not sub-pages; their content
+        # is managed directly within the tribunal-fiscal entry)
+        conn.execute(
+            "DELETE FROM kdbweb_entries WHERE slug IN ('resoluciones', 'boletinas') AND parent_slug = 'tribunal-fiscal'"
+        )
         if kdbweb_exists == 0:
             insert_entries = entries
         else:

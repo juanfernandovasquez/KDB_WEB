@@ -661,14 +661,33 @@
                 </div>
               </div>
 
-              <!-- Tribunal Fiscal: tool card URLs -->
+              <!-- Tribunal Fiscal: editor completo de tarjetas de herramientas -->
               <div id="kdbweb-meta-tf" class="hidden">
-                <div class="grid-2">
-                  <div><label>Título tarjeta 1</label><input type="text" id="kdbweb-meta-tf-title1" placeholder="Buscador del Tribunal Fiscal"></div>
-                  <div><label>URL tarjeta 1</label><input type="url" id="kdbweb-meta-tf-url1" placeholder="https://..."></div>
-                  <div><label>Título tarjeta 2</label><input type="text" id="kdbweb-meta-tf-title2" placeholder="Portal de Resoluciones SUNAT"></div>
-                  <div><label>URL tarjeta 2</label><input type="url" id="kdbweb-meta-tf-url2" placeholder="https://..."></div>
-                </div>
+                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita el contenido de las dos tarjetas de herramientas que aparecen en la sección "1. Resoluciones".</p>
+
+                <!-- Tarjeta 1 -->
+                <fieldset style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#374151;">Tarjeta 1</legend>
+                  <div class="grid-2">
+                    <div><label>Ícono (emoji)</label><input type="text" id="kdbweb-meta-tf-icon1" placeholder="🔍" style="width:4.5rem;text-align:center;font-size:1.4rem;"></div>
+                    <div><label>Etiqueta del botón</label><input type="text" id="kdbweb-meta-tf-btnlabel1" placeholder="Acceder al buscador"></div>
+                    <div class="full"><label>Título de la tarjeta</label><input type="text" id="kdbweb-meta-tf-cardtitle1" placeholder="Búsqueda por Contenido de Resoluciones del Tribunal Fiscal (RTF)"></div>
+                    <div class="full"><label>Descripción</label><textarea id="kdbweb-meta-tf-carddesc1" rows="3" placeholder="Permite buscar resoluciones..."></textarea></div>
+                    <div class="full"><label>URL del botón</label><input type="url" id="kdbweb-meta-tf-url1" placeholder="https://..."></div>
+                  </div>
+                </fieldset>
+
+                <!-- Tarjeta 2 -->
+                <fieldset style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#374151;">Tarjeta 2</legend>
+                  <div class="grid-2">
+                    <div><label>Ícono (emoji)</label><input type="text" id="kdbweb-meta-tf-icon2" placeholder="⚖️" style="width:4.5rem;text-align:center;font-size:1.4rem;"></div>
+                    <div><label>Etiqueta del botón</label><input type="text" id="kdbweb-meta-tf-btnlabel2" placeholder="Acceder al buscador"></div>
+                    <div class="full"><label>Título de la tarjeta</label><input type="text" id="kdbweb-meta-tf-cardtitle2" placeholder="Búsqueda de Resoluciones del Tribunal Fiscal"></div>
+                    <div class="full"><label>Descripción</label><textarea id="kdbweb-meta-tf-carddesc2" rows="3" placeholder="Permite ubicar resoluciones..."></textarea></div>
+                    <div class="full"><label>URL del botón</label><input type="url" id="kdbweb-meta-tf-url2" placeholder="https://..."></div>
+                  </div>
+                </fieldset>
               </div>
 
               <!-- Tratados Internacionales: texts + treaty list builder -->

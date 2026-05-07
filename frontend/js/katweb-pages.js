@@ -622,34 +622,26 @@
           const el = document.getElementById('kw-right-content');
           if (el) el.innerHTML = meta.right_content;
         }
-        // Herramientas
-        if (meta.tools && meta.tools.length >= 1) {
-          const btn1 = document.getElementById('kw-tool-btn-1');
-          if (btn1 && meta.tools[0]) {
-            btn1.href = meta.tools[0].url || '#';
-            if (meta.tools[0].label) btn1.textContent = meta.tools[0].label;
+        // Herramientas: rellena icon, card_title, card_desc y button de cada tarjeta
+        (meta.tools || []).forEach(function(tool, i) {
+          const n = i + 1;
+          const icon  = document.getElementById('kw-tool-icon-'       + n);
+          const title = document.getElementById('kw-tool-card-title-' + n);
+          const desc  = document.getElementById('kw-tool-card-desc-'  + n);
+          const btn   = document.getElementById('kw-tool-btn-'        + n);
+          if (icon  && tool.icon)         icon.textContent  = tool.icon;
+          if (title && tool.card_title)   title.textContent = tool.card_title;
+          if (desc  && tool.card_desc)    desc.textContent  = tool.card_desc;
+          if (btn) {
+            btn.href = tool.url || '#';
+            // button_label is the new field; fall back to old "label" for backward-compat
+            const label = tool.button_label || tool.label;
+            if (label) btn.textContent = label;
           }
-        }
-        if (meta.tools && meta.tools.length >= 2) {
-          const btn2 = document.getElementById('kw-tool-btn-2');
-          if (btn2 && meta.tools[1]) {
-            btn2.href = meta.tools[1].url || '#';
-            if (meta.tools[1].label) btn2.textContent = meta.tools[1].label;
-          }
-        }
+        });
       } else if (entry.content_html) {
         const el = document.getElementById('kw-right-content');
         if (el) el.innerHTML = entry.content_html;
-      }
-
-      // Herramientas: hero_primary/secondary href
-      if (entry.hero_primary_href) {
-        const btn = document.getElementById('kw-tool-btn-1');
-        if (btn) btn.href = entry.hero_primary_href;
-      }
-      if (entry.hero_secondary_href) {
-        const btn = document.getElementById('kw-tool-btn-2');
-        if (btn) btn.href = entry.hero_secondary_href;
       }
     }
 
