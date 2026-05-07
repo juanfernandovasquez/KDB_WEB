@@ -92,6 +92,17 @@
       if (el) el.classList.add("hidden");
     });
 
+    // La card de Boletines del Tribunal Fiscal solo es visible cuando
+    // la entrada seleccionada es "tribunal-fiscal"
+    const boleCard = q("kdbweb-boletines-card");
+    if (boleCard) {
+      if (slug === "tribunal-fiscal") {
+        boleCard.classList.remove("hidden");
+      } else {
+        boleCard.classList.add("hidden");
+      }
+    }
+
     const type = SLUG_TYPE[slug];
     if (!type) {
       section.classList.add("hidden");
