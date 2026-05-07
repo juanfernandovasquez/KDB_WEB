@@ -622,6 +622,23 @@
           const el = document.getElementById('kw-right-content');
           if (el) el.innerHTML = meta.right_content;
         }
+        // Subtítulos y descripciones de sección
+        if (meta.section1_title) {
+          const el = document.getElementById('kw-section1-title');
+          if (el) el.textContent = meta.section1_title;
+        }
+        if (meta.section1_desc) {
+          const el = document.getElementById('kw-section1-desc');
+          if (el) el.textContent = meta.section1_desc;
+        }
+        if (meta.section2_title) {
+          const el = document.getElementById('kw-section2-title');
+          if (el) el.textContent = meta.section2_title;
+        }
+        if (meta.section2_desc) {
+          const el = document.getElementById('kw-section2-desc');
+          if (el) el.innerHTML = meta.section2_desc;
+        }
         // Herramientas: rellena icon, card_title, card_desc y button de cada tarjeta
         (meta.tools || []).forEach(function(tool, i) {
           const n = i + 1;

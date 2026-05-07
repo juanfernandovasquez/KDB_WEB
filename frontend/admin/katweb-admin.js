@@ -125,6 +125,12 @@
       const tools = meta.tools || [];
       const t0 = tools[0] || {};
       const t1 = tools[1] || {};
+      // Sección 1 y 2: subtítulos y descripciones
+      setf("kdbweb-meta-tf-s1title", meta.section1_title || "1. Resoluciones");
+      setf("kdbweb-meta-tf-s1desc",  meta.section1_desc  || "");
+      setf("kdbweb-meta-tf-s2title", meta.section2_title || "2. Boletines de Jurisprudencia Tributaria");
+      const s2Editor = q("kdbweb-meta-tf-s2desc");
+      if (s2Editor) s2Editor.innerHTML = meta.section2_desc || "";
       // Backward-compat: old format used "label" for button text; new format uses card_title + button_label
       setf("kdbweb-meta-tf-icon1",      t0.icon         || "🔍");
       setf("kdbweb-meta-tf-cardtitle1", t0.card_title   || t0.label || "Búsqueda por Contenido de Resoluciones del Tribunal Fiscal (RTF)");
@@ -203,6 +209,11 @@
       meta[key] = (q("kdbweb-meta-access-url")?.value || "").trim();
     } else if (type === "tf") {
       const trim = (id) => (q(id)?.value || "").trim();
+      // Subtítulos y descripciones de sección
+      meta.section1_title = trim("kdbweb-meta-tf-s1title") || "1. Resoluciones";
+      meta.section1_desc  = trim("kdbweb-meta-tf-s1desc");
+      meta.section2_title = trim("kdbweb-meta-tf-s2title") || "2. Boletines de Jurisprudencia Tributaria";
+      meta.section2_desc  = (q("kdbweb-meta-tf-s2desc")?.innerHTML || "").trim();
       meta.tools = [
         {
           icon:         trim("kdbweb-meta-tf-icon1")      || "🔍",

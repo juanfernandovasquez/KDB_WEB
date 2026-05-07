@@ -663,7 +663,42 @@
 
               <!-- Tribunal Fiscal: editor completo de tarjetas de herramientas -->
               <div id="kdbweb-meta-tf" class="hidden">
-                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita el contenido de las dos tarjetas de herramientas que aparecen en la sección "1. Resoluciones".</p>
+                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita subtítulos, descripciones y tarjetas de herramientas de la página Tribunal Fiscal.</p>
+
+                <!-- Sección 1 -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Bloque "1. Resoluciones"</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Subtítulo del bloque</label>
+                    <input type="text" id="kdbweb-meta-tf-s1title" placeholder="1. Resoluciones">
+                  </div>
+                  <div>
+                    <label>Descripción del bloque</label>
+                    <textarea id="kdbweb-meta-tf-s1desc" rows="2" placeholder="Herramientas oficiales que permiten realizar búsquedas..."></textarea>
+                  </div>
+                </fieldset>
+
+                <!-- Sección 2 -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Bloque "2. Boletines de Jurisprudencia Tributaria"</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Subtítulo del bloque</label>
+                    <input type="text" id="kdbweb-meta-tf-s2title" placeholder="2. Boletines de Jurisprudencia Tributaria">
+                  </div>
+                  <div>
+                    <label>Descripción del bloque <span style="color:#9ca3af;font-size:0.8rem;">(admite párrafos separados por línea en blanco)</span></label>
+                    <div class="rich-editor">
+                      <div class="editor-toolbar" id="kdbweb-tf-s2-toolbar">
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="bold" title="Negrita"><strong>B</strong></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="italic" title="Italica"><em>I</em></button>
+                        <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
+                      </div>
+                      <div id="kdbweb-meta-tf-s2desc" class="editor-surface" contenteditable="true" style="min-height:90px;"></div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin-bottom:1.25rem;">
 
                 <!-- Tarjeta 1 -->
                 <fieldset style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
