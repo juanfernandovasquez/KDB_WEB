@@ -683,7 +683,7 @@
       const isOpen = yIdx === 0; // El año más reciente abierto por defecto
       html += `<div class="kw-year-block${isOpen ? ' is-open' : ''}" id="kw-year-${year}">`;
       html += `<div class="kw-year-header" data-action="year-toggle" data-year="${year}">`;
-      html += `<span>${year} <span class="kw-year-badge">${items.length} ${items.length === 1 ? 'Boletín disponible' : 'Boletines disponibles'}</span></span>`;
+      html += `<span class="kw-year-header-left"><span>${year}</span><span class="kw-year-badge">${items.length} ${items.length === 1 ? 'Boletín disponible' : 'Boletines disponibles'}</span></span>`;
       html += `<span class="kw-year-toggle">${SVG_CHEVRON}</span>`;
       html += '</div>';
       html += '<div class="kw-year-body">';

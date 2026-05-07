@@ -1084,13 +1084,16 @@
 }
 
 /* Acordeón de boletines por año */
-.kw-boletines {}
+.kw-boletines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
 
 .kw-year-block {
-  border-radius: 6px;
+  border-radius: 14px;
   overflow: hidden;
-  margin-bottom: 0.75rem;
-  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .kw-year-header {
@@ -1099,24 +1102,44 @@
   justify-content: space-between;
   background: var(--kw-blue);
   color: #fff;
-  padding: 0.85rem 1.25rem;
+  padding: 1rem 1.5rem;
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 1rem;
   list-style: none;
+  user-select: none;
+}
+
+.kw-year-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .kw-year-badge {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.18);
   font-size: 0.75rem;
-  padding: 0.2rem 0.6rem;
+  padding: 0.22rem 0.75rem;
   border-radius: 20px;
-  margin-left: 0.75rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .kw-year-toggle {
-  transition: transform 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.kw-year-toggle svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  fill: none;
 }
 
 .kw-year-block.is-open .kw-year-toggle {
@@ -1126,7 +1149,6 @@
 .kw-year-body {
   display: none;
   background: var(--kw-white);
-  padding: 0.25rem 0;
 }
 
 .kw-year-block.is-open .kw-year-body {
@@ -1137,14 +1159,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.25rem;
+  padding: 0.85rem 1.5rem;
   border-bottom: 1px solid var(--kw-border);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .kw-boletin-row:last-child { border-bottom: none; }
 
-.kw-boletin-name { color: var(--kw-text); }
+.kw-boletin-name {
+  color: var(--kw-text);
+  font-weight: 500;
+}
 
 /* Caja sugerencia de búsqueda */
 .kw-suggestion-box {
