@@ -700,6 +700,7 @@
         row.remove();
       });
     });
+
   }
 
   async function saveBoletines() {
