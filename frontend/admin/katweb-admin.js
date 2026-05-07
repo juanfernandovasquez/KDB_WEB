@@ -136,6 +136,10 @@
       const tools = meta.tools || [];
       const t0 = tools[0] || {};
       const t1 = tools[1] || {};
+      // Sección de presentación: columna izquierda y derecha
+      setf("kdbweb-meta-tf-left-title", meta.left_title || "¿Qué es y por qué importa?");
+      const tfRightEditor = q("kdbweb-meta-tf-right-content");
+      if (tfRightEditor) tfRightEditor.innerHTML = meta.right_content || "";
       // Sección 1 y 2: subtítulos y descripciones
       setf("kdbweb-meta-tf-s1title", meta.section1_title || "1. Resoluciones");
       setf("kdbweb-meta-tf-s1desc",  meta.section1_desc  || "");
@@ -220,6 +224,9 @@
       meta[key] = (q("kdbweb-meta-access-url")?.value || "").trim();
     } else if (type === "tf") {
       const trim = (id) => (q(id)?.value || "").trim();
+      // Sección de presentación
+      meta.left_title    = trim("kdbweb-meta-tf-left-title") || "¿Qué es y por qué importa?";
+      meta.right_content = (q("kdbweb-meta-tf-right-content")?.innerHTML || "").trim();
       // Subtítulos y descripciones de sección
       meta.section1_title = trim("kdbweb-meta-tf-s1title") || "1. Resoluciones";
       meta.section1_desc  = trim("kdbweb-meta-tf-s1desc");

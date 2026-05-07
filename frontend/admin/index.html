@@ -663,7 +663,30 @@
 
               <!-- Tribunal Fiscal: editor completo de tarjetas de herramientas -->
               <div id="kdbweb-meta-tf" class="hidden">
-                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita subtítulos, descripciones y tarjetas de herramientas de la página Tribunal Fiscal.</p>
+                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita todos los textos y herramientas de la página Tribunal Fiscal.</p>
+
+                <!-- Sección de dos columnas (¿Qué es y por qué importa?) -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Sección de presentación</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Título columna izquierda <span style="color:#9ca3af;font-size:0.8rem;">(ej. "¿Qué es y por qué importa?")</span></label>
+                    <input type="text" id="kdbweb-meta-tf-left-title" placeholder="¿Qué es y por qué importa?">
+                  </div>
+                  <div>
+                    <label>Texto columna derecha</label>
+                    <div class="rich-editor">
+                      <div class="editor-toolbar" id="kdbweb-tf-right-toolbar">
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="bold" title="Negrita"><strong>B</strong></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="italic" title="Italica"><em>I</em></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
+                        <button type="button" class="editor-pill-btn" data-cmd="createLink" title="Insertar enlace">Enlace</button>
+                        <button type="button" class="editor-pill-btn" data-cmd="unlink" title="Quitar enlace">Sin enlace</button>
+                        <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
+                      </div>
+                      <div id="kdbweb-meta-tf-right-content" class="editor-surface" contenteditable="true" style="min-height:110px;"></div>
+                    </div>
+                  </div>
+                </fieldset>
 
                 <!-- Sección 1: subtítulo + descripción -->
                 <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
