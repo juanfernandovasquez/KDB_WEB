@@ -823,13 +823,26 @@
         const el = document.getElementById('kw-right-content');
         if (el) el.innerHTML = meta.right_content;
       }
-      if (meta.access_url) {
-        const btn = document.getElementById('kw-access-btn');
-        if (btn) btn.href = absUrl(meta.access_url);
+      // Caja del buscador
+      if (meta.box_title) {
+        const el = document.getElementById('kw-box-title');
+        if (el) el.textContent = meta.box_title;
+      }
+      if (meta.box_desc) {
+        const el = document.getElementById('kw-box-desc');
+        if (el) el.textContent = meta.box_desc;
       }
       if (meta.access_label) {
         const el = document.getElementById('kw-access-label');
         if (el) el.textContent = meta.access_label;
+      }
+      if (meta.access_btn_label) {
+        const btn = document.getElementById('kw-access-btn');
+        if (btn) btn.textContent = meta.access_btn_label;
+      }
+      if (meta.access_url) {
+        const btn = document.getElementById('kw-access-btn');
+        if (btn) btn.href = absUrl(meta.access_url);
       }
     } else {
       if (entry.content_html) {

@@ -805,6 +805,64 @@
                 </fieldset>
               </div>
 
+              <!-- Sentencias del TC: editor completo -->
+              <div id="kdbweb-meta-sentencias" class="hidden">
+                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita todos los textos de la página Sentencias del TC.</p>
+
+                <!-- Sección de presentación -->
+                <fieldset style="border:1px solid #e5e7eb;border-radius:6px;padding:1rem;margin-bottom:1.25rem;">
+                  <legend style="font-size:0.82rem;font-weight:600;color:#4b5563;padding:0 0.4rem;">Sección de presentación</legend>
+
+                  <div style="margin-bottom:1rem;">
+                    <label>Título columna izquierda</label>
+                    <input type="text" id="kdbweb-meta-sen-left-title" placeholder="¿Qué es y por qué importa?" style="width:100%;">
+                  </div>
+
+                  <div style="margin-bottom:0.5rem;">
+                    <label>Texto explicativo (columna derecha)</label>
+                    <div class="rich-editor">
+                      <div class="editor-toolbar" id="kdbweb-sen-right-toolbar">
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="bold" title="Negrita"><strong>B</strong></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="italic" title="Italica"><em>I</em></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
+                        <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
+                      </div>
+                      <div id="kdbweb-meta-sen-right-content" class="editor-surface" contenteditable="true" style="min-height:120px;"></div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Caja del buscador -->
+                <fieldset style="border:1px solid #e5e7eb;border-radius:6px;padding:1rem;margin-bottom:1.25rem;">
+                  <legend style="font-size:0.82rem;font-weight:600;color:#4b5563;padding:0 0.4rem;">Caja del buscador</legend>
+
+                  <div style="margin-bottom:1rem;">
+                    <label>Título de la caja</label>
+                    <input type="text" id="kdbweb-meta-sen-box-title" placeholder="Buscador de Jurisprudencia del Tribunal Constitucional" style="width:100%;">
+                  </div>
+
+                  <div style="margin-bottom:1rem;">
+                    <label>Descripción</label>
+                    <textarea id="kdbweb-meta-sen-box-desc" rows="3" style="width:100%;font-size:0.88rem;resize:vertical;" placeholder="Descripción del buscador…"></textarea>
+                  </div>
+
+                  <div style="margin-bottom:1rem;">
+                    <label>Etiqueta del botón de acceso</label>
+                    <input type="text" id="kdbweb-meta-sen-access-label" placeholder="Acceder al buscador de jurisprudencia del Tribunal Constitucional:" style="width:100%;">
+                  </div>
+
+                  <div style="margin-bottom:1rem;">
+                    <label>Texto del botón</label>
+                    <input type="text" id="kdbweb-meta-sen-access-btn-label" placeholder="Accede al texto" style="width:100%;">
+                  </div>
+
+                  <div style="margin-bottom:0.5rem;">
+                    <label>URL del botón</label>
+                    <input type="url" id="kdbweb-meta-sen-access-url" placeholder="https://..." style="width:100%;">
+                  </div>
+                </fieldset>
+              </div>
+
               <!-- Tratados Internacionales: texts + treaty list builder -->
               <div id="kdbweb-meta-tratados" class="hidden">
 

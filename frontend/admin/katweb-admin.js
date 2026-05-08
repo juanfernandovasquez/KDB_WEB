@@ -63,7 +63,7 @@
   const SLUG_TYPE = {
     "constitucion": "constitucion",
     "casaciones-de-la-corte-suprema": "casaciones",
-    "sentencias-del-tc": "access",
+    "sentencias-del-tc": "sentencias",
     "doctrina": "doctrina_access",   // uses cta_url, not access_url
     "tribunal-fiscal": "tf",
     "tratados-internacionales": "tratados",
@@ -85,7 +85,7 @@
 
     // Hide all sub-editors first
     ["kdbweb-meta-constitucion", "kdbweb-meta-access", "kdbweb-meta-tf",
-     "kdbweb-meta-casaciones",
+     "kdbweb-meta-casaciones", "kdbweb-meta-sentencias",
      "kdbweb-meta-tratados", "kdbweb-meta-legislacion",
      "kdbweb-meta-jurisprudencia",
      "kdbweb-meta-raw"].forEach((id) => {
@@ -171,6 +171,18 @@
       setf("kdbweb-meta-cas-sug-title",       meta.suggestion_title || "Sugerencia de búsqueda");
       setf("kdbweb-meta-cas-sug-desc",        meta.suggestion_desc  || "");
       renderCasSugItems(meta.suggestion_items || []);
+    } else if (type === "sentencias") {
+      const el = q("kdbweb-meta-sentencias");
+      if (el) el.classList.remove("hidden");
+      const setf = (id, val) => { const e = q(id); if (e) e.value = val || ""; };
+      setf("kdbweb-meta-sen-left-title",      meta.left_title       || "¿Qué es y por qué importa?");
+      const senRight = q("kdbweb-meta-sen-right-content");
+      if (senRight) senRight.innerHTML = meta.right_content || "";
+      setf("kdbweb-meta-sen-box-title",       meta.box_title        || "Buscador de Jurisprudencia del Tribunal Constitucional");
+      setf("kdbweb-meta-sen-box-desc",        meta.box_desc         || "");
+      setf("kdbweb-meta-sen-access-label",    meta.access_label     || "Acceder al buscador de jurisprudencia del Tribunal Constitucional:");
+      setf("kdbweb-meta-sen-access-btn-label",meta.access_btn_label || "Accede al texto");
+      setf("kdbweb-meta-sen-access-url",      meta.access_url       || "");
     } else if (type === "tratados") {
       const el = q("kdbweb-meta-tratados");
       if (el) el.classList.remove("hidden");
@@ -276,6 +288,15 @@
           url:          trim("kdbweb-meta-tf-url2"),
         },
       ];
+    } else if (type === "sentencias") {
+      const trim = (id) => (q(id)?.value || "").trim();
+      meta.left_title       = trim("kdbweb-meta-sen-left-title")       || "¿Qué es y por qué importa?";
+      meta.right_content    = (q("kdbweb-meta-sen-right-content")?.innerHTML || "").trim();
+      meta.box_title        = trim("kdbweb-meta-sen-box-title")        || "Buscador de Jurisprudencia del Tribunal Constitucional";
+      meta.box_desc         = trim("kdbweb-meta-sen-box-desc");
+      meta.access_label     = trim("kdbweb-meta-sen-access-label")     || "Acceder al buscador de jurisprudencia del Tribunal Constitucional:";
+      meta.access_btn_label = trim("kdbweb-meta-sen-access-btn-label") || "Accede al texto";
+      meta.access_url       = trim("kdbweb-meta-sen-access-url");
     } else if (type === "tratados") {
       const leftVal  = (q("kw-tratados-left-title")?.value || "").trim();
       const rightVal = (q("kw-tratados-right-editor")?.innerHTML || "").trim();
