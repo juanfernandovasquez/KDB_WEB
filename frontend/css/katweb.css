@@ -468,8 +468,8 @@
 
 .kw-access-btn {
   display: inline-block;
-  background: #fff;
-  color: var(--kw-blue);
+  background: var(--kw-blue);
+  color: #fff;
   font-weight: 700;
   font-size: 0.85rem;
   padding: 0.6rem 1.1rem;
