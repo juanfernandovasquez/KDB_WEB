@@ -1776,7 +1776,8 @@ let currentAdminUserId = null;
             if (!detailRes.ok) throw new Error("detail");
             return await detailRes.json();
           } catch (err) {
-            return { ...entry, content_html: "" };
+            console.warn(`[KDBWEB] No se pudo cargar el detalle de "${entry.slug}". Guarda con precaución.`, err);
+            return { ...entry, content_html: "", _detailFailed: true };
           }
         }),
       );
@@ -1801,10 +1802,23 @@ let currentAdminUserId = null;
     const status = q("status-kdbweb");
     if (status) status.textContent = "Guardando...";
     try {
+      // Re-fetch detail for any entries that failed to load, to avoid wiping their meta_json
+      const entriesToSave = await Promise.all(kdbwebEntries.map(async (e) => {
+        if (!e._detailFailed) return e;
+        try {
+          const r = await apiFetch(`/api/kdbweb/${encodeURIComponent(e.slug)}`);
+          if (r.ok) {
+            const fresh = await r.json();
+            // Merge: keep any local title/summary changes but restore meta_json from DB
+            return { ...e, meta_json: fresh.meta_json, _detailFailed: false };
+          }
+        } catch (_) {}
+        return e; // still failed — meta_json may be absent; console warns above
+      }));
       const res = await apiFetch("/api/kdbweb", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entries: kdbwebEntries }),
+        body: JSON.stringify({ entries: entriesToSave }),
       });
       if (!res.ok) throw new Error("save");
       if (status) status.textContent = "KDBWEB guardado";

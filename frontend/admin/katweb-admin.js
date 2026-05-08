@@ -329,13 +329,21 @@
       meta.access_btn_label = trim("kdbweb-meta-sen-access-btn-label") || "Accede al texto";
       meta.access_url       = trim("kdbweb-meta-sen-access-url");
     } else if (type === "tratados") {
+      // If this entry's detail failed to load from the API, skip updating meta_json
+      // to avoid overwriting the database with empty/stale data.
+      if (entry._detailFailed) return;
       const leftVal  = (q("kw-tratados-left-title")?.value || "").trim();
       const rightVal = (q("kw-tratados-right-editor")?.innerHTML || "").trim();
       const secVal   = (q("kw-tratados-section-title")?.value || "").trim();
       if (leftVal)  meta.left_title    = leftVal;
       if (rightVal) meta.right_content = rightVal;
       if (secVal)   meta.section_title = secVal;
-      meta.entries = collectTreatiesFromDom();
+      const domEntries = collectTreatiesFromDom();
+      // Safety guard: if the DOM shows no entries but the form was originally opened
+      // with existing entries (currentMeta.entries), preserve those to avoid accidental wipe.
+      // This protects against edge cases like a re-render with stale data or an empty
+      // meta_json that never had entries vs. a user deliberately clearing them.
+      meta.entries = domEntries.length > 0 ? domEntries : (currentMeta.entries || []);
     } else if (type === "legislacion") {
       const leftVal  = (q("kw-leg-left-title")?.value || "").trim();
       const rightVal = (q("kw-leg-right-editor")?.innerHTML || "").trim();
@@ -926,6 +934,21 @@
         currentMeta = entry.meta_json ? JSON.parse(entry.meta_json) : {};
       } catch (_) {
         currentMeta = {};
+      }
+      // Show a warning banner if this entry's detail failed to load from the API.
+      // Saving in this state risks wiping meta_json data stored in the DB.
+      const section = q("kdbweb-meta-section");
+      let warnEl = q("kdbweb-detail-load-warning");
+      if (entry._detailFailed) {
+        if (!warnEl && section) {
+          warnEl = document.createElement("div");
+          warnEl.id = "kdbweb-detail-load-warning";
+          warnEl.style.cssText = "background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;padding:0.6rem 0.9rem;margin-bottom:1rem;color:#92400e;font-size:0.85rem;";
+          section.insertBefore(warnEl, section.firstChild);
+        }
+        if (warnEl) warnEl.textContent = "⚠️ No se pudieron cargar los datos guardados de esta subpágina (error de red). Haz clic en "Revertir cambios" antes de guardar para evitar perder información.";
+      } else if (warnEl) {
+        warnEl.remove();
       }
       showMetaSection(currentSlug, currentMeta);
     });
