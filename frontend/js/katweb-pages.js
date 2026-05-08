@@ -545,8 +545,8 @@
     const entry = await fetchKdbwebEntry('doctrina');
     if (!entry) return;
 
-    // Banner
-    setIfFound('kw-banner-title', entry.hero_title || 'Doctrina', 'textContent');
+    // Banner (split: kw-banner-title + imagen)
+    setIfFound('kw-banner-title', entry.hero_title || 'Doctrina', 'innerHTML');
     setIfFound('kw-banner-image', entry.hero_image_url, 'src');
 
     const meta = parseMeta(entry);
@@ -559,9 +559,14 @@
         const el = document.getElementById('kw-right-content');
         if (el) el.innerHTML = meta.right_content;
       }
-      // Tarjetas de categorías
+      // Tarjetas de categorías: si hay meta, actualizar los IDs estáticos (sin re-render)
       if (meta.categories && meta.categories.length) {
-        renderDoctrinaCards(meta.categories);
+        meta.categories.forEach((cat, i) => {
+          const titleEl = document.getElementById(`kw-doc-card-title-${i}`);
+          const descEl  = document.getElementById(`kw-doc-card-desc-${i}`);
+          if (titleEl && cat.title)       titleEl.textContent = cat.title;
+          if (descEl  && cat.description) descEl.textContent  = cat.description;
+        });
       }
       // Botón CTA
       if (meta.cta_label) {
