@@ -54,6 +54,23 @@
     }
   }
 
+  /**
+   * Asegura que una URL sea absoluta.
+   * Si el usuario escribe "www.google.com" sin protocolo, el browser
+   * la interpreta como relativa y la pega al dominio del sitio.
+   * Esta función añade "https://" cuando no hay protocolo explícito.
+   */
+  function absUrl(url) {
+    if (!url || url === '#') return url || '#';
+    // Ya es absoluta o es relativa al sitio ("/pagina") — no tocar
+    if (/^https?:\/\//i.test(url)) return url;
+    if (/^\/\//i.test(url))        return url;   // protocol-relative
+    if (url.startsWith('/'))       return url;   // ruta relativa del sitio
+    if (/^mailto:|^tel:/i.test(url)) return url;
+    // Falta el protocolo — asumir https
+    return 'https://' + url;
+  }
+
   /* ══════════════════════════════════════════════════════════
      PÁGINA PRINCIPAL — kdbweb.html
      Renderiza 5 tarjetas de imagen de las categorías raíz
@@ -143,7 +160,7 @@
       }
       if (meta.access_url) {
         const el = document.getElementById('kw-access-btn');
-        if (el) el.href = meta.access_url;
+        if (el) el.href = absUrl(meta.access_url);
       }
     }
 
@@ -156,7 +173,7 @@
     // Hero primary href → botón de acceso
     if (entry.hero_primary_href) {
       const btn = document.getElementById('kw-access-btn');
-      if (btn) btn.href = entry.hero_primary_href;
+      if (btn) btn.href = absUrl(entry.hero_primary_href);
     }
     if (entry.hero_primary_label) {
       const btn = document.getElementById('kw-access-btn');
@@ -248,7 +265,7 @@
       }
       html += '</div>';
       if (entry.button_url) {
-        html += `<a href="${esc(entry.button_url)}" class="kw-treaty-btn" target="_blank" rel="noopener">${esc(entry.button_label || 'Ver convenio')} ${SVG_EXT_LINK}</a>`;
+        html += `<a href="${esc(ensureAbsoluteUrl(entry.button_url))}" class="kw-treaty-btn" target="_blank" rel="noopener">${esc(entry.button_label || 'Ver convenio')} ${SVG_EXT_LINK}</a>`;
       } else {
         html += '<span></span>';
       }
@@ -260,7 +277,7 @@
           html += '<div class="kw-treaty-sub">';
           html += `<p class="kw-treaty-sub-title">${esc(sub.title || '')}</p>`;
           if (sub.button_url) {
-            html += `<a href="${esc(sub.button_url)}" class="kw-treaty-btn" target="_blank" rel="noopener">${esc(sub.button_label || 'Ver cláusula')} ${SVG_EXT_LINK}</a>`;
+            html += `<a href="${esc(ensureAbsoluteUrl(sub.button_url))}" class="kw-treaty-btn" target="_blank" rel="noopener">${esc(sub.button_label || 'Ver cláusula')} ${SVG_EXT_LINK}</a>`;
           } else {
             html += '<span></span>';
           }
@@ -557,7 +574,7 @@
       }
       if (meta.cta_url) {
         const btn = document.getElementById('kw-doctrina-cta-btn');
-        if (btn) btn.href = meta.cta_url;
+        if (btn) btn.href = absUrl(meta.cta_url);
       }
     } else if (entry.content_html) {
       const el = document.getElementById('kw-right-content');
@@ -567,7 +584,7 @@
     // CTA href desde hero_primary_href
     if (entry.hero_primary_href) {
       const btn = document.getElementById('kw-doctrina-cta-btn');
-      if (btn) btn.href = entry.hero_primary_href;
+      if (btn) btn.href = absUrl(entry.hero_primary_href);
     }
     if (entry.hero_primary_label) {
       const btn = document.getElementById('kw-doctrina-cta-btn');
@@ -650,7 +667,7 @@
           if (title && tool.card_title)   title.textContent = tool.card_title;
           if (desc  && tool.card_desc)    desc.textContent  = tool.card_desc;
           if (btn) {
-            btn.href = tool.url || '#';
+            btn.href = absUrl(tool.url);
             // button_label is the new field; fall back to old "label" for backward-compat
             const label = tool.button_label || tool.label;
             if (label) btn.textContent = label;
@@ -742,7 +759,7 @@
       }
       if (meta.access_url) {
         const btn = document.getElementById('kw-access-btn');
-        if (btn) btn.href = meta.access_url;
+        if (btn) btn.href = absUrl(meta.access_url);
       }
       if (meta.access_btn_label) {
         const btn = document.getElementById('kw-access-btn');
@@ -775,7 +792,7 @@
       }
       if (entry.hero_primary_href) {
         const btn = document.getElementById('kw-access-btn');
-        if (btn) btn.href = entry.hero_primary_href;
+        if (btn) btn.href = absUrl(entry.hero_primary_href);
       }
       if (entry.hero_primary_label) {
         const btn = document.getElementById('kw-access-btn');
@@ -808,7 +825,7 @@
       }
       if (meta.access_url) {
         const btn = document.getElementById('kw-access-btn');
-        if (btn) btn.href = meta.access_url;
+        if (btn) btn.href = absUrl(meta.access_url);
       }
       if (meta.access_label) {
         const el = document.getElementById('kw-access-label');
@@ -821,7 +838,7 @@
       }
       if (entry.hero_primary_href) {
         const btn = document.getElementById('kw-access-btn');
-        if (btn) btn.href = entry.hero_primary_href;
+        if (btn) btn.href = absUrl(entry.hero_primary_href);
       }
       if (entry.hero_primary_label) {
         const btn = document.getElementById('kw-access-btn');
