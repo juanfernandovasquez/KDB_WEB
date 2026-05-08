@@ -323,7 +323,7 @@
     row.style.cssText = "display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;";
     row.dataset.casItemText = text;
     row.innerHTML = `
-      <span style="flex:1;font-size:0.88rem;padding:0.35rem 0.5rem;background:#f3f4f6;border-radius:4px;">${esc(text)}</span>
+      <span style="flex:1;font-size:0.88rem;padding:0.35rem 0.5rem;background:#f3f4f6;border-radius:4px;">${safe(text)}</span>
       <button type="button" class="secondary small-btn kw-cas-sug-delete" style="flex-shrink:0;">✕</button>
     `;
     return row;
