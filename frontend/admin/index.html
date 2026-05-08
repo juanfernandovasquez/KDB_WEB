@@ -661,6 +661,122 @@
                 </div>
               </div>
 
+              <!-- Doctrina: editor completo -->
+              <div id="kdbweb-meta-doctrina" class="hidden">
+                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita todos los textos y tarjetas de la página Doctrina.</p>
+
+                <!-- Sección de presentación -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Sección de presentación</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Título columna izquierda <span style="color:#9ca3af;font-size:0.8rem;">(ej. "¿Qué es y por qué importa?")</span></label>
+                    <input type="text" id="kdbweb-meta-doc-left-title" placeholder="¿Qué es y por qué importa?" style="width:100%;">
+                  </div>
+                  <div>
+                    <label>Texto explicativo (columna derecha)</label>
+                    <div class="rich-editor">
+                      <div class="editor-toolbar" id="kdbweb-doc-right-toolbar">
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="bold" title="Negrita"><strong>B</strong></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="italic" title="Italica"><em>I</em></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
+                        <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
+                      </div>
+                      <div id="kdbweb-meta-doc-right-content" class="editor-surface" contenteditable="true" style="min-height:120px;"></div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Tarjetas de categorías -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Tarjetas de categorías</legend>
+
+                  <!-- Tarjeta 1 -->
+                  <div style="border:1px solid #e5e7eb;border-radius:6px;padding:0.75rem;margin-bottom:0.75rem;background:#fff;">
+                    <p style="font-size:0.8rem;font-weight:600;color:#6b7280;margin:0 0 0.5rem;">Tarjeta 1</p>
+                    <div style="display:grid;grid-template-columns:80px 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+                      <div>
+                        <label style="font-size:0.8rem;">Ícono (emoji)</label>
+                        <input type="text" id="kdbweb-meta-doc-card-icon-0" placeholder="📄" style="width:100%;text-align:center;">
+                      </div>
+                      <div>
+                        <label style="font-size:0.8rem;">Título</label>
+                        <input type="text" id="kdbweb-meta-doc-card-title-0" placeholder="Artículos académicos" style="width:100%;">
+                      </div>
+                    </div>
+                    <label style="font-size:0.8rem;">Descripción</label>
+                    <input type="text" id="kdbweb-meta-doc-card-desc-0" placeholder="Descripción de la categoría..." style="width:100%;">
+                  </div>
+
+                  <!-- Tarjeta 2 -->
+                  <div style="border:1px solid #e5e7eb;border-radius:6px;padding:0.75rem;margin-bottom:0.75rem;background:#fff;">
+                    <p style="font-size:0.8rem;font-weight:600;color:#6b7280;margin:0 0 0.5rem;">Tarjeta 2</p>
+                    <div style="display:grid;grid-template-columns:80px 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+                      <div>
+                        <label style="font-size:0.8rem;">Ícono (emoji)</label>
+                        <input type="text" id="kdbweb-meta-doc-card-icon-1" placeholder="⚖️" style="width:100%;text-align:center;">
+                      </div>
+                      <div>
+                        <label style="font-size:0.8rem;">Título</label>
+                        <input type="text" id="kdbweb-meta-doc-card-title-1" placeholder="Comentarios jurisprudenciales" style="width:100%;">
+                      </div>
+                    </div>
+                    <label style="font-size:0.8rem;">Descripción</label>
+                    <input type="text" id="kdbweb-meta-doc-card-desc-1" placeholder="Descripción de la categoría..." style="width:100%;">
+                  </div>
+
+                  <!-- Tarjeta 3 -->
+                  <div style="border:1px solid #e5e7eb;border-radius:6px;padding:0.75rem;margin-bottom:0.75rem;background:#fff;">
+                    <p style="font-size:0.8rem;font-weight:600;color:#6b7280;margin:0 0 0.5rem;">Tarjeta 3</p>
+                    <div style="display:grid;grid-template-columns:80px 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+                      <div>
+                        <label style="font-size:0.8rem;">Ícono (emoji)</label>
+                        <input type="text" id="kdbweb-meta-doc-card-icon-2" placeholder="📊" style="width:100%;text-align:center;">
+                      </div>
+                      <div>
+                        <label style="font-size:0.8rem;">Título</label>
+                        <input type="text" id="kdbweb-meta-doc-card-title-2" placeholder="Informes técnicos" style="width:100%;">
+                      </div>
+                    </div>
+                    <label style="font-size:0.8rem;">Descripción</label>
+                    <input type="text" id="kdbweb-meta-doc-card-desc-2" placeholder="Descripción de la categoría..." style="width:100%;">
+                  </div>
+
+                  <!-- Tarjeta 4 -->
+                  <div style="border:1px solid #e5e7eb;border-radius:6px;padding:0.75rem;background:#fff;">
+                    <p style="font-size:0.8rem;font-weight:600;color:#6b7280;margin:0 0 0.5rem;">Tarjeta 4</p>
+                    <div style="display:grid;grid-template-columns:80px 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+                      <div>
+                        <label style="font-size:0.8rem;">Ícono (emoji)</label>
+                        <input type="text" id="kdbweb-meta-doc-card-icon-3" placeholder="📚" style="width:100%;text-align:center;">
+                      </div>
+                      <div>
+                        <label style="font-size:0.8rem;">Título</label>
+                        <input type="text" id="kdbweb-meta-doc-card-title-3" placeholder="Materiales de estudio" style="width:100%;">
+                      </div>
+                    </div>
+                    <label style="font-size:0.8rem;">Descripción</label>
+                    <input type="text" id="kdbweb-meta-doc-card-desc-3" placeholder="Descripción de la categoría..." style="width:100%;">
+                  </div>
+                </fieldset>
+
+                <!-- CTA de acceso -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Barra de acceso (CTA)</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Texto de la etiqueta</label>
+                    <input type="text" id="kdbweb-meta-doc-cta-label" placeholder="Acceder para ver el contenido disponible:" style="width:100%;">
+                  </div>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Texto del botón</label>
+                    <input type="text" id="kdbweb-meta-doc-cta-btn-label" placeholder="Accede a la biblioteca" style="width:100%;">
+                  </div>
+                  <div>
+                    <label>URL del botón</label>
+                    <input type="url" id="kdbweb-meta-doc-cta-url" placeholder="https://..." style="width:100%;">
+                  </div>
+                </fieldset>
+              </div>
+
               <!-- Casaciones de la Corte Suprema: editor completo -->
               <div id="kdbweb-meta-casaciones" class="hidden">
                 <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita todos los textos de la página Casaciones de la Corte Suprema.</p>

@@ -64,7 +64,7 @@
     "constitucion": "constitucion",
     "casaciones-de-la-corte-suprema": "casaciones",
     "sentencias-del-tc": "sentencias",
-    "doctrina": "doctrina_access",   // uses cta_url, not access_url
+    "doctrina": "doctrina",
     "tribunal-fiscal": "tf",
     "tratados-internacionales": "tratados",
     "legislacion-tributaria-aduanera": "legislacion",
@@ -85,7 +85,7 @@
 
     // Hide all sub-editors first
     ["kdbweb-meta-constitucion", "kdbweb-meta-access", "kdbweb-meta-tf",
-     "kdbweb-meta-casaciones", "kdbweb-meta-sentencias",
+     "kdbweb-meta-casaciones", "kdbweb-meta-sentencias", "kdbweb-meta-doctrina",
      "kdbweb-meta-tratados", "kdbweb-meta-legislacion",
      "kdbweb-meta-jurisprudencia",
      "kdbweb-meta-raw"].forEach((id) => {
@@ -171,6 +171,25 @@
       setf("kdbweb-meta-cas-sug-title",       meta.suggestion_title || "Sugerencia de búsqueda");
       setf("kdbweb-meta-cas-sug-desc",        meta.suggestion_desc  || "");
       renderCasSugItems(meta.suggestion_items || []);
+    } else if (type === "doctrina") {
+      const el = q("kdbweb-meta-doctrina");
+      if (el) el.classList.remove("hidden");
+      const setf = (id, val) => { const e = q(id); if (e) e.value = val || ""; };
+      setf("kdbweb-meta-doc-left-title",  meta.left_title  || "¿Qué es y por qué importa?");
+      const docRight = q("kdbweb-meta-doc-right-content");
+      if (docRight) docRight.innerHTML = meta.right_content || "";
+      // Tarjetas de categoría (fijas, 4 campos)
+      const cats = meta.categories || [];
+      [0, 1, 2, 3].forEach((i) => {
+        const c = cats[i] || {};
+        setf(`kdbweb-meta-doc-card-icon-${i}`,  c.icon_emoji || "");
+        setf(`kdbweb-meta-doc-card-title-${i}`, c.title      || "");
+        setf(`kdbweb-meta-doc-card-desc-${i}`,  c.description || "");
+      });
+      // CTA
+      setf("kdbweb-meta-doc-cta-label",     meta.cta_label     || "Acceder para ver el contenido disponible:");
+      setf("kdbweb-meta-doc-cta-btn-label", meta.cta_btn_label || "Accede a la biblioteca");
+      setf("kdbweb-meta-doc-cta-url",       meta.cta_url       || "");
     } else if (type === "sentencias") {
       const el = q("kdbweb-meta-sentencias");
       if (el) el.classList.remove("hidden");
@@ -288,6 +307,18 @@
           url:          trim("kdbweb-meta-tf-url2"),
         },
       ];
+    } else if (type === "doctrina") {
+      const trim = (id) => (q(id)?.value || "").trim();
+      meta.left_title    = trim("kdbweb-meta-doc-left-title")  || "¿Qué es y por qué importa?";
+      meta.right_content = (q("kdbweb-meta-doc-right-content")?.innerHTML || "").trim();
+      meta.categories = [0, 1, 2, 3].map((i) => ({
+        icon_emoji:  trim(`kdbweb-meta-doc-card-icon-${i}`)  || "📄",
+        title:       trim(`kdbweb-meta-doc-card-title-${i}`) || "",
+        description: trim(`kdbweb-meta-doc-card-desc-${i}`)  || "",
+      }));
+      meta.cta_label     = trim("kdbweb-meta-doc-cta-label")     || "Acceder para ver el contenido disponible:";
+      meta.cta_btn_label = trim("kdbweb-meta-doc-cta-btn-label") || "Accede a la biblioteca";
+      meta.cta_url       = trim("kdbweb-meta-doc-cta-url");
     } else if (type === "sentencias") {
       const trim = (id) => (q(id)?.value || "").trim();
       meta.left_title       = trim("kdbweb-meta-sen-left-title")       || "¿Qué es y por qué importa?";

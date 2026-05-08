@@ -484,6 +484,16 @@
   color: #fff;
 }
 
+/* Dentro del CTA azul de Doctrina el botón va en blanco */
+.kw-doctrina-cta-box .kw-access-btn {
+  background: #fff;
+  color: var(--kw-blue);
+}
+.kw-doctrina-cta-box .kw-access-btn:hover {
+  background: var(--kw-gold);
+  color: #fff;
+}
+
 /* ─── SECCIÓN DESCRICIÓN CENTRADA (Jurisprudencia) ──────── */
 .kw-centered-desc {
   background: var(--kw-gray-bg);
