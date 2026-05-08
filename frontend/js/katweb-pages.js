@@ -752,6 +752,14 @@
         const el = document.getElementById('kw-access-label');
         if (el) el.textContent = meta.access_label;
       }
+      if (meta.suggestion_title) {
+        const el = document.getElementById('kw-suggestion-title-text');
+        if (el) el.textContent = meta.suggestion_title;
+      }
+      if (meta.suggestion_desc) {
+        const el = document.getElementById('kw-suggestion-desc');
+        if (el) el.textContent = meta.suggestion_desc;
+      }
       if (meta.suggestion_items && meta.suggestion_items.length) {
         const box = document.getElementById('kw-suggestion-items');
         if (box) {

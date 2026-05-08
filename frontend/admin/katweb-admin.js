@@ -62,7 +62,7 @@
 
   const SLUG_TYPE = {
     "constitucion": "constitucion",
-    "casaciones-de-la-corte-suprema": "access",
+    "casaciones-de-la-corte-suprema": "casaciones",
     "sentencias-del-tc": "access",
     "doctrina": "doctrina_access",   // uses cta_url, not access_url
     "tribunal-fiscal": "tf",
@@ -85,6 +85,7 @@
 
     // Hide all sub-editors first
     ["kdbweb-meta-constitucion", "kdbweb-meta-access", "kdbweb-meta-tf",
+     "kdbweb-meta-casaciones",
      "kdbweb-meta-tratados", "kdbweb-meta-legislacion",
      "kdbweb-meta-jurisprudencia",
      "kdbweb-meta-raw"].forEach((id) => {
@@ -157,6 +158,19 @@
       setf("kdbweb-meta-tf-carddesc2",  t1.card_desc    || "");
       setf("kdbweb-meta-tf-btnlabel2",  t1.button_label || (t1.card_title ? "Acceder al buscador" : t1.label) || "Acceder al buscador");
       setf("kdbweb-meta-tf-url2",       t1.url          || "");
+    } else if (type === "casaciones") {
+      const el = q("kdbweb-meta-casaciones");
+      if (el) el.classList.remove("hidden");
+      const setf = (id, val) => { const e = q(id); if (e) e.value = val || ""; };
+      setf("kdbweb-meta-cas-left-title",      meta.left_title       || "¿Qué es y por qué importa?");
+      const casRight = q("kdbweb-meta-cas-right-content");
+      if (casRight) casRight.innerHTML = meta.right_content || "";
+      setf("kdbweb-meta-cas-access-label",    meta.access_label     || "Acceder al buscador de jurisprudencia del Poder Judicial:");
+      setf("kdbweb-meta-cas-access-btn-label",meta.access_btn_label || "Accede al texto");
+      setf("kdbweb-meta-cas-access-url",      meta.access_url       || "");
+      setf("kdbweb-meta-cas-sug-title",       meta.suggestion_title || "Sugerencia de búsqueda");
+      setf("kdbweb-meta-cas-sug-desc",        meta.suggestion_desc  || "");
+      renderCasSugItems(meta.suggestion_items || []);
     } else if (type === "tratados") {
       const el = q("kdbweb-meta-tratados");
       if (el) el.classList.remove("hidden");
@@ -222,6 +236,20 @@
     } else if (type === "access" || type === "doctrina_access") {
       const key = ACCESS_KEY[type] || "access_url";
       meta[key] = (q("kdbweb-meta-access-url")?.value || "").trim();
+    } else if (type === "casaciones") {
+      const trim = (id) => (q(id)?.value || "").trim();
+      meta.left_title       = trim("kdbweb-meta-cas-left-title")       || "¿Qué es y por qué importa?";
+      meta.right_content    = (q("kdbweb-meta-cas-right-content")?.innerHTML || "").trim();
+      meta.access_label     = trim("kdbweb-meta-cas-access-label")     || "Acceder al buscador de jurisprudencia del Poder Judicial:";
+      meta.access_btn_label = trim("kdbweb-meta-cas-access-btn-label") || "Accede al texto";
+      meta.access_url       = trim("kdbweb-meta-cas-access-url");
+      meta.suggestion_title = trim("kdbweb-meta-cas-sug-title")        || "Sugerencia de búsqueda";
+      meta.suggestion_desc  = trim("kdbweb-meta-cas-sug-desc");
+      meta.suggestion_items = [];
+      document.querySelectorAll("#kdbweb-cas-sug-items [data-cas-item-text]").forEach((el) => {
+        const t = el.dataset.casItemText || "";
+        if (t) meta.suggestion_items.push(t);
+      });
     } else if (type === "tf") {
       const trim = (id) => (q(id)?.value || "").trim();
       // Sección de presentación
@@ -277,6 +305,28 @@
     // Update preview
     const preview = q("kdbweb-meta-json-preview");
     if (preview) preview.textContent = JSON.stringify(meta, null, 2);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CASACIONES — SUGERENCIA DE BÚSQUEDA (ítems dinámicos)
+     ══════════════════════════════════════════════════════════════════════ */
+
+  function renderCasSugItems(items) {
+    const cont = q("kdbweb-cas-sug-items");
+    if (!cont) return;
+    cont.innerHTML = "";
+    (items || []).forEach((text) => cont.appendChild(buildCasSugItem(text)));
+  }
+
+  function buildCasSugItem(text) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;";
+    row.dataset.casItemText = text;
+    row.innerHTML = `
+      <span style="flex:1;font-size:0.88rem;padding:0.35rem 0.5rem;background:#f3f4f6;border-radius:4px;">${esc(text)}</span>
+      <button type="button" class="secondary small-btn kw-cas-sug-delete" style="flex-shrink:0;">✕</button>
+    `;
+    return row;
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -854,6 +904,24 @@
       });
 
       legCurrentTab = tab;
+    });
+
+    /* ── Casaciones: add suggestion item ─────────────────────────────── */
+    document.addEventListener("click", (evt) => {
+      if (!evt.target.closest("#kdbweb-cas-sug-add")) return;
+      const inp = q("kdbweb-cas-sug-new-item");
+      const text = (inp?.value || "").trim();
+      if (!text) return;
+      const cont = q("kdbweb-cas-sug-items");
+      if (cont) cont.appendChild(buildCasSugItem(text));
+      if (inp) inp.value = "";
+    });
+
+    /* ── Casaciones: delete suggestion item ───────────────────────────── */
+    document.addEventListener("click", (evt) => {
+      const btn = evt.target.closest(".kw-cas-sug-delete");
+      if (!btn) return;
+      btn.closest("[data-cas-item-text]")?.remove();
     });
 
     /* ── Add treaty button ────────────────────────────────────────────── */

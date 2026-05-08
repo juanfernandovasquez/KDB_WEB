@@ -651,7 +651,7 @@
                 </div>
               </div>
 
-              <!-- Simple: URL de acceso (casaciones, sentencias-del-tc) -->
+              <!-- Simple: URL de acceso (sentencias-del-tc) -->
               <div id="kdbweb-meta-access" class="hidden">
                 <div class="grid-2">
                   <div class="full">
@@ -659,6 +659,65 @@
                     <input type="url" id="kdbweb-meta-access-url" placeholder="https://...">
                   </div>
                 </div>
+              </div>
+
+              <!-- Casaciones de la Corte Suprema: editor completo -->
+              <div id="kdbweb-meta-casaciones" class="hidden">
+                <p class="small" style="color:#6b7280;margin:0 0 1.25rem;">Edita todos los textos de la página Casaciones de la Corte Suprema.</p>
+
+                <!-- Sección de presentación -->
+                <fieldset style="border:1px solid #d1d5db;border-radius:8px;padding:1rem;margin-bottom:1.25rem;background:#f9fafb;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#111827;">Sección de presentación</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Título columna izquierda <span style="color:#9ca3af;font-size:0.8rem;">(ej. "¿Qué es y por qué importa?")</span></label>
+                    <input type="text" id="kdbweb-meta-cas-left-title" placeholder="¿Qué es y por qué importa?">
+                  </div>
+                  <div>
+                    <label>Texto columna derecha</label>
+                    <div class="rich-editor">
+                      <div class="editor-toolbar" id="kdbweb-cas-right-toolbar">
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="bold" title="Negrita"><strong>B</strong></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="italic" title="Italica"><em>I</em></button>
+                        <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
+                        <button type="button" class="editor-pill-btn" data-cmd="createLink" title="Insertar enlace">Enlace</button>
+                        <button type="button" class="editor-pill-btn" data-cmd="unlink" title="Quitar enlace">Sin enlace</button>
+                        <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
+                      </div>
+                      <div id="kdbweb-meta-cas-right-content" class="editor-surface" contenteditable="true" style="min-height:120px;"></div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Caja de acceso -->
+                <fieldset style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1.25rem;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#374151;">Caja de acceso</legend>
+                  <div class="grid-2">
+                    <div class="full"><label>Texto de la etiqueta</label><input type="text" id="kdbweb-meta-cas-access-label" placeholder="Acceder al buscador de jurisprudencia del Poder Judicial:"></div>
+                    <div><label>Etiqueta del botón</label><input type="text" id="kdbweb-meta-cas-access-btn-label" placeholder="Accede al texto"></div>
+                    <div><label>URL del botón</label><input type="url" id="kdbweb-meta-cas-access-url" placeholder="https://..."></div>
+                  </div>
+                </fieldset>
+
+                <!-- Sugerencia de búsqueda -->
+                <fieldset style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;">
+                  <legend style="font-weight:600;padding:0 0.5rem;color:#374151;">Sugerencia de búsqueda</legend>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Título de la caja</label>
+                    <input type="text" id="kdbweb-meta-cas-sug-title" placeholder="Sugerencia de búsqueda">
+                  </div>
+                  <div style="margin-bottom:0.75rem;">
+                    <label>Descripción introductoria</label>
+                    <textarea id="kdbweb-meta-cas-sug-desc" rows="2" placeholder="Para encontrar casaciones tributarias de manera más precisa..."></textarea>
+                  </div>
+                  <div>
+                    <label>Ítems de la lista</label>
+                    <div id="kdbweb-cas-sug-items" style="margin-bottom:0.5rem;"></div>
+                    <div class="row" style="gap:0.5rem;align-items:center;">
+                      <input type="text" id="kdbweb-cas-sug-new-item" placeholder="Sala: Quinta Sala de Derecho Constitucional..." style="flex:1;">
+                      <button type="button" class="secondary small-btn" id="kdbweb-cas-sug-add">+ Agregar</button>
+                    </div>
+                  </div>
+                </fieldset>
               </div>
 
               <!-- Tribunal Fiscal: editor completo de tarjetas de herramientas -->
