@@ -946,7 +946,7 @@
           warnEl.style.cssText = "background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;padding:0.6rem 0.9rem;margin-bottom:1rem;color:#92400e;font-size:0.85rem;";
           section.insertBefore(warnEl, section.firstChild);
         }
-        if (warnEl) warnEl.textContent = "⚠️ No se pudieron cargar los datos guardados de esta subpágina (error de red). Haz clic en "Revertir cambios" antes de guardar para evitar perder información.";
+        if (warnEl) warnEl.textContent = "⚠️ No se pudieron cargar los datos guardados de esta subpágina (error de red). Haz clic en 'Revertir cambios' antes de guardar para evitar perder información.";
       } else if (warnEl) {
         warnEl.remove();
       }
