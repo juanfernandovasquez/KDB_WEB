@@ -113,8 +113,8 @@
      de todas las entradas de la KATWeb.
   ══════════════════════════════════════════════════════════ */
   function initKatwebSearch(allEntries) {
-    const input = document.getElementById('kw-search-input');
-    const form  = document.querySelector('.katweb-hero-search');
+    var input = document.getElementById('kw-search-input');
+    var form  = document.querySelector('.katweb-hero-search');
     if (!input || !form) return;
 
     // Mapa slug → título para el breadcrumb de entradas hijas
@@ -123,18 +123,23 @@
       slugTitle[e.slug] = e.card_title || e.title || e.slug;
     });
 
-    // Envolver el form en un contenedor relativo para posicionar el dropdown
-    var wrap = document.createElement('div');
-    wrap.className = 'kw-search-wrap';
-    form.parentNode.insertBefore(wrap, form);
-    wrap.appendChild(form);
-
-    // Elemento dropdown
+    // ── Patrón portal: el dropdown vive en <body> con position:fixed ──
+    // Esto escapa cualquier overflow:hidden ancestral (incluido .katweb-hero)
     var drop = document.createElement('div');
     drop.className = 'kw-search-results';
     drop.setAttribute('hidden', '');
     drop.setAttribute('role', 'listbox');
-    wrap.appendChild(drop);
+    document.body.appendChild(drop);
+
+    // Posiciona el dropdown justo bajo el form, usando coordenadas de viewport
+    function positionDrop() {
+      var rect = form.getBoundingClientRect();
+      drop.style.position = 'fixed';
+      drop.style.top      = (rect.bottom + 6) + 'px';
+      drop.style.left     = rect.left + 'px';
+      drop.style.width    = rect.width + 'px';
+      drop.style.zIndex   = '9999';
+    }
 
     // Normaliza texto: minúsculas + quita tildes
     function norm(s) {
@@ -154,15 +159,23 @@
 
     var activeIdx = -1;
 
+    function hideDrop() {
+      drop.setAttribute('hidden', '');
+      drop.innerHTML = '';
+      activeIdx = -1;
+    }
+
     function renderResults(q) {
       var qn = norm(q.trim());
-      if (!qn) { drop.setAttribute('hidden', ''); drop.innerHTML = ''; activeIdx = -1; return; }
+      if (!qn) { hideDrop(); return; }
 
       var results = allEntries.filter(function(e) {
         return norm(e.title).includes(qn)
             || norm(e.card_title || '').includes(qn)
             || norm(e.summary || '').includes(qn);
-      }).slice(0, 8);
+      }).slice(0, 10);
+
+      positionDrop();
 
       if (!results.length) {
         drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
@@ -223,8 +236,7 @@
         var target = activeIdx >= 0 ? items[activeIdx] : items[0];
         if (target) target.click();
       } else if (e.key === 'Escape') {
-        drop.setAttribute('hidden', '');
-        activeIdx = -1;
+        hideDrop();
       }
     });
 
@@ -233,21 +245,20 @@
       e.preventDefault();
       var q = input.value.trim();
       if (!q) return;
-      // Si hay un resultado activo o hay resultados, navegar al primero
       var items = drop.querySelectorAll('.kw-sr-item');
       var target = activeIdx >= 0 ? items[activeIdx] : items[0];
       if (target) { target.click(); return; }
-      // Si el dropdown está oculto, forzar búsqueda y seleccionar primero
       renderResults(q);
-      var first = drop.querySelector('.kw-sr-item');
-      if (first) first.click();
+      setTimeout(function() {
+        var first = drop.querySelector('.kw-sr-item');
+        if (first) first.click();
+      }, 0);
     });
 
-    // Cerrar al hacer clic fuera
+    // Cerrar al hacer clic fuera (del form Y del dropdown)
     document.addEventListener('click', function(e) {
-      if (!wrap.contains(e.target)) {
-        drop.setAttribute('hidden', '');
-        activeIdx = -1;
+      if (!form.contains(e.target) && !drop.contains(e.target)) {
+        hideDrop();
       }
     });
 
@@ -255,6 +266,14 @@
     input.addEventListener('focus', function() {
       if (input.value.trim()) renderResults(input.value);
     });
+
+    // Re-posicionar si el usuario hace scroll o resize (el form puede moverse)
+    window.addEventListener('scroll', function() {
+      if (!drop.hasAttribute('hidden')) positionDrop();
+    }, { passive: true });
+    window.addEventListener('resize', function() {
+      if (!drop.hasAttribute('hidden')) positionDrop();
+    }, { passive: true });
   }
 
   function buildCatCard(entry) {

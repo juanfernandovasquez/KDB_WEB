@@ -144,14 +144,10 @@
 }
 
 .kw-search-results {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
+  /* position y coordenadas las inyecta JS (patrón portal sobre body) */
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 8px 36px rgba(0, 0, 0, 0.22);
-  z-index: 400;
   max-height: 340px;
   overflow-y: auto;
   scrollbar-width: thin;
