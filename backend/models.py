@@ -781,9 +781,22 @@ def fetch_kdbweb_entry_by_slug(slug):
 
 
 def replace_kdbweb_entries(entries):
+    import json as _json
     now = datetime.utcnow().isoformat()
     conn = get_conn()
     with conn:
+        # ── Safety snapshot ──────────────────────────────────────────────────
+        # Before wiping the table, save every slug's existing meta_json.
+        # If the incoming payload for that slug has null/invalid meta_json we
+        # RESTORE the snapshot instead of silently dropping structured data.
+        # This means a frontend bug or a failed detail-fetch can NEVER destroy
+        # meta_json that already lived in the database.
+        existing_meta = {}
+        for row in conn.execute("SELECT slug, meta_json FROM kdbweb_entries").fetchall():
+            if row["meta_json"]:
+                existing_meta[row["slug"]] = row["meta_json"]
+        # ─────────────────────────────────────────────────────────────────────
+
         conn.execute("DELETE FROM kdbweb_entries")
         for pos, entry in enumerate(entries or []):
             content_raw = entry.get("content_html") or ""
@@ -803,10 +816,17 @@ def replace_kdbweb_entries(entries):
             meta_raw = entry.get("meta_json") or None
             if meta_raw:
                 try:
-                    import json as _json
                     _json.loads(meta_raw)  # validate JSON
                 except Exception:
                     meta_raw = None
+            # ── Restore guard ────────────────────────────────────────────────
+            # If we ended up with null meta_json but the DB previously had a
+            # valid value for this slug, put it back.  The frontend must send
+            # an explicit non-null value to overwrite; absence = preserve.
+            slug = entry.get("slug")
+            if meta_raw is None and slug in existing_meta:
+                meta_raw = existing_meta[slug]
+            # ─────────────────────────────────────────────────────────────────
             conn.execute(
                 """
                 INSERT INTO kdbweb_entries (

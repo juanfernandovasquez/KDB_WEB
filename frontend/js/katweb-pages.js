@@ -80,35 +80,181 @@
     if (!container) return;
 
     const list = await fetchKdbwebList();
-    const roots = (list || [])
+    const all   = list || [];
+    const roots = all
       .filter((e) => !e.parent_slug)
       .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
     if (!roots.length) {
       container.innerHTML = '<p style="text-align:center;color:#999;">Sin categorías disponibles.</p>';
-      return;
+    } else {
+      // Primeras 3 en fila superior, las restantes (2) en fila inferior centrada
+      const first3 = roots.slice(0, 3);
+      const rest = roots.slice(3);
+
+      let html = '<div class="katweb-cards-grid">';
+      first3.forEach((e) => { html += buildCatCard(e); });
+      if (rest.length) {
+        html += '<div class="katweb-cards-row2">';
+        rest.forEach((e) => { html += buildCatCard(e); });
+        html += '</div>';
+      }
+      html += '</div>';
+      container.innerHTML = html;
     }
 
-    // Primeras 3 en fila superior, las restantes (2) en fila inferior centrada
-    const first3 = roots.slice(0, 3);
-    const rest = roots.slice(3);
+    // Activar buscador con todas las entradas (raíces + hijas)
+    initKatwebSearch(all);
+  }
 
-    let html = '<div class="katweb-cards-grid">';
+  /* ══════════════════════════════════════════════════════════
+     BUSCADOR — página principal kdbweb.html
+     Filtra en tiempo real sobre title, card_title y summary
+     de todas las entradas de la KATWeb.
+  ══════════════════════════════════════════════════════════ */
+  function initKatwebSearch(allEntries) {
+    const input = document.getElementById('kw-search-input');
+    const form  = document.querySelector('.katweb-hero-search');
+    if (!input || !form) return;
 
-    first3.forEach((e) => {
-      html += buildCatCard(e);
+    // Mapa slug → título para el breadcrumb de entradas hijas
+    var slugTitle = {};
+    allEntries.forEach(function(e) {
+      slugTitle[e.slug] = e.card_title || e.title || e.slug;
     });
 
-    if (rest.length) {
-      html += '<div class="katweb-cards-row2">';
-      rest.forEach((e) => {
-        html += buildCatCard(e);
-      });
-      html += '</div>';
+    // Envolver el form en un contenedor relativo para posicionar el dropdown
+    var wrap = document.createElement('div');
+    wrap.className = 'kw-search-wrap';
+    form.parentNode.insertBefore(wrap, form);
+    wrap.appendChild(form);
+
+    // Elemento dropdown
+    var drop = document.createElement('div');
+    drop.className = 'kw-search-results';
+    drop.setAttribute('hidden', '');
+    drop.setAttribute('role', 'listbox');
+    wrap.appendChild(drop);
+
+    // Normaliza texto: minúsculas + quita tildes
+    function norm(s) {
+      return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    html += '</div>';
-    container.innerHTML = html;
+    // Resalta la coincidencia dentro del texto plano
+    function highlight(text, q) {
+      if (!q) return esc(text);
+      var t = norm(text), qn = norm(q);
+      var idx = t.indexOf(qn);
+      if (idx === -1) return esc(text);
+      return esc(text.slice(0, idx))
+        + '<mark>' + esc(text.slice(idx, idx + q.length)) + '</mark>'
+        + esc(text.slice(idx + q.length));
+    }
+
+    var activeIdx = -1;
+
+    function renderResults(q) {
+      var qn = norm(q.trim());
+      if (!qn) { drop.setAttribute('hidden', ''); drop.innerHTML = ''; activeIdx = -1; return; }
+
+      var results = allEntries.filter(function(e) {
+        return norm(e.title).includes(qn)
+            || norm(e.card_title || '').includes(qn)
+            || norm(e.summary || '').includes(qn);
+      }).slice(0, 8);
+
+      if (!results.length) {
+        drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
+          + esc(q.trim()) + '</strong></div>';
+        drop.removeAttribute('hidden');
+        activeIdx = -1;
+        return;
+      }
+
+      drop.innerHTML = results.map(function(e, i) {
+        var label  = e.card_title || e.title || '';
+        var parent = e.parent_slug ? (slugTitle[e.parent_slug] || '') : null;
+        var icon   = e.parent_slug ? '📄' : '📂';
+        var href   = 'kdbweb-' + esc(e.slug) + '.html';
+        return '<a class="kw-sr-item" href="' + href + '" data-idx="' + i + '" role="option">'
+          + '<span class="kw-sr-icon">' + icon + '</span>'
+          + '<span class="kw-sr-body">'
+          + (parent ? '<span class="kw-sr-breadcrumb">' + esc(parent) + '</span>' : '')
+          + '<span class="kw-sr-title">' + highlight(label, q.trim()) + '</span>'
+          + (e.summary ? '<span class="kw-sr-summary">' + esc(e.summary) + '</span>' : '')
+          + '</span>'
+          + '</a>';
+      }).join('');
+
+      drop.removeAttribute('hidden');
+      activeIdx = -1;
+    }
+
+    function setActive(items) {
+      items.forEach(function(it, i) {
+        it.classList.toggle('kw-sr-active', i === activeIdx);
+      });
+      if (activeIdx >= 0 && items[activeIdx]) {
+        items[activeIdx].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    // Debounce al escribir
+    var timer;
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      timer = setTimeout(function() { renderResults(input.value); }, 180);
+    });
+
+    // Navegación con teclado
+    input.addEventListener('keydown', function(e) {
+      var items = Array.from(drop.querySelectorAll('.kw-sr-item'));
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, items.length - 1);
+        setActive(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIdx = Math.max(activeIdx - 1, -1);
+        setActive(items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        var target = activeIdx >= 0 ? items[activeIdx] : items[0];
+        if (target) target.click();
+      } else if (e.key === 'Escape') {
+        drop.setAttribute('hidden', '');
+        activeIdx = -1;
+      }
+    });
+
+    // Submit del form (botón lupa)
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var q = input.value.trim();
+      if (!q) return;
+      // Si hay un resultado activo o hay resultados, navegar al primero
+      var items = drop.querySelectorAll('.kw-sr-item');
+      var target = activeIdx >= 0 ? items[activeIdx] : items[0];
+      if (target) { target.click(); return; }
+      // Si el dropdown está oculto, forzar búsqueda y seleccionar primero
+      renderResults(q);
+      var first = drop.querySelector('.kw-sr-item');
+      if (first) first.click();
+    });
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      if (!wrap.contains(e.target)) {
+        drop.setAttribute('hidden', '');
+        activeIdx = -1;
+      }
+    });
+
+    // Abrir de nuevo si el usuario vuelve a hacer foco con texto ya escrito
+    input.addEventListener('focus', function() {
+      if (input.value.trim()) renderResults(input.value);
+    });
   }
 
   function buildCatCard(entry) {

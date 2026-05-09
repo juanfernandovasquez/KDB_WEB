@@ -137,6 +137,103 @@
   fill: none;
 }
 
+/* ── Buscador KATWeb: wrapper + dropdown de resultados ────── */
+.kw-search-wrap {
+  position: relative;
+  max-width: 420px;
+}
+
+.kw-search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.22);
+  z-index: 400;
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c8cfe8 transparent;
+}
+
+.kw-search-results[hidden] { display: none; }
+
+.kw-sr-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.8rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid #f0f2f8;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.kw-sr-item:last-child { border-bottom: none; }
+.kw-sr-item:hover,
+.kw-sr-item.kw-sr-active { background: #eef1fb; }
+
+.kw-sr-icon {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  padding-top: 2px;
+  line-height: 1;
+}
+
+.kw-sr-body {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kw-sr-breadcrumb {
+  font-size: 0.68rem;
+  color: #8090b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kw-sr-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1a2744;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kw-sr-title mark {
+  background: #fde68a;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+  font-style: normal;
+}
+
+.kw-sr-summary {
+  font-size: 0.75rem;
+  color: #6b7a99;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kw-sr-empty {
+  padding: 1.1rem 1rem;
+  text-align: center;
+  color: #9aaabb;
+  font-size: 0.875rem;
+}
+/* ─────────────────────────────────────────────────────────── */
+
 .katweb-hero-right {
   position: relative;
   overflow: hidden;
