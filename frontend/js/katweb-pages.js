@@ -158,6 +158,7 @@
     }
 
     var activeIdx = -1;
+    var searchController = null; // para cancelar peticiones anteriores
 
     function hideDrop() {
       drop.setAttribute('hidden', '');
@@ -165,43 +166,79 @@
       activeIdx = -1;
     }
 
-    function renderResults(q) {
-      var qn = norm(q.trim());
-      if (!qn) { hideDrop(); return; }
-
-      var results = allEntries.filter(function(e) {
-        return norm(e.title).includes(qn)
-            || norm(e.card_title || '').includes(qn)
-            || norm(e.summary || '').includes(qn);
-      }).slice(0, 10);
-
-      positionDrop();
-
-      if (!results.length) {
-        drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
-          + esc(q.trim()) + '</strong></div>';
-        drop.removeAttribute('hidden');
-        activeIdx = -1;
-        return;
-      }
-
-      drop.innerHTML = results.map(function(e, i) {
-        var label  = e.card_title || e.title || '';
-        var parent = e.parent_slug ? (slugTitle[e.parent_slug] || '') : null;
-        var icon   = e.parent_slug ? '📄' : '📂';
-        var href   = 'kdbweb-' + esc(e.slug) + '.html';
-        return '<a class="kw-sr-item" href="' + href + '" data-idx="' + i + '" role="option">'
+    function buildResultsHtml(results, q) {
+      return results.map(function(r, i) {
+        var icon = r.is_content ? '📄' : '📂';
+        return '<a class="kw-sr-item" href="' + esc(r.href) + '" data-idx="' + i + '" role="option">'
           + '<span class="kw-sr-icon">' + icon + '</span>'
           + '<span class="kw-sr-body">'
-          + (parent ? '<span class="kw-sr-breadcrumb">' + esc(parent) + '</span>' : '')
-          + '<span class="kw-sr-title">' + highlight(label, q.trim()) + '</span>'
-          + (e.summary ? '<span class="kw-sr-summary">' + esc(e.summary) + '</span>' : '')
+          + (r.context ? '<span class="kw-sr-breadcrumb">' + esc(r.context) + '</span>' : '')
+          + '<span class="kw-sr-title">' + highlight(r.label || '', q) + '</span>'
+          + (r.summary ? '<span class="kw-sr-summary">' + esc(r.summary) + '</span>' : '')
           + '</span>'
           + '</a>';
       }).join('');
+    }
 
+    function renderResults(q) {
+      var trimmed = q.trim();
+      if (!trimmed) { hideDrop(); return; }
+
+      // Mostrar estado de carga
+      positionDrop();
+      drop.innerHTML = '<div class="kw-sr-empty">Buscando...</div>';
       drop.removeAttribute('hidden');
       activeIdx = -1;
+
+      // Cancelar petición anterior si hay una en curso
+      if (searchController) { try { searchController.abort(); } catch (_) {} }
+      searchController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var signal = searchController ? searchController.signal : undefined;
+
+      var base = window.API_BASE || '';
+      fetch(base + '/api/kdbweb/search?q=' + encodeURIComponent(trimmed), { signal: signal })
+        .then(function(r) { return r.ok ? r.json() : []; })
+        .then(function(results) {
+          positionDrop();
+          if (!results.length) {
+            drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
+              + esc(trimmed) + '</strong></div>';
+            drop.removeAttribute('hidden');
+            activeIdx = -1;
+            return;
+          }
+          drop.innerHTML = buildResultsHtml(results, trimmed);
+          drop.removeAttribute('hidden');
+          activeIdx = -1;
+        })
+        .catch(function(err) {
+          // Si fue cancelada la petición, ignorar
+          if (err && err.name === 'AbortError') return;
+          // Fallback: búsqueda local básica sobre allEntries
+          var qn = norm(trimmed);
+          var local = allEntries.filter(function(e) {
+            return norm(e.title).includes(qn)
+                || norm(e.card_title || '').includes(qn)
+                || norm(e.summary || '').includes(qn);
+          }).slice(0, 10).map(function(e) {
+            return {
+              href: 'kdbweb-' + e.slug + '.html',
+              label: e.card_title || e.title || '',
+              context: e.parent_slug ? (slugTitle[e.parent_slug] || '') : null,
+              summary: e.summary || '',
+              is_content: false,
+            };
+          });
+          positionDrop();
+          if (!local.length) {
+            drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
+              + esc(trimmed) + '</strong></div>';
+          } else {
+            drop.innerHTML = buildResultsHtml(local, trimmed);
+          }
+          drop.removeAttribute('hidden');
+          activeIdx = -1;
+        });
     }
 
     function setActive(items) {
@@ -413,8 +450,6 @@
         html += `<img class="kw-treaty-icon" src="${esc(entry.icon_url)}" alt="${esc(entry.title)}" loading="lazy" />`;
       } else if (entry.icon_emoji) {
         html += `<span class="kw-treaty-icon-placeholder">${esc(entry.icon_emoji)}</span>`;
-      } else {
-        html += `<span class="kw-treaty-icon-placeholder">🌐</span>`;
       }
       html += '</div>'; // kw-treaty-icon-col
 

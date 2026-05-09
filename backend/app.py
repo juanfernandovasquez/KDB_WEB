@@ -661,6 +661,193 @@ def api_kdbweb_list():
     )
 
 
+@app.route("/api/kdbweb/search", methods=["GET"])
+def api_kdbweb_search():
+    """
+    Búsqueda profunda en todas las entradas de KATWeb.
+    Busca en: title, card_title, summary, hero_title, hero_subtitle y dentro
+    de meta_json (entradas de tratados, categorías de legislación, etc.).
+    Parámetro: ?q=texto
+    """
+    import unicodedata
+    import json as _json
+
+    ensure_db()
+
+    q = (request.args.get("q") or "").strip()
+    if not q or len(q) < 2:
+        return jsonify([])
+
+    def norm(s):
+        """Minúsculas + quita tildes."""
+        if not s:
+            return ""
+        nfkd = unicodedata.normalize("NFD", str(s).lower())
+        return "".join(c for c in nfkd if not unicodedata.combining(c))
+
+    def extract_strings(obj):
+        """Extrae recursivamente todos los strings de un objeto JSON."""
+        if isinstance(obj, str):
+            yield obj
+        elif isinstance(obj, dict):
+            for v in obj.values():
+                yield from extract_strings(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                yield from extract_strings(v)
+
+    qn = norm(q)
+    all_entries = fetch_kdbweb_entries()
+
+    # Mapa slug → título para breadcrumbs
+    by_slug = {e["slug"]: e for e in all_entries}
+
+    results = []
+    seen = set()
+
+    for entry in all_entries:
+        slug = entry.get("slug", "")
+        parent_slug = entry.get("parent_slug")
+        entry_title = entry.get("card_title") or entry.get("title") or ""
+        parent_entry = by_slug.get(parent_slug) if parent_slug else None
+        parent_title = (parent_entry.get("card_title") or parent_entry.get("title") or "") if parent_entry else ""
+        href = f"kdbweb-{slug}.html"
+
+        # ── 1. Búsqueda en campos básicos de la entrada ──────────────────
+        basic = [
+            entry.get("title", ""),
+            entry.get("card_title", ""),
+            entry.get("summary", ""),
+            entry.get("hero_title", ""),
+            entry.get("hero_subtitle", ""),
+        ]
+        if any(qn in norm(f) for f in basic if f) and slug not in seen:
+            seen.add(slug)
+            results.append({
+                "href": href,
+                "label": entry_title,
+                "context": parent_title or None,
+                "summary": entry.get("summary") or "",
+                "is_content": False,
+            })
+
+        # ── 2. Búsqueda profunda en meta_json ────────────────────────────
+        meta_raw = entry.get("meta_json")
+        if not meta_raw:
+            continue
+        try:
+            meta = _json.loads(meta_raw)
+        except Exception:
+            continue
+
+        # Tratados: array de convenios con title/date/button_label
+        if isinstance(meta.get("entries"), list):
+            for item in meta["entries"]:
+                if not isinstance(item, dict):
+                    continue
+                item_title = item.get("title", "")
+                item_date  = item.get("date", "")
+                item_btn   = item.get("button_label", "")
+                searchable = [item_title, item_date, item_btn]
+                for sub in (item.get("sub_entries") or []):
+                    if isinstance(sub, dict):
+                        searchable += [sub.get("title", ""), sub.get("button_label", "")]
+                if any(qn in norm(t) for t in searchable if t):
+                    key = f"{slug}::entry::{item_title}"
+                    if key not in seen:
+                        seen.add(key)
+                        results.append({
+                            "href": href,
+                            "label": item_title or entry_title,
+                            "context": entry_title,
+                            "summary": item_date or item_btn or "",
+                            "is_content": True,
+                        })
+
+        # Legislación: tabs con categorías y normas
+        if isinstance(meta.get("tabs"), dict):
+            for tab_key, tab_val in meta["tabs"].items():
+                if not isinstance(tab_val, dict):
+                    continue
+                for cat in (tab_val.get("categories") or []):
+                    if not isinstance(cat, dict):
+                        continue
+                    cat_title = cat.get("title", "")
+                    cat_desc  = cat.get("description", "")
+                    items_text = []
+                    for norm_item in (cat.get("items") or []):
+                        if isinstance(norm_item, dict):
+                            items_text += [norm_item.get("label", ""), norm_item.get("url", "")]
+                        elif isinstance(norm_item, str):
+                            items_text.append(norm_item)
+                    searchable = [cat_title, cat_desc] + items_text
+                    if any(qn in norm(t) for t in searchable if t):
+                        tab_label = {"tributaria": "Tributaria", "aduanera": "Aduanera"}.get(tab_key, tab_key.capitalize())
+                        key = f"{slug}::tab::{tab_key}::{cat_title}"
+                        if key not in seen:
+                            seen.add(key)
+                            results.append({
+                                "href": href,
+                                "label": cat_title or entry_title,
+                                "context": f"{entry_title} — {tab_label}",
+                                "summary": cat_desc or "",
+                                "is_content": True,
+                            })
+
+        # Doctrina: categorías con title/description
+        if isinstance(meta.get("categories"), list):
+            for cat in meta["categories"]:
+                if not isinstance(cat, dict):
+                    continue
+                cat_title = cat.get("title", "")
+                cat_desc  = cat.get("description", "")
+                if any(qn in norm(t) for t in [cat_title, cat_desc] if t):
+                    key = f"{slug}::cat::{cat_title}"
+                    if key not in seen:
+                        seen.add(key)
+                        results.append({
+                            "href": href,
+                            "label": cat_title or entry_title,
+                            "context": entry_title,
+                            "summary": cat_desc or "",
+                            "is_content": True,
+                        })
+
+        # Tribunal Fiscal: herramientas (tools)
+        if isinstance(meta.get("tools"), list):
+            for tool in meta["tools"]:
+                if not isinstance(tool, dict):
+                    continue
+                tool_title = tool.get("card_title", "")
+                tool_desc  = tool.get("card_desc", "")
+                if any(qn in norm(t) for t in [tool_title, tool_desc] if t):
+                    key = f"{slug}::tool::{tool_title}"
+                    if key not in seen:
+                        seen.add(key)
+                        results.append({
+                            "href": href,
+                            "label": tool_title or entry_title,
+                            "context": entry_title,
+                            "summary": tool_desc or "",
+                            "is_content": True,
+                        })
+
+        # Fallback genérico: cualquier string dentro del meta_json que coincida
+        # Solo aplica si la entrada no fue capturada por nada de lo anterior
+        if slug not in seen:
+            if any(qn in norm(t) for t in extract_strings(meta)):
+                seen.add(slug)
+                results.append({
+                    "href": href,
+                    "label": entry_title,
+                    "context": parent_title or None,
+                    "summary": entry.get("summary") or "",
+                    "is_content": False,
+                })
+
+    return jsonify(results[:20])
+
+
 @app.route("/api/kdbweb/<slug>", methods=["GET"])
 def api_kdbweb_detail(slug):
     ensure_db()
