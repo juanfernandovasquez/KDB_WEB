@@ -27,6 +27,18 @@ def get_conn():
 def init_db():
     conn = get_conn()
     with conn:
+        # ── Registro de migraciones ───────────────────────────────────────────
+        # Cada migración de datos (no de esquema) se registra aquí para que
+        # corra exactamente UNA vez, aunque el servidor se reinicie mil veces.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS db_migrations (
+              name TEXT PRIMARY KEY,
+              applied_at TEXT NOT NULL
+            )
+            """
+        )
+
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS subscriptions (
@@ -490,15 +502,27 @@ def init_db():
                 "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1600&q=80",
             ),
         ]
+        # Las posiciones se actualizan solo la primera vez (migración de una sola ejecución).
+        # Las imágenes sí pueden re-evaluarse siempre porque su condición LIKE se agota sola.
+        _pos_migration = "root_category_reorder_v1"
+        _pos_done = conn.execute(
+            "SELECT 1 FROM db_migrations WHERE name = ?", (_pos_migration,)
+        ).fetchone()
         for slug, new_pos, old_pat, new_img in _root_reorder:
-            conn.execute(
-                "UPDATE kdbweb_entries SET position = ? WHERE slug = ? AND parent_slug IS NULL",
-                (new_pos, slug),
-            )
+            if not _pos_done:
+                conn.execute(
+                    "UPDATE kdbweb_entries SET position = ? WHERE slug = ? AND parent_slug IS NULL",
+                    (new_pos, slug),
+                )
             conn.execute(
                 "UPDATE kdbweb_entries SET hero_image_url = ? "
                 "WHERE slug = ? AND hero_image_url LIKE ?",
                 (new_img, slug, f"%{old_pat}%"),
+            )
+        if not _pos_done:
+            conn.execute(
+                "INSERT INTO db_migrations (name, applied_at) VALUES (?, ?)",
+                (_pos_migration, datetime.utcnow().isoformat()),
             )
 
         # Migration: fix Constitución hero image — photo-1589829085413 turned
@@ -590,13 +614,14 @@ def init_db():
                 }
             ]
         }, ensure_ascii=False)
-        # Always overwrite — no admin panel exists yet for this field,
-        # so there are no real edits to protect. The prior condition
-        # (meta_json IS NULL OR meta_json = '') was silently skipping
-        # rows that already had any value, even an empty object.
+        # Solo insertar el seed si no hay datos reales guardados.
+        # Condición: meta_json es NULL, vacío, o un objeto vacío "{}".
+        # Si el admin ya editó y guardó datos (entries con links/emojis),
+        # NO se sobreescriben en cada restart del servidor.
         conn.execute(
             "UPDATE kdbweb_entries SET meta_json = ? "
-            "WHERE slug = 'tratados-internacionales'",
+            "WHERE slug = 'tratados-internacionales' "
+            "AND (meta_json IS NULL OR TRIM(meta_json) = '' OR TRIM(meta_json) = '{}')",
             (_tratados_meta,),
         )
 
