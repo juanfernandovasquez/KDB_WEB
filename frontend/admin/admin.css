@@ -1428,79 +1428,216 @@ button.secondary.small-btn {
 .editor-toolbar--publication .editor-table-btn .editor-table-glyph.del-col::before { inset: 7px -9px 7px auto; width: 8px; height: 2px; background: #b42318; }
 .editor-toolbar--publication .editor-table-btn .editor-table-glyph.del-col::after  { display: none; }
 
-/* ── Responsivo ──────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVO — Mobile-first corrections
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet y móvil (≤ 900px) ────────────────────────────────────── */
 @media (max-width: 900px) {
+
+  /* Evitar scroll horizontal global */
+  html, body { overflow-x: hidden; }
+
+  /* ── Header en móvil ──────────────────────────────────────────── */
+  header {
+    padding: 0 1rem;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    gap: 0.5rem;
+  }
+
+  /* Reordenar: ☰ → Título → Usuario */
+  .sidebar-toggle { order: -1; display: inline-flex; flex-shrink: 0; }
+
+  header h1 {
+    order: 0;
+    flex: 1;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .admin-user {
+    order: 1;
+    margin-left: 0;
+    flex-shrink: 0;
+    gap: 0.4rem;
+  }
+
+  .admin-user #admin-user-label { display: none; } /* ocultar email en móvil */
+
+  /* ── Layout: quitar columnas ──────────────────────────────────── */
   .layout { grid-template-columns: 1fr; }
 
+  /* ── Sidebar: drawer lateral completo ────────────────────────── */
   .sidebar {
     position: fixed;
-    top: 0;
+    top: 0;           /* cubre desde arriba, sobre el header */
     left: 0;
-    width: 260px;
-    height: 100vh;
+    width: 72vw;
+    max-width: 300px;
+    height: 100dvh;   /* usa dvh para respetar barra del navegador móvil */
     transform: translateX(-110%);
-    transition: transform 0.22s ease;
-    z-index: 11;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 30;      /* ⚠ debe ser > header (20) */
     overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 1.5rem;
+  }
+
+  /* Cabecera del drawer */
+  .sidebar::before {
+    content: 'KDB Legal';
+    display: block;
+    padding: 0 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 0.75rem;
+  }
+
+  .sidebar-backdrop {
+    z-index: 25;  /* entre el header (20) y el sidebar (30) */
   }
 
   body.sidebar-open .sidebar          { transform: translateX(0); }
   body.sidebar-open .sidebar-backdrop { display: block; }
   body.sidebar-open                   { overflow: hidden; }
 
-  .sidebar-toggle { display: inline-flex; }
-  main { padding: 1.25rem; }
-
-  section { padding: 1.25rem; }
-
-  .grid-2 { grid-template-columns: 1fr; }
-
-  .row.between { flex-wrap: wrap; }
-
-  .page-toggle-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-
-  .filter-row { grid-template-columns: 1fr 1fr; }
-}
-
-@media (max-width: 640px) {
+  /* ── Contenido principal ──────────────────────────────────────── */
   main { padding: 1rem; }
 
-  section { padding: 1rem; border-radius: var(--r-md); }
+  section {
+    padding: 1.25rem;
+    border-radius: var(--r-md);
+    margin-bottom: 1rem;
+  }
 
-  .card { padding: 1rem; }
+  .section-card { padding: 1rem; border-radius: var(--r-md); }
 
-  h2 { font-size: 1rem; }
+  /* ── Grillas → columna única ──────────────────────────────────── */
+  .grid-2        { grid-template-columns: 1fr; }
+  .team-grid     { grid-template-columns: 1fr; }
+  #hero-slides   { grid-template-columns: 1fr; }
+  .filter-row    { grid-template-columns: 1fr; }
+  .page-toggle-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 
-  .filter-row { grid-template-columns: 1fr; }
+  /* ── Filas "between" → permitir wrap ─────────────────────────── */
+  .row.between { flex-wrap: wrap; gap: 0.5rem; }
+  .row.between .danger.small-btn { margin-left: 0; }
 
-  .team-grid { grid-template-columns: 1fr; }
+  /* ── Editor de publicaciones: toolbar con scroll ──────────────── */
+  .editor-toolbar,
+  .editor-toolbar--publication {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+  }
 
-  #hero-slides { grid-template-columns: 1fr; }
+  .editor-toolbar::-webkit-scrollbar,
+  .editor-toolbar--publication::-webkit-scrollbar { height: 3px; }
 
+  /* ── Tabla responsive ─────────────────────────────────────────── */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+  }
+
+  .subs-table th,
+  .subs-table td { padding: 0.55rem 0.65rem; font-size: 0.82rem; }
+
+  /* ── Modal ────────────────────────────────────────────────────── */
+  .modal-content {
+    width: min(96vw, 680px);
+    padding: 1.25rem;
+    border-radius: var(--r-lg);
+    max-height: 90dvh;
+  }
+
+  /* ── Media grid ──────────────────────────────────────────────── */
   .media-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 
+  /* ── Logo picker ─────────────────────────────────────────────── */
   .logo-picker { grid-template-columns: 1fr; }
 
-  .modal-content { padding: 1.25rem; }
+  /* ── Acciones de equipo ──────────────────────────────────────── */
+  .team-actions { flex-wrap: wrap; }
 
+  /* ── Sección hero admin ──────────────────────────────────────── */
+  .section-head.spaced { flex-wrap: wrap; gap: 0.5rem; }
+
+  /* ── Paginación ──────────────────────────────────────────────── */
   .subs-pagination { flex-wrap: wrap; justify-content: center; }
 
-  .page-toggle-grid { grid-template-columns: 1fr; }
+  /* ── KDBWEB tree rows ────────────────────────────────────────── */
+  .kdbweb-row { flex-wrap: wrap; gap: 0.4rem; }
 }
 
+/* ── Móvil chico (≤ 520px) ───────────────────────────────────────── */
 @media (max-width: 520px) {
-  header { padding: 0.75rem 1rem; }
-  header h1 { font-size: 1rem; }
 
-  .sidebar { width: 240px; }
+  /* ── Header más compacto ──────────────────────────────────────── */
+  header { height: 52px; padding: 0 0.85rem; }
 
-  .row.between { flex-wrap: wrap; gap: 0.5rem; }
+  /* ── Main ─────────────────────────────────────────────────────── */
+  main { padding: 0.85rem; }
 
+  section { padding: 1rem; gap: 0.9rem; }
+  .card   { padding: 0.85rem; }
+
+  h2 { font-size: 1rem; }
+  h3 { font-size: 0.9rem; }
+
+  /* ── Botones: targets táctiles mínimos 44px ───────────────────── */
   button.cta,
   button.secondary,
-  button.danger { padding: 0.55rem 0.9rem; font-size: 0.85rem; }
+  button.danger {
+    min-height: 40px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.875rem;
+  }
 
+  button.secondary.small-btn {
+    min-height: 36px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* ── Sidebar más angosto ──────────────────────────────────────── */
+  .sidebar { width: 80vw; max-width: 260px; }
+
+  /* ── Auth card ────────────────────────────────────────────────── */
   .auth-card { padding: 1.5rem; }
 
-  .kdbweb-row { flex-wrap: wrap; gap: 0.5rem; }
+  /* ── Logo picker apilado ──────────────────────────────────────── */
+  .logo-preview { min-height: 80px; }
+
+  /* ── Media grid más pequeño ───────────────────────────────────── */
+  .media-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .media-card img { height: 7rem; max-height: 7rem; }
+
+  /* ── Grilla de filtros siempre en una columna ─────────────────── */
+  .filter-row { grid-template-columns: 1fr; }
+
+  /* ── Toggle grid ──────────────────────────────────────────────── */
+  .page-toggle-grid { grid-template-columns: 1fr; }
+
+  /* ── Pub-card: ocultar label, mostrar ID corto ────────────────── */
+  .subs-table th:nth-child(n+4),
+  .subs-table td:nth-child(n+4) { display: none; }
+
+  /* ── Editor: textarea más compacta ───────────────────────────── */
+  .editor-surface { min-height: 120px; }
+  .team-description-editor .editor-surface,
+  .service-description-editor .editor-surface { min-height: 160px; }
 }
