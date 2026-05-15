@@ -304,12 +304,34 @@
       if (input.value.trim()) renderResults(input.value);
     });
 
-    // Re-posicionar si el usuario hace scroll o resize (el form puede moverse)
+    // ── Scroll y resize ─────────────────────────────────────────────────
+    // En móvil (pantalla táctil o ancho < 768px), position:fixed pierde su
+    // anclaje durante el scroll con momentum: el viewport visual cambia cuando
+    // la barra del navegador aparece/desaparece y el handler llega tarde.
+    // Solución estándar (Google, YouTube, etc.): cerrar el dropdown al scrollear.
+    // En desktop no hay ese problema — reposicionar es correcto.
+    function isMobileViewport() {
+      return window.innerWidth < 768 || ('ontouchstart' in window && window.innerWidth < 1024);
+    }
+
     window.addEventListener('scroll', function() {
-      if (!drop.hasAttribute('hidden')) positionDrop();
+      if (drop.hasAttribute('hidden')) return;
+      if (isMobileViewport()) {
+        hideDrop();
+      } else {
+        positionDrop();
+      }
     }, { passive: true });
+
     window.addEventListener('resize', function() {
       if (!drop.hasAttribute('hidden')) positionDrop();
+    }, { passive: true });
+
+    // En móvil: cerrar también al hacer touchstart fuera (sin esperar click)
+    document.addEventListener('touchstart', function(e) {
+      if (!form.contains(e.target) && !drop.contains(e.target)) {
+        hideDrop();
+      }
     }, { passive: true });
   }
 
