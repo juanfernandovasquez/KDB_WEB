@@ -117,56 +117,28 @@
     var form  = document.querySelector('.katweb-hero-search');
     if (!input || !form) return;
 
-    // Mapa slug → título para el breadcrumb de entradas hijas
+    // Mapa slug → título para breadcrumbs
     var slugTitle = {};
     allEntries.forEach(function(e) {
       slugTitle[e.slug] = e.card_title || e.title || e.slug;
     });
 
-    // ── Patrón portal: el dropdown vive en <body> con position:fixed ──
-    // Esto escapa cualquier overflow:hidden ancestral (incluido .katweb-hero)
-    var drop = document.createElement('div');
-    drop.className = 'kw-search-results';
-    drop.setAttribute('hidden', '');
-    drop.setAttribute('role', 'listbox');
-    document.body.appendChild(drop);
-
-    // Posiciona el dropdown justo bajo el form, usando coordenadas de viewport
-    function positionDrop() {
-      var rect = form.getBoundingClientRect();
-      drop.style.position = 'fixed';
-      drop.style.top      = (rect.bottom + 6) + 'px';
-      drop.style.left     = rect.left + 'px';
-      drop.style.width    = rect.width + 'px';
-      drop.style.zIndex   = '9999';
-    }
-
-    // Normaliza texto: minúsculas + quita tildes
+    /* ─── Utilidades comunes ────────────────────────────────────────── */
     function norm(s) {
       return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
-
-    // Resalta la coincidencia dentro del texto plano
     function highlight(text, q) {
       if (!q) return esc(text);
-      var t = norm(text), qn = norm(q);
-      var idx = t.indexOf(qn);
+      var t = norm(text), qn = norm(q), idx = t.indexOf(qn);
       if (idx === -1) return esc(text);
       return esc(text.slice(0, idx))
         + '<mark>' + esc(text.slice(idx, idx + q.length)) + '</mark>'
         + esc(text.slice(idx + q.length));
     }
-
-    var activeIdx = -1;
-    var searchController = null; // para cancelar peticiones anteriores
-
-    function hideDrop() {
-      drop.setAttribute('hidden', '');
-      drop.innerHTML = '';
-      activeIdx = -1;
-    }
-
     function buildResultsHtml(results, q) {
+      if (!results.length) {
+        return '<div class="kw-sr-empty">Sin resultados para <strong>' + esc(q) + '</strong></div>';
+      }
       return results.map(function(r, i) {
         var icon = r.is_content ? '📄' : '📂';
         return '<a class="kw-sr-item" href="' + esc(r.href) + '" data-idx="' + i + '" role="option">'
@@ -175,164 +147,196 @@
           + (r.context ? '<span class="kw-sr-breadcrumb">' + esc(r.context) + '</span>' : '')
           + '<span class="kw-sr-title">' + highlight(r.label || '', q) + '</span>'
           + (r.summary ? '<span class="kw-sr-summary">' + esc(r.summary) + '</span>' : '')
-          + '</span>'
-          + '</a>';
+          + '</span></a>';
       }).join('');
     }
 
-    function renderResults(q) {
+    var searchController = null;
+    function doSearch(q, onResults) {
       var trimmed = q.trim();
-      if (!trimmed) { hideDrop(); return; }
-
-      // Mostrar estado de carga
-      positionDrop();
-      drop.innerHTML = '<div class="kw-sr-empty">Buscando...</div>';
-      drop.removeAttribute('hidden');
-      activeIdx = -1;
-
-      // Cancelar petición anterior si hay una en curso
+      if (!trimmed) { onResults(null); return; }
       if (searchController) { try { searchController.abort(); } catch (_) {} }
       searchController = typeof AbortController !== 'undefined' ? new AbortController() : null;
       var signal = searchController ? searchController.signal : undefined;
-
       var base = window.API_BASE || '';
       fetch(base + '/api/kdbweb/search?q=' + encodeURIComponent(trimmed), { signal: signal })
         .then(function(r) { return r.ok ? r.json() : []; })
-        .then(function(results) {
-          positionDrop();
-          if (!results.length) {
-            drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
-              + esc(trimmed) + '</strong></div>';
-            drop.removeAttribute('hidden');
-            activeIdx = -1;
-            return;
-          }
-          drop.innerHTML = buildResultsHtml(results, trimmed);
-          drop.removeAttribute('hidden');
-          activeIdx = -1;
-        })
+        .then(function(results) { onResults(results, trimmed); })
         .catch(function(err) {
-          // Si fue cancelada la petición, ignorar
           if (err && err.name === 'AbortError') return;
-          // Fallback: búsqueda local básica sobre allEntries
+          // Fallback local
           var qn = norm(trimmed);
           var local = allEntries.filter(function(e) {
             return norm(e.title).includes(qn)
                 || norm(e.card_title || '').includes(qn)
                 || norm(e.summary || '').includes(qn);
           }).slice(0, 10).map(function(e) {
-            return {
-              href: 'kdbweb-' + e.slug + '.html',
+            return { href: 'kdbweb-' + e.slug + '.html',
               label: e.card_title || e.title || '',
               context: e.parent_slug ? (slugTitle[e.parent_slug] || '') : null,
-              summary: e.summary || '',
-              is_content: false,
-            };
+              summary: e.summary || '', is_content: false };
           });
-          positionDrop();
-          if (!local.length) {
-            drop.innerHTML = '<div class="kw-sr-empty">Sin resultados para <strong>'
-              + esc(trimmed) + '</strong></div>';
-          } else {
-            drop.innerHTML = buildResultsHtml(local, trimmed);
-          }
-          drop.removeAttribute('hidden');
-          activeIdx = -1;
+          onResults(local, trimmed);
         });
     }
 
-    function setActive(items) {
-      items.forEach(function(it, i) {
-        it.classList.toggle('kw-sr-active', i === activeIdx);
-      });
-      if (activeIdx >= 0 && items[activeIdx]) {
-        items[activeIdx].scrollIntoView({ block: 'nearest' });
-      }
+    function isMobile() {
+      return window.innerWidth < 768;
     }
 
-    // Debounce al escribir
-    var timer;
-    input.addEventListener('input', function() {
-      clearTimeout(timer);
-      timer = setTimeout(function() { renderResults(input.value); }, 180);
-    });
+    /* ═══════════════════════════════════════════════════════════════════
+       DESKTOP — dropdown flotante anclado al form con position:fixed
+       En desktop no hay problema de scroll porque el viewport visual
+       no cambia al scrollear.
+    ═══════════════════════════════════════════════════════════════════ */
+    var drop = document.createElement('div');
+    drop.className = 'kw-search-results';
+    drop.setAttribute('hidden', '');
+    drop.setAttribute('role', 'listbox');
+    document.body.appendChild(drop);
 
-    // Navegación con teclado
-    input.addEventListener('keydown', function(e) {
-      var items = Array.from(drop.querySelectorAll('.kw-sr-item'));
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        activeIdx = Math.min(activeIdx + 1, items.length - 1);
-        setActive(items);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        activeIdx = Math.max(activeIdx - 1, -1);
-        setActive(items);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        var target = activeIdx >= 0 ? items[activeIdx] : items[0];
-        if (target) target.click();
-      } else if (e.key === 'Escape') {
-        hideDrop();
-      }
-    });
-
-    // Submit del form (botón lupa)
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      var q = input.value.trim();
-      if (!q) return;
-      var items = drop.querySelectorAll('.kw-sr-item');
-      var target = activeIdx >= 0 ? items[activeIdx] : items[0];
-      if (target) { target.click(); return; }
-      renderResults(q);
-      setTimeout(function() {
-        var first = drop.querySelector('.kw-sr-item');
-        if (first) first.click();
-      }, 0);
-    });
-
-    // Cerrar al hacer clic fuera (del form Y del dropdown)
-    document.addEventListener('click', function(e) {
-      if (!form.contains(e.target) && !drop.contains(e.target)) {
-        hideDrop();
-      }
-    });
-
-    // Abrir de nuevo si el usuario vuelve a hacer foco con texto ya escrito
-    input.addEventListener('focus', function() {
-      if (input.value.trim()) renderResults(input.value);
-    });
-
-    // ── Scroll y resize ─────────────────────────────────────────────────
-    // En móvil (pantalla táctil o ancho < 768px), position:fixed pierde su
-    // anclaje durante el scroll con momentum: el viewport visual cambia cuando
-    // la barra del navegador aparece/desaparece y el handler llega tarde.
-    // Solución estándar (Google, YouTube, etc.): cerrar el dropdown al scrollear.
-    // En desktop no hay ese problema — reposicionar es correcto.
-    function isMobileViewport() {
-      return window.innerWidth < 768 || ('ontouchstart' in window && window.innerWidth < 1024);
+    function positionDrop() {
+      var rect = form.getBoundingClientRect();
+      drop.style.position = 'fixed';
+      drop.style.top    = (rect.bottom + 6) + 'px';
+      drop.style.left   = rect.left + 'px';
+      drop.style.width  = rect.width + 'px';
+      drop.style.zIndex = '9999';
+    }
+    function hideDrop() {
+      drop.setAttribute('hidden', '');
+      drop.innerHTML = '';
+      desktopActiveIdx = -1;
     }
 
-    window.addEventListener('scroll', function() {
-      if (drop.hasAttribute('hidden')) return;
-      if (isMobileViewport()) {
-        hideDrop();
-      } else {
+    var desktopActiveIdx = -1;
+    function desktopSetActive(items) {
+      items.forEach(function(it, i) { it.classList.toggle('kw-sr-active', i === desktopActiveIdx); });
+      if (desktopActiveIdx >= 0 && items[desktopActiveIdx]) items[desktopActiveIdx].scrollIntoView({ block: 'nearest' });
+    }
+
+    var desktopTimer;
+    function desktopOnInput() {
+      if (isMobile()) return;
+      clearTimeout(desktopTimer);
+      desktopTimer = setTimeout(function() {
+        var q = input.value.trim();
+        if (!q) { hideDrop(); return; }
         positionDrop();
-      }
-    }, { passive: true });
+        drop.innerHTML = '<div class="kw-sr-empty">Buscando...</div>';
+        drop.removeAttribute('hidden');
+        doSearch(q, function(results, trimmed) {
+          if (!trimmed) return;
+          positionDrop();
+          drop.innerHTML = buildResultsHtml(results || [], trimmed);
+          drop.removeAttribute('hidden');
+          desktopActiveIdx = -1;
+        });
+      }, 180);
+    }
 
-    window.addEventListener('resize', function() {
+    input.addEventListener('input', desktopOnInput);
+    input.addEventListener('focus', function() {
+      if (!isMobile() && input.value.trim()) desktopOnInput();
+    });
+    input.addEventListener('keydown', function(e) {
+      if (isMobile()) return;
+      var items = Array.from(drop.querySelectorAll('.kw-sr-item'));
+      if (e.key === 'ArrowDown') { e.preventDefault(); desktopActiveIdx = Math.min(desktopActiveIdx + 1, items.length - 1); desktopSetActive(items); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); desktopActiveIdx = Math.max(desktopActiveIdx - 1, -1); desktopSetActive(items); }
+      else if (e.key === 'Enter') { e.preventDefault(); var t = desktopActiveIdx >= 0 ? items[desktopActiveIdx] : items[0]; if (t) t.click(); }
+      else if (e.key === 'Escape') hideDrop();
+    });
+    document.addEventListener('click', function(e) {
+      if (!form.contains(e.target) && !drop.contains(e.target)) hideDrop();
+    });
+    window.addEventListener('scroll', function() {
       if (!drop.hasAttribute('hidden')) positionDrop();
     }, { passive: true });
-
-    // En móvil: cerrar también al hacer touchstart fuera (sin esperar click)
-    document.addEventListener('touchstart', function(e) {
-      if (!form.contains(e.target) && !drop.contains(e.target)) {
-        hideDrop();
-      }
+    window.addEventListener('resize', function() {
+      if (!drop.hasAttribute('hidden')) { isMobile() ? hideDrop() : positionDrop(); }
     }, { passive: true });
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MÓVIL — overlay de pantalla completa
+       position:fixed sobre toda la pantalla: no hay elemento flotante
+       que pelee con el scroll del navegador. Es el patrón que usan
+       Google, YouTube y cualquier app nativa de búsqueda en móvil.
+    ═══════════════════════════════════════════════════════════════════ */
+    var overlay = document.createElement('div');
+    overlay.className = 'kw-search-overlay';
+    overlay.setAttribute('hidden', '');
+    overlay.innerHTML =
+      '<div class="kw-search-overlay-bar">'
+      + '<button class="kw-search-overlay-back" aria-label="Cerrar búsqueda">'
+      +   '<svg viewBox="0 0 24 24" width="22" height="22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>'
+      + '</button>'
+      + '<input class="kw-search-overlay-input" type="search" placeholder="Busca una norma, resolución o concepto" autocomplete="off" />'
+      + '</div>'
+      + '<div class="kw-search-overlay-results" role="listbox"></div>';
+    document.body.appendChild(overlay);
+
+    var overlayInput   = overlay.querySelector('.kw-search-overlay-input');
+    var overlayResults = overlay.querySelector('.kw-search-overlay-results');
+    var overlayBack    = overlay.querySelector('.kw-search-overlay-back');
+
+    function openOverlay() {
+      overlay.removeAttribute('hidden');
+      document.body.style.overflow = 'hidden'; // bloquea scroll del fondo
+      overlayInput.value = input.value;
+      setTimeout(function() { overlayInput.focus(); }, 60);
+      if (overlayInput.value.trim()) triggerOverlaySearch(overlayInput.value);
+    }
+    function closeOverlay() {
+      overlay.setAttribute('hidden', '');
+      document.body.style.overflow = '';
+      overlayResults.innerHTML = '';
+    }
+
+    var overlayTimer;
+    function triggerOverlaySearch(q) {
+      clearTimeout(overlayTimer);
+      overlayTimer = setTimeout(function() {
+        var trimmed = q.trim();
+        if (!trimmed) { overlayResults.innerHTML = ''; return; }
+        overlayResults.innerHTML = '<div class="kw-sr-empty">Buscando...</div>';
+        doSearch(trimmed, function(results, qt) {
+          if (!qt) return;
+          overlayResults.innerHTML = buildResultsHtml(results || [], qt);
+        });
+      }, 180);
+    }
+
+    overlayInput.addEventListener('input', function() { triggerOverlaySearch(overlayInput.value); });
+    overlayBack.addEventListener('click', closeOverlay);
+    overlay.addEventListener('click', function(e) {
+      // Cerrar si toca el fondo oscuro (fuera del bar y los resultados)
+      if (e.target === overlay) closeOverlay();
+    });
+
+    // Abrir overlay al tocar el buscador en móvil
+    input.addEventListener('focus', function() {
+      if (isMobile()) { input.blur(); openOverlay(); }
+    });
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (isMobile()) { openOverlay(); return; }
+      // Desktop: navegar al primer resultado
+      var items = drop.querySelectorAll('.kw-sr-item');
+      var t = desktopActiveIdx >= 0 ? items[desktopActiveIdx] : items[0];
+      if (t) { t.click(); return; }
+      desktopOnInput();
+    });
+
+    // En el overlay: submit → ir al primer resultado
+    overlayInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        var first = overlayResults.querySelector('.kw-sr-item');
+        if (first) first.click();
+      } else if (e.key === 'Escape') {
+        closeOverlay();
+      }
+    });
   }
 
   function buildCatCard(entry) {
