@@ -330,7 +330,7 @@
         const name = getFileName(item.key);
         const sel = selectedMediaItem?.key === item.key ? " expl-selected" : "";
         return `<div class="expl-file${sel}" data-key="${safe(item.key)}" data-url="${safe(item.url)}" title="${safe(name)}">
-          <img class="expl-file-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy">
+          <div class="expl-thumb-wrap"><img class="expl-file-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy" width="120" height="80"></div>
           <span class="expl-file-name">${safe(name)}</span>
           <div class="expl-file-actions">
             <button type="button" class="media-icon-btn" data-action="rename" title="Renombrar">✎</button>
@@ -354,7 +354,7 @@
         const name = getFileName(item.key);
         const sel = selectedMediaItem?.key === item.key ? " expl-selected" : "";
         return `<tr class="expl-file-row${sel}" data-key="${safe(item.key)}" data-url="${safe(item.url)}">
-          <td><img class="list-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy"></td>
+          <td><img class="list-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy" width="38" height="28"></td>
           <td class="list-name">${safe(name)}</td>
           <td class="list-size">${safe(formatFileSize(item.size))}</td>
           <td class="list-date">${safe(formatFileDate(item.last_modified))}</td>

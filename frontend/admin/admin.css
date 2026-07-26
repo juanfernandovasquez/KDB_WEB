@@ -1171,7 +1171,8 @@ button.danger:hover {
 }
 .expl-file:hover { border-color: var(--navy-mid); box-shadow: var(--shadow-xs); }
 .expl-file.expl-selected { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(6,24,109,0.2); }
-.expl-file-thumb { width: 100%; height: 80px; object-fit: cover; display: block; background: #eef0f6; }
+.expl-thumb-wrap { width: 100%; height: 80px; overflow: hidden; flex-shrink: 0; background: #eef0f6; }
+.expl-file-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
 .expl-file-name {
   font-size: 0.7rem; color: var(--dark); padding: 0.3rem 0.35rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1813,7 +1814,7 @@ button.secondary.small-btn {
 
   /* ── Media explorer móvil ────────────────────────────────────── */
   .explorer-files.grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
-  .expl-file-thumb { height: 64px; }
+  .expl-thumb-wrap { height: 64px; }
   .explorer-preview { width: 160px; }
   .media-explorer { height: 96vh; }
 
