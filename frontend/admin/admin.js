@@ -410,6 +410,27 @@
     popover.style.zIndex = "9999";
     popover.style.top = (rect.bottom + 4) + "px";
     popover.style.right = Math.max(4, window.innerWidth - rect.right) + "px";
+    popover.addEventListener("click", async (ev) => {
+      const btn = ev.target.closest(".move-folder-btn");
+      if (!btn || !movePickerKey) return;
+      ev.stopPropagation();
+      const targetPrefix = btn.dataset.target;
+      const key = movePickerKey;
+      closeMovePopover();
+      setMediaStatus("Moviendo imagen...");
+      try {
+        const res = await apiFetch("/api/media/move", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, target_prefix: targetPrefix })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setMediaStatus(data.error || "No se pudo mover la imagen"); return; }
+        setMediaStatus("Imagen movida");
+        mediaCache = mediaCache.filter(i => i.key !== key);
+        if (selectedMediaItem?.key === key) setSelectedMediaItem(null);
+        renderMediaBrowser();
+      } catch { setMediaStatus("No se pudo mover la imagen"); }
+    });
     document.body.appendChild(popover);
     setTimeout(() => document.addEventListener("click", closeMovePopover, { once: true }), 0);
   };
@@ -3976,30 +3997,6 @@ let currentAdminUserId = null;
       filesContainer.addEventListener("dblclick", (ev) => {
         const fileEl = ev.target.closest(".expl-file, .expl-file-row");
         if (fileEl && fileEl.dataset.url) { applyMediaSelection(fileEl.dataset.url); closeMediaModal(); }
-      });
-    }
-    const explorerEl = document.querySelector(".media-explorer");
-    if (explorerEl) {
-      explorerEl.addEventListener("click", async (ev) => {
-        const btn = ev.target.closest(".move-folder-btn");
-        if (!btn || !movePickerKey) return;
-        ev.stopPropagation();
-        const targetPrefix = btn.dataset.target;
-        const key = movePickerKey;
-        closeMovePopover();
-        setMediaStatus("Moviendo imagen...");
-        try {
-          const res = await apiFetch("/api/media/move", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key, target_prefix: targetPrefix })
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) { setMediaStatus(data.error || "No se pudo mover la imagen"); return; }
-          setMediaStatus("Imagen movida");
-          mediaCache = mediaCache.filter(i => i.key !== key);
-          if (selectedMediaItem?.key === key) setSelectedMediaItem(null);
-          renderMediaBrowser();
-        } catch { setMediaStatus("No se pudo mover la imagen"); }
       });
     }
     // logo picker uses the shared media modal
