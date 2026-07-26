@@ -379,17 +379,22 @@
     movePickerKey = key;
     const folders = Array.isArray(mediaFolders) ? mediaFolders : [];
     const items = [];
-    if (currentMediaPrefix) items.push({ label: "📁 Raíz", prefix: "" });
     const parentPrefix = (() => {
       const clean = currentMediaPrefix.replace(/\/$/, "");
       if (!clean) return null;
       const idx = clean.lastIndexOf("/");
       return idx < 0 ? "" : clean.slice(0, idx + 1);
     })();
-    if (parentPrefix !== null && parentPrefix !== currentMediaPrefix) {
+    // Parent folder option
+    if (parentPrefix !== null) {
       const parentName = parentPrefix ? parentPrefix.replace(/\/$/, "").split("/").pop() : "Raíz";
       items.push({ label: `📁 ↑ ${parentName}`, prefix: parentPrefix });
     }
+    // Root option only if parent isn't already root
+    if (parentPrefix !== null && parentPrefix !== "") {
+      items.push({ label: "📁 Raíz", prefix: "" });
+    }
+    // Subfolders at current level
     folders.forEach(pref => {
       const label = pref.startsWith(currentMediaPrefix) ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "") : pref.replace(/\/$/, "");
       if (label) items.push({ label: `📁 ${label}`, prefix: pref });
