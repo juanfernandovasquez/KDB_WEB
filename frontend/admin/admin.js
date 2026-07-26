@@ -330,7 +330,7 @@
         const name = getFileName(item.key);
         const sel = selectedMediaItem?.key === item.key ? " expl-selected" : "";
         return `<div class="expl-file${sel}" data-key="${safe(item.key)}" data-url="${safe(item.url)}" title="${safe(name)}">
-          <div class="expl-thumb-wrap"><img class="expl-file-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy" width="120" height="80"></div>
+          <div class="expl-thumb-wrap"><img class="expl-file-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy" width="120" height="120"></div>
           <span class="expl-file-name">${safe(name)}</span>
           <div class="expl-file-actions">
             <button type="button" class="media-icon-btn" data-action="rename" title="Renombrar">✎</button>
