@@ -487,11 +487,12 @@ export function setupRichEditor(toolbarId, editorId) {
       return;
     }
 
-    if (cmd === "textAlignLeft" || cmd === "textAlignCenter" || cmd === "textAlignRight") {
+    if (cmd === "textAlignLeft" || cmd === "textAlignCenter" || cmd === "textAlignRight" || cmd === "textAlignJustify") {
       const map = {
         textAlignLeft: "justifyLeft",
         textAlignCenter: "justifyCenter",
         textAlignRight: "justifyRight",
+        textAlignJustify: "justifyFull",
       };
       const img = getSelectedOrAnchoredImage(editor);
       if (img) {

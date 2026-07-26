@@ -178,10 +178,17 @@
           <div class="collapsible-body collapsed" id="story-body">
             <div class="grid-2" id="story-image-row">
               <div>
-                <label>Imagen (URL)</label>
-                <div class="row media-input-row">
-                  <input id="story-image" type="text">
-                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                <label>Imagen</label>
+                <div class="image-picker-field">
+                  <input type="hidden" id="story-image">
+                  <div class="img-picker-preview">
+                    <img class="img-picker-thumb" alt="Vista previa" style="display:none">
+                    <span class="img-picker-empty">Sin imagen seleccionada</span>
+                  </div>
+                  <div class="img-picker-actions">
+                    <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                    <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                  </div>
                 </div>
               </div>
               </div>
@@ -238,10 +245,17 @@
                 </div>
               </div>
               <div id="about-image-wrap">
-                <label>Imagen (URL)</label>
-                <div class="row media-input-row">
-                  <input id="about-image" type="text">
-                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                <label>Imagen</label>
+                <div class="image-picker-field">
+                  <input type="hidden" id="about-image">
+                  <div class="img-picker-preview">
+                    <img class="img-picker-thumb" alt="Vista previa" style="display:none">
+                    <span class="img-picker-empty">Sin imagen seleccionada</span>
+                  </div>
+                  <div class="img-picker-actions">
+                    <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                    <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -525,13 +539,6 @@
                 <button type="button" class="cta small-btn" id="media-upload-btn">Subir</button>
               </div>
             </div>
-            <div class="media-manual">
-              <label>URL manual</label>
-              <div class="row">
-                <input type="url" id="media-url-input" placeholder="https://...">
-                <button type="button" class="cta small-btn" id="media-insert-url">Insertar</button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -592,10 +599,17 @@
             </div>
             <div class="grid-2">
               <div>
-                <label>Imagen hero (URL)</label>
-                <div class="row media-input-row">
-                  <input type="text" id="kdbweb-form-hero-image">
-                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                <label>Imagen hero</label>
+                <div class="image-picker-field">
+                  <input type="hidden" id="kdbweb-form-hero-image">
+                  <div class="img-picker-preview">
+                    <img class="img-picker-thumb" alt="Vista previa" style="display:none">
+                    <span class="img-picker-empty">Sin imagen seleccionada</span>
+                  </div>
+                  <div class="img-picker-actions">
+                    <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                    <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1303,21 +1317,33 @@
             </div>
             <div class="grid-2">
               <div>
-                <label>Imagen hero (URL)</label>
-                <div class="row media-input-row">
-                  <input type="text" id="pub-hero-image">
-                  <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
+                <label>Imagen hero</label>
+                <div class="image-picker-field">
+                  <input type="hidden" id="pub-hero-image">
+                  <div class="img-picker-preview">
+                    <img class="img-picker-thumb" alt="Vista previa" style="display:none">
+                    <span class="img-picker-empty">Sin imagen seleccionada</span>
+                  </div>
+                  <div class="img-picker-actions">
+                    <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                    <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                  </div>
                 </div>
               </div>
             </div>
             <label>Contenido (HTML permitido)</label>
             <div class="rich-editor">
               <div class="editor-toolbar editor-toolbar--publication" id="pub-content-toolbar">
-                <button type="button" class="editor-pill-btn" data-cmd="undo" title="Deshacer">Deshacer</button>
-                <button type="button" class="editor-pill-btn" data-cmd="redo" title="Rehacer">Rehacer</button>
+                <!-- Deshacer / Rehacer -->
+                <button type="button" class="editor-pill-btn" data-cmd="undo" title="Deshacer">&#8592; Deshacer</button>
+                <button type="button" class="editor-pill-btn" data-cmd="redo" title="Rehacer">Rehacer &#8594;</button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Estilos de texto -->
                 <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="bold" title="Negrita"><strong>B</strong></button>
                 <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="italic" title="Italica"><em>I</em></button>
                 <button type="button" class="editor-icon-btn editor-text-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Bloques y tamano -->
                 <button type="button" class="editor-pill-btn" data-cmd="styleTitle" title="Titulo">Titulo</button>
                 <button type="button" class="editor-pill-btn" data-cmd="styleSubtitle" title="Subtitulo">Subtitulo</button>
                 <select class="editor-block-select" data-cmd="formatBlock">
@@ -1340,6 +1366,14 @@
                   <option value="28">28 px</option>
                   <option value="32">32 px</option>
                 </select>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Alineacion de parrafo -->
+                <button type="button" class="editor-icon-btn editor-align-btn align-left" data-cmd="textAlignLeft" title="Alinear a la izquierda"><span class="editor-bars" aria-hidden="true"></span></button>
+                <button type="button" class="editor-icon-btn editor-align-btn align-center" data-cmd="textAlignCenter" title="Centrar"><span class="editor-bars" aria-hidden="true"></span></button>
+                <button type="button" class="editor-icon-btn editor-align-btn align-right" data-cmd="textAlignRight" title="Alinear a la derecha"><span class="editor-bars" aria-hidden="true"></span></button>
+                <button type="button" class="editor-icon-btn editor-align-btn align-justify" data-cmd="textAlignJustify" title="Justificado"><span class="editor-bars" aria-hidden="true"></span></button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Colores de texto -->
                 <div class="editor-palette-group">
                   <span>Color</span>
                   <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#0b3b91" style="--swatch:#0b3b91" title="Azul marca"></button>
@@ -1348,6 +1382,7 @@
                   <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#4b5563" style="--swatch:#4b5563" title="Gris"></button>
                   <button type="button" class="editor-color-swatch" data-cmd="textColor" data-value="#111111" style="--swatch:#111111" title="Negro"></button>
                 </div>
+                <!-- Resaltado -->
                 <div class="editor-palette-group">
                   <span>Resaltado</span>
                   <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#fff4bf" style="--swatch:#fff4bf" title="Amarillo suave"></button>
@@ -1356,26 +1391,31 @@
                   <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#fee2e2" style="--swatch:#fee2e2" title="Rojo suave"></button>
                   <button type="button" class="editor-color-swatch light" data-cmd="textBackgroundColor" data-value="#f3e8ff" style="--swatch:#f3e8ff" title="Lila suave"></button>
                 </div>
-                <button type="button" class="editor-pill-btn" data-cmd="insertUnorderedList" title="Lista con vi?etas">Lista</button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Listas y bloques especiales -->
+                <button type="button" class="editor-pill-btn" data-cmd="insertUnorderedList" title="Lista con vinetas">&#8226; Lista</button>
                 <button type="button" class="editor-pill-btn" data-cmd="insertOrderedList" title="Lista numerada">1. Lista</button>
-                <button type="button" class="editor-pill-btn" data-cmd="blockquote" title="Cita">Cita</button>
-                <button type="button" class="editor-pill-btn" data-cmd="insertHorizontalRule" title="Linea divisoria">Linea</button>
-                <button type="button" class="editor-pill-btn" data-cmd="createLink" title="Insertar enlace">Enlace</button>
+                <button type="button" class="editor-pill-btn" data-cmd="blockquote" title="Cita">&#8220; Cita</button>
+                <button type="button" class="editor-pill-btn" data-cmd="insertHorizontalRule" title="Linea divisoria">&#8212; Linea</button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Enlace e imagen -->
+                <button type="button" class="editor-pill-btn" data-cmd="createLink" title="Insertar enlace">&#128279; Enlace</button>
                 <button type="button" class="editor-pill-btn" data-cmd="unlink" title="Quitar enlace">Sin enlace</button>
-                <button type="button" class="editor-pill-btn" data-cmd="insertImage" title="Insertar imagen">Imagen</button>
-                <button type="button" class="editor-icon-btn editor-align-btn align-left" data-cmd="textAlignLeft" title="Alinear a la izquierda"><span class="editor-bars" aria-hidden="true"></span></button>
-                <button type="button" class="editor-icon-btn editor-align-btn align-center" data-cmd="textAlignCenter" title="Centrar"><span class="editor-bars" aria-hidden="true"></span></button>
-                <button type="button" class="editor-icon-btn editor-align-btn align-right" data-cmd="textAlignRight" title="Alinear a la derecha"><span class="editor-bars" aria-hidden="true"></span></button>
-                <button type="button" class="editor-icon-btn editor-wrap-btn wrap-square" data-cmd="wrapSquare" title="Ajuste cuadrado"><span class="editor-wrap-glyph" aria-hidden="true"></span></button>
-                <button type="button" class="editor-icon-btn editor-wrap-btn wrap-block" data-cmd="wrapBlock" title="Ajuste arriba y abajo"><span class="editor-wrap-glyph" aria-hidden="true"></span></button>
-                <button type="button" class="editor-pill-btn" data-cmd="insertTable" title="Insertar tabla">Tabla</button>
+                <button type="button" class="editor-pill-btn" data-cmd="insertImage" title="Insertar imagen de galeria">&#128247; Imagen</button>
+                <!-- Ajuste de imagen -->
+                <button type="button" class="editor-icon-btn editor-wrap-btn wrap-square" data-cmd="wrapSquare" title="Imagen con texto al lado"><span class="editor-wrap-glyph" aria-hidden="true"></span></button>
+                <button type="button" class="editor-icon-btn editor-wrap-btn wrap-block" data-cmd="wrapBlock" title="Imagen en bloque"><span class="editor-wrap-glyph" aria-hidden="true"></span></button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <!-- Tabla -->
+                <button type="button" class="editor-pill-btn" data-cmd="insertTable" title="Insertar tabla">&#9776; Tabla</button>
                 <button type="button" class="editor-icon-btn editor-table-btn" data-cmd="addRowAfter" title="Agregar fila"><span class="editor-table-glyph add-row" aria-hidden="true"></span></button>
                 <button type="button" class="editor-icon-btn editor-table-btn" data-cmd="addColumnAfter" title="Agregar columna"><span class="editor-table-glyph add-col" aria-hidden="true"></span></button>
                 <button type="button" class="editor-icon-btn editor-table-btn" data-cmd="deleteRow" title="Eliminar fila"><span class="editor-table-glyph del-row" aria-hidden="true"></span></button>
                 <button type="button" class="editor-icon-btn editor-table-btn" data-cmd="deleteColumn" title="Eliminar columna"><span class="editor-table-glyph del-col" aria-hidden="true"></span></button>
-                <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">Limpiar</button>
+                <span class="editor-sep" aria-hidden="true"></span>
+                <button type="button" class="editor-pill-btn" data-cmd="removeFormat" title="Limpiar formato">&#10006; Limpiar</button>
               </div>
-              <div id="pub-content-editor" class="editor-surface"></div>
+              <div id="pub-content-editor" class="editor-surface pub-editor-surface"></div>
               <textarea id="pub-form-content" class="hidden"></textarea>
             </div>
             <div class="row">

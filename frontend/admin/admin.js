@@ -148,6 +148,42 @@
     const clean = (value || "").trim().toLowerCase();
     return clean.startsWith("http://") || clean.startsWith("https://");
   };
+
+  // Renders an image picker field (no URL text visible, only preview + buttons)
+  const imgPickerField = (fieldName, value) => {
+    const url = (value || "").trim();
+    const hasImg = !!url;
+    return `
+      <div class="image-picker-field">
+        <input type="hidden" data-field="${fieldName}" value="${safe(url)}">
+        <div class="img-picker-preview">
+          <img class="img-picker-thumb" src="${safe(url)}" alt="Vista previa" style="display:${hasImg ? "block" : "none"}">
+          <span class="img-picker-empty" style="display:${hasImg ? "none" : ""}">Sin imagen seleccionada</span>
+        </div>
+        <div class="img-picker-actions">
+          <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+          <button type="button" class="secondary small-btn danger img-picker-clear" style="display:${hasImg ? "" : "none"}">&#10005; Quitar</button>
+        </div>
+      </div>
+    `;
+  };
+
+  // Sets an image picker field value and updates the preview
+  const setImgPicker = (id, url) => {
+    const input = q(id);
+    if (!input) return;
+    const cleanUrl = (url || "").trim();
+    input.value = cleanUrl;
+    const field = input.closest(".image-picker-field");
+    if (!field) return;
+    const thumb = field.querySelector(".img-picker-thumb");
+    const empty = field.querySelector(".img-picker-empty");
+    const clearBtn = field.querySelector(".img-picker-clear");
+    const hasImg = !!cleanUrl;
+    if (thumb) { thumb.src = cleanUrl; thumb.style.display = hasImg ? "block" : "none"; }
+    if (empty) empty.style.display = hasImg ? "none" : "";
+    if (clearBtn) clearBtn.style.display = hasImg ? "" : "none";
+  };
   const insertImageIntoEditor = (editor, url) => {
     const cleanUrl = (url || "").trim();
     if (!cleanUrl) return;
@@ -191,6 +227,16 @@
       }
       mediaTargetInput.value = cleanUrl;
       mediaTargetInput.dispatchEvent(new Event("input", { bubbles: true }));
+      // Update image-picker-field preview if this input lives inside one
+      const pickerField = mediaTargetInput.closest(".image-picker-field");
+      if (pickerField) {
+        const thumb = pickerField.querySelector(".img-picker-thumb");
+        const empty = pickerField.querySelector(".img-picker-empty");
+        const clearBtn = pickerField.querySelector(".img-picker-clear");
+        if (thumb) { thumb.src = cleanUrl; thumb.style.display = "block"; }
+        if (empty) empty.style.display = "none";
+        if (clearBtn) clearBtn.style.display = "";
+      }
       if (mediaTargetInput.id === "c-logo-url") {
         setLogoPreview(cleanUrl);
       }
@@ -948,11 +994,8 @@ let currentAdminUserId = null;
           <div><label>Boton secundario</label><input type="text" data-field="secondary_label" value="${val("secondary_label")}" placeholder="${val("secondary_label")}"></div>
           <div><label>Enlace secundario</label>${heroHrefField('secondary_href', slide.secondary_href)}</div>
         </div>
-        <label>Imagen (URL)</label>
-        <div class="row media-input-row">
-          <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
-          <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
-        </div>
+        <label>Imagen</label>
+        ${imgPickerField("image_url", slide.image_url)}
       </div>
     `;
   };
@@ -982,16 +1025,10 @@ let currentAdminUserId = null;
           </div>
           <div id="service-description-editor-${uid}" class="editor-surface" contenteditable="true" data-editor-field="description">${svc.description || ""}</div>
         </div>
-        <label>Imagen del servicio (URL)</label>
-        <div class="row media-input-row">
-          <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
-          <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
-        </div>
-        <label>Icono del servicio (URL)</label>
-        <div class="row media-input-row">
-          <input type="text" data-field="icon_url" value="${val("icon_url")}" placeholder="${val("icon_url")}">
-          <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
-        </div>
+        <label>Imagen del servicio</label>
+        ${imgPickerField("image_url", svc.image_url)}
+        <label>Icono del servicio</label>
+        ${imgPickerField("icon_url", svc.icon_url)}
       </div>
     `;
   };
@@ -1007,11 +1044,8 @@ let currentAdminUserId = null;
         </div>
         <label>Nombre</label><input type="text" data-field="name" value="${val("name")}" placeholder="${val("name")}">
         <label>Cargo</label><input type="text" data-field="role" value="${val("role")}" placeholder="${val("role")}">
-        <label>Imagen (URL)</label>
-          <div class="row media-input-row">
-            <input type="text" data-field="image_url" value="${val("image_url")}" placeholder="${val("image_url")}">
-            <button type="button" class="secondary small-btn media-picker-btn">Elegir</button>
-          </div>
+        <label>Imagen</label>
+          ${imgPickerField("image_url", member.image_url)}
           <label>LinkedIn</label><input type="text" data-field="linkedin" value="${val("linkedin")}" placeholder="${val("linkedin")}">
           <label>Descripcion completa</label>
           <div class="rich-editor team-description-editor">
@@ -1302,7 +1336,7 @@ let currentAdminUserId = null;
         linkEnsurers["about-content-editor"](editor);
       }
     }
-    setVal("about-image", about.image_url || "");
+    setImgPicker("about-image", about.image_url || "");
     setVal("about-primary-label", about.primary_label || "");
     setVal("about-primary-href", about.primary_href || "");
     setVal("about-secondary-label", about.secondary_label || "");
@@ -1311,7 +1345,7 @@ let currentAdminUserId = null;
 
   function setStoryForm(story = {}) {
     setVal("story-title", story.title || "");
-    setVal("story-image", story.image_url || "");
+    setImgPicker("story-image", story.image_url || "");
     const titleEditor = q("story-title-editor");
     if (titleEditor) {
       titleEditor.innerHTML = story.title || "";
@@ -1730,7 +1764,7 @@ let currentAdminUserId = null;
     setVal("kdbweb-form-title", entry.title || "");
     setVal("kdbweb-form-slug", entry.slug || "");
     setVal("kdbweb-form-summary", entry.summary || "");
-    setVal("kdbweb-form-hero-image", entry.hero_image_url || "");
+    setImgPicker("kdbweb-form-hero-image", entry.hero_image_url || "");
     kdbwebEditingSlug = entry.slug || null;
     // Notify katweb-admin.js so it can show slug-specific meta editors
     document.dispatchEvent(new CustomEvent("katweb:open-form", { detail: entry }));
@@ -1934,7 +1968,7 @@ let currentAdminUserId = null;
     setValSafe("pub-form-content", pub?.content_html || "");
     setValSafe("pub-form-date", pub?.published_at || "");
     setValSafe("pub-form-author", pub?.author || "");
-    setValSafe("pub-hero-image", pub?.hero_image_url || "");
+    setImgPicker("pub-hero-image", pub?.hero_image_url || "");
     const catSel = q("pub-form-category");
     if (catSel) {
       catSel.innerHTML = categoriesCache.map((c) => `<option value="${c.id}">${safe(c.name)}</option>`).join("");
@@ -2800,14 +2834,15 @@ let currentAdminUserId = null;
         editor.focus();
         return;
       }
-      if (cmd === "textAlignLeft" || cmd === "textAlignCenter" || cmd === "textAlignRight") {
+      if (cmd === "textAlignLeft" || cmd === "textAlignCenter" || cmd === "textAlignRight" || cmd === "textAlignJustify") {
         const map = {
           textAlignLeft: "justifyLeft",
           textAlignCenter: "justifyCenter",
           textAlignRight: "justifyRight",
+          textAlignJustify: "justifyFull",
         };
         const img = getSelectedOrAnchoredImage(editor);
-        if (img) {
+        if (img && cmd !== "textAlignJustify") {
           const wrap = makeResizable(img);
           const clsMap = {
             textAlignLeft: "img-align-left",
@@ -3246,6 +3281,7 @@ let currentAdminUserId = null;
         if (cmd === "textAlignLeft") return chain.setTextAlign("left").run();
         if (cmd === "textAlignCenter") return chain.setTextAlign("center").run();
         if (cmd === "textAlignRight") return chain.setTextAlign("right").run();
+        if (cmd === "textAlignJustify") return chain.setTextAlign("justify").run();
         if (cmd === "insertTable") {
           const rows = Number.parseInt(prompt("Numero de filas:", "3"), 10);
           const cols = Number.parseInt(prompt("Numero de columnas:", "3"), 10);
@@ -3763,16 +3799,6 @@ let currentAdminUserId = null;
         if (input) input.value = "";
       });
     });
-    bind("media-insert-url", () => {
-      const url = q("media-url-input")?.value.trim();
-      if (!url) return;
-      if (!mediaTargetEditor && !mediaTargetInput) {
-        alert("No hay destino para la imagen.");
-        return;
-      }
-      applyMediaSelection(url);
-      closeMediaModal();
-    });
     const mediaSearch = q("media-search");
     if (mediaSearch) mediaSearch.addEventListener("input", renderMediaGrid);
     const mediaGrid = q("media-grid");
@@ -3855,12 +3881,30 @@ let currentAdminUserId = null;
     if (!document.body.dataset.mediaPickerBound) {
       document.body.dataset.mediaPickerBound = "1";
       document.body.addEventListener("click", (ev) => {
+        // Image picker "Elegir" button
         const btn = ev.target.closest(".media-picker-btn");
-        if (!btn) return;
-        const row = btn.closest(".media-input-row") || btn.parentElement;
-        const input = row?.querySelector("input");
-        if (!input) return;
-        openMediaModalForInput(input);
+        if (btn) {
+          const field = btn.closest(".image-picker-field");
+          const row = btn.closest(".media-input-row") || btn.parentElement;
+          const input = field?.querySelector("input") || row?.querySelector("input");
+          if (input) openMediaModalForInput(input);
+          return;
+        }
+        // Image picker "Quitar" (clear) button
+        const clearBtn = ev.target.closest(".img-picker-clear");
+        if (clearBtn) {
+          const field = clearBtn.closest(".image-picker-field");
+          const input = field?.querySelector("input");
+          if (input) {
+            input.value = "";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          const thumb = field?.querySelector(".img-picker-thumb");
+          const empty = field?.querySelector(".img-picker-empty");
+          if (thumb) { thumb.src = ""; thumb.style.display = "none"; }
+          if (empty) empty.style.display = "";
+          clearBtn.style.display = "none";
+        }
       });
     }
     bind("kdbweb-save-all", saveKdbwebEntries);
