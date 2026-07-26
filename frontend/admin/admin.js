@@ -125,6 +125,10 @@
   let currentMediaPrefix = "";
   let logoGalleryPrefix = "logos/";
   let faviconGalleryPrefix = "favicons/";
+  let mediaViewMode = "grid";
+  let mediaNavHistory = [];
+  let mediaNavFuture = [];
+  let selectedMediaItem = null;
   const resolveCssColor = (value) => {
     if (!value) return "";
     const probe = document.createElement("span");
@@ -257,56 +261,122 @@
     const el = q("media-status");
     if (el) el.textContent = msg || "";
   };
-  const renderMediaGrid = () => {
-    const grid = q("media-grid");
-    if (!grid) return;
-    const term = (q("media-search")?.value || "").toLowerCase().trim();
-    const items = mediaCache.filter((item) => {
-      if (!term) return true;
-      return (item.key || "").toLowerCase().includes(term) || (item.url || "").toLowerCase().includes(term);
-    });
-    if (!items.length) {
-      grid.innerHTML = "<div class=\"media-empty\">Sin imagenes</div>";
-      return;
-    }
-    grid.innerHTML = items
-      .map(
-        (item) => `
-        <div class="media-card" data-url="${safe(item.url || "")}" data-key="${safe(item.key || "")}" title="${safe(item.key || "")}" role="button" tabindex="0">
-          <img src="${safe(item.url || "")}" alt="${safe(item.key || "imagen")}" loading="lazy">
-          <span class="media-name">${safe(item.key || "")}</span>
-          <div class="media-actions">
-            <button type="button" class="media-icon-btn" data-action="rename" title="Renombrar" aria-label="Renombrar">&#9998;</button>
-            <button type="button" class="media-icon-btn danger" data-action="delete" title="Eliminar" aria-label="Eliminar">X</button>
-          </div>
-        </div>
-      `
-      )
-      .join("");
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
-  const renderMediaFolders = () => {
-    const wrap = q("media-folders");
-    if (!wrap) return;
-    const folders = Array.isArray(mediaFolders) ? mediaFolders : [];
-    const backPrefix = getParentPrefix(currentMediaPrefix);
-    const buttons = [];
-    if (currentMediaPrefix) {
-      buttons.push(`<button type="button" class="media-folder-item back" data-prefix="${safe(backPrefix)}">⬅ Atrás</button>`);
+  const formatFileDate = (iso) => {
+    if (!iso) return "";
+    try { return new Date(iso).toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }); } catch { return ""; }
+  };
+  const getFileName = (key) => {
+    if (currentMediaPrefix && key.startsWith(currentMediaPrefix)) return key.slice(currentMediaPrefix.length);
+    return key.split("/").pop() || key;
+  };
+  const renderMediaBreadcrumb = () => {
+    const bc = q("media-breadcrumb");
+    if (!bc) return;
+    const parts = currentMediaPrefix ? currentMediaPrefix.replace(/\/$/, "").split("/").filter(Boolean) : [];
+    const segs = [{ label: "Raíz", prefix: "" }, ...parts.map((p, i) => ({ label: p, prefix: parts.slice(0, i + 1).join("/") + "/" }))];
+    bc.innerHTML = segs.map((s, i) => {
+      const isLast = i === segs.length - 1;
+      const sep = i > 0 ? `<span class="bc-sep">›</span>` : "";
+      return `${sep}<button type="button" class="bc-seg${isLast ? " active" : ""}" data-prefix="${safe(s.prefix)}">${safe(s.label)}</button>`;
+    }).join("");
+  };
+  const updateExplorerNavBtns = () => {
+    const b = q("media-back"); const f = q("media-forward");
+    if (b) b.disabled = !mediaNavHistory.length;
+    if (f) f.disabled = !mediaNavFuture.length;
+  };
+  const setSelectedMediaItem = (item) => {
+    selectedMediaItem = item;
+    const panel = q("media-preview");
+    document.querySelectorAll(".expl-file, .expl-file-row").forEach(el => el.classList.toggle("expl-selected", item ? el.dataset.key === item.key : false));
+    if (!item || !panel) { panel?.classList.add("hidden"); return; }
+    panel.classList.remove("hidden");
+    const img = q("preview-img"); const nm = q("preview-name"); const mt = q("preview-meta");
+    if (img) img.src = item.url;
+    if (nm) nm.textContent = getFileName(item.key);
+    if (mt) mt.textContent = [item.size ? formatFileSize(item.size) : null, item.last_modified ? formatFileDate(item.last_modified) : null].filter(Boolean).join("  ·  ");
+  };
+  const FOLDER_SVG = `<svg viewBox="0 0 56 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:52px;height:40px;display:block">
+    <rect x="0" y="10" width="56" height="34" rx="4" fill="#e8a000"/>
+    <path d="M0 18 L56 18 L56 44 C56 46.2 54.2 44 52 44 L4 44 C1.8 44 0 46.2 0 44 Z" fill="#ffc107"/>
+    <path d="M0 10 C0 7.8 1.8 6 4 6 L19 6 L23 10 Z" fill="#ffa000"/>
+  </svg>`;
+  const renderMediaBrowser = () => {
+    const container = q("media-files");
+    if (!container) return;
+    renderMediaBreadcrumb();
+    updateExplorerNavBtns();
+    const term = (q("media-search")?.value || "").toLowerCase().trim();
+    const files = mediaCache.filter(item => !term || (item.key || "").toLowerCase().includes(term));
+    const folders = term ? [] : (Array.isArray(mediaFolders) ? mediaFolders : []);
+    if (mediaViewMode === "grid") {
+      container.className = "explorer-files grid";
+      if (!files.length && !folders.length) {
+        container.innerHTML = `<div class="expl-empty"><span style="font-size:2.5rem">📂</span><span>Carpeta vacía</span></div>`;
+        return;
+      }
+      const folderHtml = folders.map(pref => {
+        const label = pref.startsWith(currentMediaPrefix) ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "") : pref.replace(/\/$/, "");
+        if (!label) return "";
+        return `<div class="expl-folder" data-prefix="${safe(pref)}" title="${safe(label)}">${FOLDER_SVG}<span class="expl-folder-name">${safe(label)}</span></div>`;
+      }).join("");
+      const fileHtml = files.map(item => {
+        const name = getFileName(item.key);
+        const sel = selectedMediaItem?.key === item.key ? " expl-selected" : "";
+        return `<div class="expl-file${sel}" data-key="${safe(item.key)}" data-url="${safe(item.url)}" title="${safe(name)}">
+          <img class="expl-file-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy">
+          <span class="expl-file-name">${safe(name)}</span>
+          <div class="expl-file-actions">
+            <button type="button" class="media-icon-btn" data-action="rename" title="Renombrar">✎</button>
+            <button type="button" class="media-icon-btn danger" data-action="delete" title="Eliminar">✕</button>
+          </div>
+        </div>`;
+      }).join("");
+      container.innerHTML = folderHtml + fileHtml;
+    } else {
+      container.className = "explorer-files list";
+      if (!files.length && !folders.length) {
+        container.innerHTML = `<div class="expl-empty"><span style="font-size:2.5rem">📂</span><span>Carpeta vacía</span></div>`;
+        return;
+      }
+      const folderRows = folders.map(pref => {
+        const label = pref.startsWith(currentMediaPrefix) ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "") : pref.replace(/\/$/, "");
+        if (!label) return "";
+        return `<tr class="expl-folder-row" data-prefix="${safe(pref)}"><td><span style="font-size:1.1rem">📁</span></td><td class="list-name">${safe(label)}</td><td class="list-size">Carpeta</td><td class="list-date">—</td><td></td></tr>`;
+      }).join("");
+      const fileRows = files.map(item => {
+        const name = getFileName(item.key);
+        const sel = selectedMediaItem?.key === item.key ? " expl-selected" : "";
+        return `<tr class="expl-file-row${sel}" data-key="${safe(item.key)}" data-url="${safe(item.url)}">
+          <td><img class="list-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy"></td>
+          <td class="list-name">${safe(name)}</td>
+          <td class="list-size">${safe(formatFileSize(item.size))}</td>
+          <td class="list-date">${safe(formatFileDate(item.last_modified))}</td>
+          <td class="list-actions">
+            <button type="button" class="media-icon-btn" data-action="rename" data-key="${safe(item.key)}" title="Renombrar">✎</button>
+            <button type="button" class="media-icon-btn danger" data-action="delete" data-key="${safe(item.key)}" title="Eliminar">✕</button>
+          </td>
+        </tr>`;
+      }).join("");
+      container.innerHTML = `<table class="expl-list-table"><thead><tr><th style="width:46px"></th><th>Nombre</th><th style="width:90px">Tamaño</th><th style="width:120px">Fecha</th><th style="width:72px"></th></tr></thead><tbody>${folderRows}${fileRows}</tbody></table>`;
     }
-    folders.forEach((pref) => {
-      if (!pref) return;
-      const label = pref.startsWith(currentMediaPrefix)
-        ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "")
-        : pref.replace(/\/$/, "");
-      if (!label) return;
-      buttons.push(`<button type="button" class="media-folder-item" data-prefix="${safe(pref)}">${safe(label)}</button>`);
-    });
-    wrap.innerHTML = buttons.length ? buttons.join("") : "";
+  };
+  const navigateToPrefix = async (prefix, pushHistory = true) => {
+    if (pushHistory) { mediaNavHistory.push(currentMediaPrefix); mediaNavFuture = []; }
+    currentMediaPrefix = normalizePrefix(prefix);
+    setSelectedMediaItem(null);
+    await loadMediaLibrary();
   };
   const loadMediaLibrary = async () => {
-    setMediaStatus("Cargando imagenes...");
-    const grid = q("media-grid");
-    if (grid) grid.innerHTML = "";
+    setMediaStatus("Cargando...");
+    const container = q("media-files");
+    if (container) container.innerHTML = `<div class="expl-empty"><span style="font-size:1.5rem">⏳</span><span>Cargando...</span></div>`;
     try {
       const params = new URLSearchParams();
       if (currentMediaPrefix) params.set("prefix", currentMediaPrefix);
@@ -315,27 +385,19 @@
       const res = await apiFetch(url);
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = data.error || "No se pudo cargar el repositorio";
-        setMediaStatus(err);
-        mediaCache = [];
-        mediaFolders = [];
-        renderMediaGrid();
-        renderMediaFolders();
+        setMediaStatus(data.error || "No se pudo cargar el repositorio");
+        mediaCache = []; mediaFolders = [];
+        renderMediaBrowser();
         return;
       }
       mediaCache = Array.isArray(data.items) ? data.items : [];
       mediaFolders = Array.isArray(data.folders) ? data.folders : [];
-      if (typeof data.prefix === "string") {
-        currentMediaPrefix = normalizePrefix(data.prefix);
-      }
-      const prefixInput = q("media-prefix");
-      if (prefixInput) prefixInput.value = currentMediaPrefix;
-      const prefixLabel = currentMediaPrefix ? `Carpeta: ${currentMediaPrefix}` : "Carpeta: raiz";
-      setMediaStatus(mediaCache.length ? `${prefixLabel} · ${mediaCache.length} imagenes` : `${prefixLabel} · Sin imagenes`);
+      if (typeof data.prefix === "string") currentMediaPrefix = normalizePrefix(data.prefix);
       const delBtn = q("media-delete-folder");
       if (delBtn) delBtn.disabled = !currentMediaPrefix;
-      renderMediaFolders();
-      renderMediaGrid();
+      const count = mediaCache.length + mediaFolders.length;
+      setMediaStatus(count ? `${mediaCache.length} imagen${mediaCache.length !== 1 ? "es" : ""}, ${mediaFolders.length} carpeta${mediaFolders.length !== 1 ? "s" : ""}` : "Carpeta vacía");
+      renderMediaBrowser();
     } catch (err) {
       console.error("Error loading media", err);
       setMediaStatus("Error al cargar el repositorio");
@@ -377,6 +439,8 @@
     mediaTargetEditor = null;
     mediaTargetInput = null;
     mediaTargetTiptap = null;
+    selectedMediaItem = null;
+    q("media-preview")?.classList.add("hidden");
   };
   const normalizePrefix = (value) => {
     let prefix = (value || "").trim().replace(/^\/+/, "");
@@ -425,7 +489,7 @@
           size: file.size || 0,
           last_modified: new Date().toISOString(),
         });
-        renderMediaGrid();
+        renderMediaBrowser();
       } else {
         await loadMediaLibrary();
       }
@@ -3727,20 +3791,34 @@ let currentAdminUserId = null;
     bind("media-modal-close", closeMediaModal);
     bind("media-modal-backdrop", closeMediaModal);
     bind("media-refresh", () => loadMediaLibrary());
-    bind("media-open-prefix", () => {
-      const input = q("media-prefix");
-      currentMediaPrefix = normalizePrefix(input?.value || "");
-      if (input) input.value = currentMediaPrefix;
-      loadMediaLibrary();
+    bind("media-back", async () => {
+      if (!mediaNavHistory.length) return;
+      mediaNavFuture.push(currentMediaPrefix);
+      currentMediaPrefix = normalizePrefix(mediaNavHistory.pop());
+      setSelectedMediaItem(null);
+      await loadMediaLibrary();
     });
-    bind("media-clear-prefix", () => {
-      const input = q("media-prefix");
-      currentMediaPrefix = "";
-      if (input) input.value = "";
-      loadMediaLibrary();
+    bind("media-forward", async () => {
+      if (!mediaNavFuture.length) return;
+      mediaNavHistory.push(currentMediaPrefix);
+      currentMediaPrefix = normalizePrefix(mediaNavFuture.pop());
+      setSelectedMediaItem(null);
+      await loadMediaLibrary();
+    });
+    bind("media-view-grid", () => {
+      mediaViewMode = "grid";
+      q("media-view-grid")?.classList.add("active");
+      q("media-view-list")?.classList.remove("active");
+      renderMediaBrowser();
+    });
+    bind("media-view-list", () => {
+      mediaViewMode = "list";
+      q("media-view-list")?.classList.add("active");
+      q("media-view-grid")?.classList.remove("active");
+      renderMediaBrowser();
     });
     bind("media-create-folder", () => {
-      const name = prompt("Nombre de la carpeta:");
+      const name = prompt("Nombre de la nueva carpeta:");
       if (!name) return;
       setMediaStatus("Creando carpeta...");
       apiFetch("/api/media/folder", {
@@ -3750,23 +3828,15 @@ let currentAdminUserId = null;
       })
         .then((res) => res.json().catch(() => ({})).then((data) => ({ res, data })))
         .then(({ res, data }) => {
-          if (!res.ok) {
-            setMediaStatus(data.error || "No se pudo crear la carpeta");
-            return;
-          }
+          if (!res.ok) { setMediaStatus(data.error || "No se pudo crear la carpeta"); return; }
           currentMediaPrefix = normalizePrefix(data.prefix || currentMediaPrefix);
-          const input = q("media-prefix");
-          if (input) input.value = currentMediaPrefix;
           setMediaStatus("Carpeta creada");
           loadMediaLibrary();
         })
         .catch(() => setMediaStatus("No se pudo crear la carpeta"));
     });
     bind("media-delete-folder", () => {
-      if (!currentMediaPrefix) {
-        setMediaStatus("No hay carpeta seleccionada");
-        return;
-      }
+      if (!currentMediaPrefix) { setMediaStatus("No hay carpeta seleccionada"); return; }
       if (!confirm("¿Eliminar esta carpeta? Debe estar vacía.")) return;
       setMediaStatus("Eliminando carpeta...");
       apiFetch("/api/media/folder/delete", {
@@ -3776,57 +3846,52 @@ let currentAdminUserId = null;
       })
         .then((res) => res.json().catch(() => ({})).then((data) => ({ res, data })))
         .then(({ res, data }) => {
-          if (!res.ok) {
-            setMediaStatus(data.error || "No se pudo eliminar la carpeta");
-            return;
-          }
-          currentMediaPrefix = getParentPrefix(currentMediaPrefix);
-          const input = q("media-prefix");
-          if (input) input.value = currentMediaPrefix;
-          setMediaStatus("Carpeta eliminada");
-          loadMediaLibrary();
+          if (!res.ok) { setMediaStatus(data.error || "No se pudo eliminar la carpeta"); return; }
+          navigateToPrefix(getParentPrefix(currentMediaPrefix), false);
         })
         .catch(() => setMediaStatus("No se pudo eliminar la carpeta"));
     });
-    bind("media-upload-btn", () => {
-      const input = q("media-upload-input");
-      const file = input?.files && input.files[0];
-      if (!file) {
-        setMediaStatus("Selecciona una imagen primero");
-        return;
-      }
-      uploadMediaFile(file).then(() => {
-        if (input) input.value = "";
-      });
+    bind("preview-select-btn", () => {
+      if (!selectedMediaItem) return;
+      applyMediaSelection(selectedMediaItem.url);
+      closeMediaModal();
     });
-    const mediaSearch = q("media-search");
-    if (mediaSearch) mediaSearch.addEventListener("input", renderMediaGrid);
-    const mediaGrid = q("media-grid");
-    if (mediaGrid) {
-      mediaGrid.addEventListener("click", (ev) => {
+    const uploadInput = q("media-upload-input");
+    if (uploadInput) {
+      uploadInput.addEventListener("change", () => {
+        const file = uploadInput.files[0];
+        if (file) uploadMediaFile(file).then(() => { uploadInput.value = ""; });
+      });
+    }
+    const mediaSearchEl = q("media-search");
+    if (mediaSearchEl) mediaSearchEl.addEventListener("input", renderMediaBrowser);
+    const breadcrumbEl = q("media-breadcrumb");
+    if (breadcrumbEl) {
+      breadcrumbEl.addEventListener("click", (ev) => {
+        const seg = ev.target.closest(".bc-seg");
+        if (seg && !seg.classList.contains("active")) navigateToPrefix(seg.dataset.prefix || "");
+      });
+    }
+    const filesContainer = q("media-files");
+    if (filesContainer) {
+      filesContainer.addEventListener("click", (ev) => {
         const actionBtn = ev.target.closest("button[data-action]");
         if (actionBtn) {
+          ev.stopPropagation();
           const action = actionBtn.dataset.action;
-          const card = actionBtn.closest(".media-card");
-          if (!card) return;
-          const key = card.dataset.key || "";
+          const key = actionBtn.dataset.key || actionBtn.closest("[data-key]")?.dataset.key || "";
           if (!key) return;
           if (action === "delete") {
-            if (!confirm("¿Eliminar esta imagen del repositorio?")) return;
+            if (!confirm("¿Eliminar esta imagen?")) return;
             setMediaStatus("Eliminando imagen...");
-            apiFetch("/api/media/delete", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ key }),
-            })
-              .then((res) => res.json().catch(() => ({})).then((data) => ({ res, data })))
-              .then(({ res, data }) => {
-                if (!res.ok) {
-                  setMediaStatus(data.error || "No se pudo eliminar la imagen");
-                  return;
-                }
+            apiFetch("/api/media/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) })
+              .then(r => r.json().catch(() => ({})).then(d => ({ r, d })))
+              .then(({ r, d }) => {
+                if (!r.ok) { setMediaStatus(d.error || "No se pudo eliminar la imagen"); return; }
                 setMediaStatus("Imagen eliminada");
-                loadMediaLibrary();
+                mediaCache = mediaCache.filter(i => i.key !== key);
+                if (selectedMediaItem?.key === key) setSelectedMediaItem(null);
+                renderMediaBrowser();
               })
               .catch(() => setMediaStatus("No se pudo eliminar la imagen"));
             return;
@@ -3834,19 +3899,12 @@ let currentAdminUserId = null;
           if (action === "rename") {
             const currentName = key.split("/").pop() || key;
             const newName = prompt("Nuevo nombre:", currentName);
-            if (!newName) return;
+            if (!newName || newName === currentName) return;
             setMediaStatus("Renombrando imagen...");
-            apiFetch("/api/media/rename", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ key, new_name: newName }),
-            })
-              .then((res) => res.json().catch(() => ({})).then((data) => ({ res, data })))
-              .then(({ res, data }) => {
-                if (!res.ok) {
-                  setMediaStatus(data.error || "No se pudo renombrar la imagen");
-                  return;
-                }
+            apiFetch("/api/media/rename", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key, new_name: newName }) })
+              .then(r => r.json().catch(() => ({})).then(d => ({ r, d })))
+              .then(({ r, d }) => {
+                if (!r.ok) { setMediaStatus(d.error || "No se pudo renombrar la imagen"); return; }
                 setMediaStatus("Imagen renombrada");
                 loadMediaLibrary();
               })
@@ -3854,27 +3912,20 @@ let currentAdminUserId = null;
             return;
           }
         }
-        const card = ev.target.closest(".media-card");
-        if (!card) return;
-        const url = card.dataset.url || "";
-        if (!mediaTargetEditor && !mediaTargetInput) {
-          alert("No hay destino para la imagen.");
+        const folderEl = ev.target.closest(".expl-folder, .expl-folder-row");
+        if (folderEl) { navigateToPrefix(folderEl.dataset.prefix || ""); return; }
+        const fileEl = ev.target.closest(".expl-file, .expl-file-row");
+        if (fileEl) {
+          const key = fileEl.dataset.key; const url = fileEl.dataset.url;
+          const item = mediaCache.find(i => i.key === key) || { key, url };
+          setSelectedMediaItem(selectedMediaItem?.key === key ? null : item);
           return;
         }
-        applyMediaSelection(url);
-        closeMediaModal();
+        setSelectedMediaItem(null);
       });
-    }
-    const mediaFoldersWrap = q("media-folders");
-    if (mediaFoldersWrap) {
-      mediaFoldersWrap.addEventListener("click", (ev) => {
-        const btn = ev.target.closest(".media-folder-item");
-        if (!btn) return;
-        const pref = btn.dataset.prefix || "";
-        currentMediaPrefix = normalizePrefix(pref);
-        const input = q("media-prefix");
-        if (input) input.value = currentMediaPrefix;
-        loadMediaLibrary();
+      filesContainer.addEventListener("dblclick", (ev) => {
+        const fileEl = ev.target.closest(".expl-file, .expl-file-row");
+        if (fileEl && fileEl.dataset.url) { applyMediaSelection(fileEl.dataset.url); closeMediaModal(); }
       });
     }
     // logo picker uses the shared media modal

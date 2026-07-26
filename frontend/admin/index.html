@@ -512,32 +512,48 @@
       </div>
       <div class="modal hidden" id="media-modal" aria-hidden="true">
         <div class="modal-backdrop" id="media-modal-backdrop"></div>
-        <div class="modal-content media-modal" role="dialog" aria-modal="true" aria-label="Seleccionar imagen">
-          <div class="modal-head">
-            <h3>Seleccionar imagen</h3>
-            <button type="button" class="secondary small-btn" id="media-modal-close">Cerrar</button>
+        <div class="modal-content media-explorer" role="dialog" aria-modal="true" aria-label="Seleccionar imagen">
+          <!-- Cabecera -->
+          <div class="expl-header">
+            <span class="expl-title">Seleccionar imagen</span>
+            <button type="button" class="secondary small-btn" id="media-modal-close">✕ Cerrar</button>
           </div>
-          <div class="modal-body">
-            <div class="media-controls">
-              <input type="text" id="media-search" placeholder="Buscar por nombre">
-              <button type="button" class="secondary small-btn" id="media-refresh">Refrescar</button>
+          <!-- Barra de herramientas -->
+          <div class="expl-toolbar">
+            <div class="expl-nav-btns">
+              <button type="button" class="expl-nav-btn" id="media-back" title="Atrás" disabled>&#8592;</button>
+              <button type="button" class="expl-nav-btn" id="media-forward" title="Adelante" disabled>&#8594;</button>
             </div>
-            <div class="media-folder">
-              <input type="text" id="media-prefix" placeholder="Carpeta (ej: publicaciones/)">
-              <button type="button" class="secondary small-btn" id="media-open-prefix">Abrir</button>
-              <button type="button" class="secondary small-btn" id="media-clear-prefix">Raiz</button>
-              <button type="button" class="secondary small-btn" id="media-create-folder">Nueva carpeta</button>
-              <button type="button" class="secondary small-btn danger" id="media-delete-folder">Eliminar carpeta</button>
+            <nav class="expl-breadcrumb" id="media-breadcrumb" aria-label="Ruta actual"></nav>
+            <div class="expl-toolbar-right">
+              <input type="text" id="media-search" placeholder="Buscar...">
+              <button type="button" class="expl-view-btn active" id="media-view-grid" title="Vista cuadrícula">&#9638;</button>
+              <button type="button" class="expl-view-btn" id="media-view-list" title="Vista lista">&#9776;</button>
+              <button type="button" class="expl-nav-btn" id="media-refresh" title="Refrescar">&#8635;</button>
             </div>
-            <div class="media-status small" id="media-status"></div>
-            <div class="media-folders" id="media-folders"></div>
-            <div class="media-grid" id="media-grid"></div>
-            <div class="media-upload">
-              <label>Subir imagen</label>
-              <div class="row">
-                <input type="file" id="media-upload-input" accept="image/*">
-                <button type="button" class="cta small-btn" id="media-upload-btn">Subir</button>
+          </div>
+          <!-- Área principal -->
+          <div class="expl-body">
+            <div class="explorer-files grid" id="media-files"></div>
+            <div class="explorer-preview hidden" id="media-preview">
+              <div class="preview-img-wrap">
+                <img id="preview-img" src="" alt="Vista previa">
               </div>
+              <div class="preview-info">
+                <p class="preview-name" id="preview-name"></p>
+                <p class="preview-meta" id="preview-meta"></p>
+              </div>
+              <button type="button" class="cta preview-select-btn" id="preview-select-btn">Seleccionar</button>
+            </div>
+          </div>
+          <!-- Barra de estado -->
+          <div class="expl-statusbar">
+            <span class="expl-status-msg" id="media-status"></span>
+            <div class="expl-status-right">
+              <label class="expl-upload-lbl" for="media-upload-input" title="Subir imagen">&#8679; Subir imagen</label>
+              <input type="file" id="media-upload-input" accept="image/*" style="display:none">
+              <button type="button" class="secondary small-btn" id="media-create-folder">+ Carpeta</button>
+              <button type="button" class="secondary small-btn danger" id="media-delete-folder">Eliminar carpeta</button>
             </div>
           </div>
         </div>
@@ -1500,7 +1516,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260726"></script>
+  <script type="module" src="./main.js?v=20260726b"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");
