@@ -129,6 +129,7 @@
   let mediaNavHistory = [];
   let mediaNavFuture = [];
   let selectedMediaItem = null;
+  let movePickerKey = null;
   const resolveCssColor = (value) => {
     if (!value) return "";
     const probe = document.createElement("span");
@@ -333,6 +334,7 @@
           <div class="expl-thumb-wrap"><img class="expl-file-thumb" src="${safe(item.url)}" alt="${safe(name)}" loading="lazy" width="120" height="120"></div>
           <span class="expl-file-name">${safe(name)}</span>
           <div class="expl-file-actions">
+            <button type="button" class="media-icon-btn" data-action="move" title="Mover">⇥</button>
             <button type="button" class="media-icon-btn" data-action="rename" title="Renombrar">✎</button>
             <button type="button" class="media-icon-btn danger" data-action="delete" title="Eliminar">✕</button>
           </div>
@@ -359,13 +361,55 @@
           <td class="list-size">${safe(formatFileSize(item.size))}</td>
           <td class="list-date">${safe(formatFileDate(item.last_modified))}</td>
           <td class="list-actions">
+            <button type="button" class="media-icon-btn" data-action="move" data-key="${safe(item.key)}" title="Mover">⇥</button>
             <button type="button" class="media-icon-btn" data-action="rename" data-key="${safe(item.key)}" title="Renombrar">✎</button>
             <button type="button" class="media-icon-btn danger" data-action="delete" data-key="${safe(item.key)}" title="Eliminar">✕</button>
           </td>
         </tr>`;
       }).join("");
-      container.innerHTML = `<table class="expl-list-table"><thead><tr><th style="width:46px"></th><th>Nombre</th><th style="width:90px">Tamaño</th><th style="width:120px">Fecha</th><th style="width:72px"></th></tr></thead><tbody>${folderRows}${fileRows}</tbody></table>`;
+      container.innerHTML = `<table class="expl-list-table"><thead><tr><th style="width:46px"></th><th>Nombre</th><th style="width:90px">Tamaño</th><th style="width:120px">Fecha</th><th style="width:100px"></th></tr></thead><tbody>${folderRows}${fileRows}</tbody></table>`;
     }
+  };
+  const closeMovePopover = () => {
+    document.getElementById("media-move-popover")?.remove();
+    movePickerKey = null;
+  };
+  const showMovePopover = (key, anchorEl) => {
+    closeMovePopover();
+    movePickerKey = key;
+    const folders = Array.isArray(mediaFolders) ? mediaFolders : [];
+    const items = [];
+    if (currentMediaPrefix) items.push({ label: "📁 Raíz", prefix: "" });
+    const parentPrefix = (() => {
+      const clean = currentMediaPrefix.replace(/\/$/, "");
+      if (!clean) return null;
+      const idx = clean.lastIndexOf("/");
+      return idx < 0 ? "" : clean.slice(0, idx + 1);
+    })();
+    if (parentPrefix !== null && parentPrefix !== currentMediaPrefix) {
+      const parentName = parentPrefix ? parentPrefix.replace(/\/$/, "").split("/").pop() : "Raíz";
+      items.push({ label: `📁 ↑ ${parentName}`, prefix: parentPrefix });
+    }
+    folders.forEach(pref => {
+      const label = pref.startsWith(currentMediaPrefix) ? pref.slice(currentMediaPrefix.length).replace(/\/$/, "") : pref.replace(/\/$/, "");
+      if (label) items.push({ label: `📁 ${label}`, prefix: pref });
+    });
+    if (!items.length) { setMediaStatus("No hay otras carpetas disponibles"); return; }
+    const popover = document.createElement("div");
+    popover.id = "media-move-popover";
+    popover.className = "move-popover";
+    popover.innerHTML = `<div class="move-popover-title">Mover a:</div>` +
+      items.map(it => `<button class="move-folder-btn" data-target="${safe(it.prefix)}">${safe(it.label)}</button>`).join("");
+    const explorerEl = document.querySelector(".media-explorer");
+    if (!explorerEl) return;
+    explorerEl.style.position = "relative";
+    explorerEl.appendChild(popover);
+    const rect = anchorEl.getBoundingClientRect();
+    const explorerRect = explorerEl.getBoundingClientRect();
+    popover.style.top = (rect.bottom - explorerRect.top + 4) + "px";
+    const rightFromExplorer = explorerRect.right - rect.right;
+    popover.style.right = Math.max(4, rightFromExplorer) + "px";
+    setTimeout(() => document.addEventListener("click", closeMovePopover, { once: true }), 0);
   };
   const navigateToPrefix = async (prefix, pushHistory = true) => {
     if (pushHistory) { mediaNavHistory.push(currentMediaPrefix); mediaNavFuture = []; }
@@ -3896,6 +3940,10 @@ let currentAdminUserId = null;
               .catch(() => setMediaStatus("No se pudo eliminar la imagen"));
             return;
           }
+          if (action === "move") {
+            showMovePopover(key, actionBtn);
+            return;
+          }
           if (action === "rename") {
             const currentName = key.split("/").pop() || key;
             const newName = prompt("Nuevo nombre:", currentName);
@@ -3926,6 +3974,30 @@ let currentAdminUserId = null;
       filesContainer.addEventListener("dblclick", (ev) => {
         const fileEl = ev.target.closest(".expl-file, .expl-file-row");
         if (fileEl && fileEl.dataset.url) { applyMediaSelection(fileEl.dataset.url); closeMediaModal(); }
+      });
+    }
+    const explorerEl = document.querySelector(".media-explorer");
+    if (explorerEl) {
+      explorerEl.addEventListener("click", async (ev) => {
+        const btn = ev.target.closest(".move-folder-btn");
+        if (!btn || !movePickerKey) return;
+        ev.stopPropagation();
+        const targetPrefix = btn.dataset.target;
+        const key = movePickerKey;
+        closeMovePopover();
+        setMediaStatus("Moviendo imagen...");
+        try {
+          const res = await apiFetch("/api/media/move", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key, target_prefix: targetPrefix })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) { setMediaStatus(data.error || "No se pudo mover la imagen"); return; }
+          setMediaStatus("Imagen movida");
+          mediaCache = mediaCache.filter(i => i.key !== key);
+          if (selectedMediaItem?.key === key) setSelectedMediaItem(null);
+          renderMediaBrowser();
+        } catch { setMediaStatus("No se pudo mover la imagen"); }
       });
     }
     // logo picker uses the shared media modal

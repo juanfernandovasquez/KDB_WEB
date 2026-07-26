@@ -72,6 +72,7 @@ from s3_service import (
     delete_media_object,
     delete_media_folder,
     list_media_objects,
+    move_media_object,
     rename_media_object,
 )
 
@@ -1038,6 +1039,24 @@ def api_media_rename():
     except Exception:
         app.logger.exception("Error renaming media from S3")
         return jsonify(error="No se pudo renombrar la imagen"), 500
+    return jsonify(key=new_key, url=url), 200
+
+
+@app.route("/api/media/move", methods=["POST"])
+@require_admin()
+def api_media_move():
+    payload = request.get_json(silent=True) or {}
+    key = (payload.get("key") or "").strip()
+    target_prefix = (payload.get("target_prefix") or "").strip()
+    if not key:
+        return jsonify(error="key es obligatorio"), 400
+    try:
+        new_key, url = move_media_object(key, target_prefix)
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception:
+        app.logger.exception("Error moving media in S3")
+        return jsonify(error="No se pudo mover la imagen"), 500
     return jsonify(key=new_key, url=url), 200
 
 

@@ -172,6 +172,40 @@ def rename_media_object(key, new_name, prefix_override=None):
     return new_key, _build_public_url(bucket, region, new_key, public_base)
 
 
+def move_media_object(key, target_prefix, prefix_override=None):
+    """Move a media object to a different prefix (folder)."""
+    bucket, region, prefix, public_base = _get_bucket_config()
+    allowed_prefixes = _get_allowed_prefixes(prefix)
+    if prefix_override is not None:
+        prefix = _normalize_prefix(prefix_override)
+        if prefix and prefix not in allowed_prefixes:
+            allowed_prefixes = [prefix]
+    key = (key or "").strip()
+    if not key:
+        raise ValueError("key es obligatorio")
+    target_prefix = _normalize_prefix(target_prefix or "")
+    _assert_key_in_prefix(key, allowed_prefixes)
+    filename = key.rsplit("/", 1)[-1] if "/" in key else key
+    new_key = f"{target_prefix}{filename}"
+    if new_key == key:
+        raise ValueError("El archivo ya está en esa carpeta")
+    _assert_key_in_prefix(new_key, allowed_prefixes)
+    client = boto3.client("s3", region_name=region or None)
+    try:
+        client.head_object(Bucket=bucket, Key=new_key)
+        raise ValueError("Ya existe un archivo con ese nombre en la carpeta destino")
+    except ClientError as exc:
+        code = exc.response.get("Error", {}).get("Code", "")
+        if code not in ("404", "NoSuchKey", "NotFound"):
+            raise RuntimeError("No se pudo validar el destino") from exc
+    try:
+        client.copy_object(Bucket=bucket, CopySource={"Bucket": bucket, "Key": key}, Key=new_key)
+        client.delete_object(Bucket=bucket, Key=key)
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError("No se pudo mover la imagen") from exc
+    return new_key, _build_public_url(bucket, region, new_key, public_base)
+
+
 def create_media_folder(folder_name, prefix_override=None):
     bucket, region, prefix, _ = _get_bucket_config()
     allowed_prefixes = _get_allowed_prefixes(prefix)
