@@ -1144,6 +1144,7 @@ button.danger:hover {
 .explorer-files.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-auto-rows: 140px;
   gap: 8px; align-content: start;
 }
 .explorer-files.list { display: block; padding: 0; }
@@ -1168,7 +1169,6 @@ button.danger:hover {
   display: flex; flex-direction: column; border: 2px solid var(--border);
   border-radius: var(--r-sm); overflow: hidden; cursor: pointer;
   transition: border-color 0.12s, box-shadow 0.12s; background: var(--white); position: relative;
-  aspect-ratio: 1;
 }
 .expl-file:hover { border-color: var(--navy-mid); box-shadow: var(--shadow-xs); }
 .expl-file.expl-selected { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(6,24,109,0.2); }
@@ -1814,8 +1814,7 @@ button.secondary.small-btn {
   .logo-preview { min-height: 80px; }
 
   /* ── Media explorer móvil ────────────────────────────────────── */
-  .explorer-files.grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
-  /* expl-thumb-wrap is self-adaptive via padding-bottom:100% */
+  .explorer-files.grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); grid-auto-rows: 110px; gap: 6px; }
   .explorer-preview { width: 160px; }
   .media-explorer { height: 96vh; }
 
