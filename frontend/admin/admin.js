@@ -405,15 +405,12 @@
     popover.className = "move-popover";
     popover.innerHTML = `<div class="move-popover-title">Mover a:</div>` +
       items.map(it => `<button class="move-folder-btn" data-target="${safe(it.prefix)}">${safe(it.label)}</button>`).join("");
-    const explorerEl = document.querySelector(".media-explorer");
-    if (!explorerEl) return;
-    explorerEl.style.position = "relative";
-    explorerEl.appendChild(popover);
     const rect = anchorEl.getBoundingClientRect();
-    const explorerRect = explorerEl.getBoundingClientRect();
-    popover.style.top = (rect.bottom - explorerRect.top + 4) + "px";
-    const rightFromExplorer = explorerRect.right - rect.right;
-    popover.style.right = Math.max(4, rightFromExplorer) + "px";
+    popover.style.position = "fixed";
+    popover.style.zIndex = "9999";
+    popover.style.top = (rect.bottom + 4) + "px";
+    popover.style.right = Math.max(4, window.innerWidth - rect.right) + "px";
+    document.body.appendChild(popover);
     setTimeout(() => document.addEventListener("click", closeMovePopover, { once: true }), 0);
   };
   const navigateToPrefix = async (prefix, pushHistory = true) => {

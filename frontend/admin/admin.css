@@ -1253,7 +1253,6 @@ button.danger:hover {
 
 /* Move-to popover */
 .move-popover {
-  position: absolute; z-index: 200;
   background: var(--white); border: 1px solid var(--border);
   border-radius: var(--r-sm); box-shadow: 0 4px 16px rgba(0,0,0,0.13);
   min-width: 160px; max-width: 240px; overflow: hidden;
