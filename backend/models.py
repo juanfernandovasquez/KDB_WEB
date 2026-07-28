@@ -914,6 +914,32 @@ def replace_katweb_boletines(boletines):
     return len(boletines or [])
 
 
+def update_all_url_references(old_url, new_url):
+    """Replace every occurrence of old_url with new_url in all tables that store image URLs."""
+    if not old_url or not new_url or old_url == new_url:
+        return
+    url_columns = [
+        ("company_info",   ["logo_url", "favicon_url"]),
+        ("hero_slides",    ["image_url"]),
+        ("page_story",     ["image_url"]),
+        ("page_about",     ["image_url"]),
+        ("team_members",   ["image_url"]),
+        ("services_items", ["image_url", "icon_url"]),
+        ("publications",   ["hero_image_url", "content_html"]),
+        ("kdbweb_entries", ["hero_image_url", "content_html", "meta_json"]),
+    ]
+    conn = get_conn()
+    with conn:
+        for table, cols in url_columns:
+            for col in cols:
+                conn.execute(
+                    f"UPDATE {table} SET {col} = REPLACE({col}, ?, ?)"
+                    f" WHERE instr(COALESCE({col}, ''), ?) > 0",
+                    (old_url, new_url, old_url),
+                )
+    conn.close()
+
+
 def delete_publication(pub_id):
     conn = get_conn()
     with conn:

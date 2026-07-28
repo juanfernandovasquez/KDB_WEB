@@ -65,14 +65,17 @@ from models import (
     list_admins,
     revoke_admin_session,
     update_admin_user,
+    update_all_url_references,
 )
 from s3_service import (
     create_media_folder,
     create_presigned_post,
     delete_media_object,
     delete_media_folder,
+    get_public_url_for_key,
     list_media_objects,
     move_media_object,
+    optimize_media_object,
     rename_media_object,
 )
 
@@ -1051,13 +1054,73 @@ def api_media_move():
     if not key:
         return jsonify(error="key es obligatorio"), 400
     try:
+        old_url = get_public_url_for_key(key)
         new_key, url = move_media_object(key, target_prefix)
     except ValueError as exc:
         return jsonify(error=str(exc)), 400
     except Exception:
         app.logger.exception("Error moving media in S3")
         return jsonify(error="No se pudo mover la imagen"), 500
+    try:
+        update_all_url_references(old_url, url)
+    except Exception:
+        app.logger.exception("Error updating URL references after move")
     return jsonify(key=new_key, url=url), 200
+
+
+@app.route("/api/media/optimize", methods=["POST"])
+@require_admin()
+def api_media_optimize():
+    payload = request.get_json(silent=True) or {}
+    key = (payload.get("key") or "").strip()
+    if not key:
+        return jsonify(error="key es obligatorio"), 400
+    try:
+        result = optimize_media_object(key)
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception:
+        app.logger.exception("Error optimizing media")
+        return jsonify(error="No se pudo optimizar la imagen"), 500
+    return jsonify(result), 200
+
+
+@app.route("/api/media/optimize-all", methods=["POST"])
+@require_admin()
+def api_media_optimize_all():
+    payload = request.get_json(silent=True) or {}
+    prefix = (payload.get("prefix") or "").strip()
+    try:
+        all_keys = []
+        token = None
+        while True:
+            items, next_token, _, _ = list_media_objects(
+                limit=500,
+                prefix_override=prefix or None,
+                continuation=token,
+                delimiter=None,
+            )
+            all_keys.extend(item["key"] for item in items)
+            token = next_token
+            if not token:
+                break
+    except Exception:
+        app.logger.exception("Error listing media for optimize-all")
+        return jsonify(error="No se pudo listar las imágenes"), 500
+
+    stats = {"optimized": 0, "skipped": 0, "errors": 0, "saved_bytes": 0, "total": len(all_keys)}
+    for key in all_keys:
+        try:
+            r = optimize_media_object(key)
+            if r.get("skipped"):
+                stats["skipped"] += 1
+            else:
+                stats["optimized"] += 1
+                stats["saved_bytes"] += r.get("saved", 0)
+        except Exception as exc:
+            app.logger.warning("optimize-all failed for %s: %s", key, exc)
+            stats["errors"] += 1
+    return jsonify(stats), 200
 
 
 @app.route("/api/media/folder", methods=["POST"])

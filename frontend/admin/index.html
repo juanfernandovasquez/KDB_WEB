@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel de contenido</title>
-  <link rel="stylesheet" href="./admin.css?v=20260726j">
+  <link rel="stylesheet" href="./admin.css?v=20260727a">
 </head>
 <body>
   <header>
@@ -553,6 +553,7 @@
               <label class="expl-upload-lbl" for="media-upload-input" title="Subir imagen">&#8679; Subir imagen</label>
               <input type="file" id="media-upload-input" accept="image/*" style="display:none">
               <button type="button" class="secondary small-btn" id="media-create-folder">+ Carpeta</button>
+              <button type="button" class="secondary small-btn" id="media-optimize-all" title="Recomprime todas las imágenes del bucket para reducir su peso">&#9889; Optimizar todo</button>
               <button type="button" class="secondary small-btn danger" id="media-delete-folder">Eliminar carpeta</button>
             </div>
           </div>
@@ -1516,7 +1517,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260726k"></script>
+  <script type="module" src="./main.js?v=20260727a"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");

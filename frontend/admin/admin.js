@@ -521,8 +521,35 @@
     if (idx === -1) return "";
     return clean.slice(0, idx + 1);
   };
+  const compressImageFile = (file, maxWidth = 1920, quality = 0.82) => {
+    if (!file.type.startsWith("image/")) return Promise.resolve(file);
+    if (file.type === "image/svg+xml" || file.type === "image/gif") return Promise.resolve(file);
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        let { width, height } = img;
+        if (width <= maxWidth && file.size < 300 * 1024) { resolve(file); return; }
+        if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        const isPng = file.type === "image/png";
+        const outType = isPng ? "image/png" : "image/jpeg";
+        canvas.toBlob((blob) => {
+          if (!blob || blob.size >= file.size) { resolve(file); return; }
+          resolve(new File([blob], file.name, { type: outType, lastModified: file.lastModified }));
+        }, outType, isPng ? undefined : quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+      img.src = objectUrl;
+    });
+  };
   const uploadMediaFile = async (file) => {
     if (!file) return;
+    setMediaStatus("Optimizando imagen...");
+    file = await compressImageFile(file);
     setMediaStatus("Preparando subida...");
     try {
       const res = await apiFetch("/api/media/presign", {
@@ -3917,6 +3944,27 @@ let currentAdminUserId = null;
           navigateToPrefix(getParentPrefix(currentMediaPrefix), false);
         })
         .catch(() => setMediaStatus("No se pudo eliminar la carpeta"));
+    });
+    bind("media-optimize-all", async () => {
+      if (!confirm("¿Optimizar todas las imágenes del bucket? Esto puede tardar varios minutos. Las imágenes ya optimizadas se saltarán automáticamente.")) return;
+      const btn = q("media-optimize-all");
+      if (btn) { btn.disabled = true; btn.textContent = "⏳ Optimizando..."; }
+      setMediaStatus("Optimizando imágenes... esto puede tardar varios minutos.");
+      try {
+        const res = await apiFetch("/api/media/optimize-all", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prefix: "" }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setMediaStatus(data.error || "No se pudo optimizar"); return; }
+        const savedMB = (data.saved_bytes / 1024 / 1024).toFixed(1);
+        setMediaStatus(`✓ ${data.optimized} optimizadas, ${data.skipped} omitidas, ${data.errors} errores — ${savedMB} MB ahorrados`);
+      } catch {
+        setMediaStatus("Error al optimizar las imágenes");
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "⚡ Optimizar todo"; }
+      }
     });
     bind("preview-select-btn", () => {
       if (!selectedMediaItem) return;

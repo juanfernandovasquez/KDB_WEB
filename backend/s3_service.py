@@ -206,6 +206,92 @@ def move_media_object(key, target_prefix, prefix_override=None):
     return new_key, _build_public_url(bucket, region, new_key, public_base)
 
 
+def get_public_url_for_key(key):
+    """Build the public URL for a given S3 key without hitting the API."""
+    bucket, region, prefix, public_base = _get_bucket_config()
+    return _build_public_url(bucket, region, key, public_base)
+
+
+def optimize_media_object(key, max_width=1920, jpeg_quality=82, prefix_override=None):
+    """Download, resize/recompress, and re-upload an image with the same S3 key.
+
+    Only re-uploads if the optimized version is actually smaller.
+    Returns a dict with original_size, new_size, saved (bytes), skipped (bool).
+    """
+    from io import BytesIO
+    try:
+        from PIL import Image, ImageOps
+    except ImportError:
+        raise RuntimeError("Pillow no está instalado en el servidor")
+
+    bucket, region, prefix, public_base = _get_bucket_config()
+    allowed_prefixes = _get_allowed_prefixes(prefix)
+    if prefix_override is not None:
+        prefix = _normalize_prefix(prefix_override)
+        if prefix and prefix not in allowed_prefixes:
+            allowed_prefixes = [prefix]
+
+    key = (key or "").strip()
+    if not key:
+        raise ValueError("key es obligatorio")
+    _assert_key_in_prefix(key, allowed_prefixes)
+
+    ext = key.rsplit(".", 1)[-1].lower() if "." in key else ""
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        return {"key": key, "skipped": True, "reason": "formato no soportado", "saved": 0}
+
+    client = boto3.client("s3", region_name=region or None)
+    try:
+        response = client.get_object(Bucket=bucket, Key=key)
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError("No se pudo descargar la imagen") from exc
+
+    original_data = response["Body"].read()
+    original_size = len(original_data)
+
+    try:
+        img = Image.open(BytesIO(original_data))
+        img = ImageOps.exif_transpose(img)
+
+        w, h = img.size
+        if w > max_width:
+            new_h = int(h * max_width / w)
+            img = img.resize((max_width, new_h), Image.LANCZOS)
+
+        buf = BytesIO()
+        if ext in ("jpg", "jpeg"):
+            if img.mode in ("RGBA", "P", "LA"):
+                img = img.convert("RGB")
+            img.save(buf, format="JPEG", quality=jpeg_quality, optimize=True)
+            content_type = "image/jpeg"
+        elif ext == "png":
+            img.save(buf, format="PNG", optimize=True, compress_level=9)
+            content_type = "image/png"
+        elif ext == "webp":
+            img.save(buf, format="WEBP", quality=jpeg_quality, method=4)
+            content_type = "image/webp"
+    except Exception as exc:
+        raise RuntimeError(f"No se pudo procesar la imagen: {exc}") from exc
+
+    optimized_data = buf.getvalue()
+    new_size = len(optimized_data)
+
+    if new_size >= original_size:
+        return {"key": key, "original_size": original_size, "new_size": original_size, "saved": 0, "skipped": True, "reason": "ya optimizada"}
+
+    try:
+        client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=optimized_data,
+            ContentType=content_type,
+        )
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError("No se pudo subir la imagen optimizada") from exc
+
+    return {"key": key, "original_size": original_size, "new_size": new_size, "saved": original_size - new_size, "skipped": False}
+
+
 def create_media_folder(folder_name, prefix_override=None):
     bucket, region, prefix, _ = _get_bucket_config()
     allowed_prefixes = _get_allowed_prefixes(prefix)
