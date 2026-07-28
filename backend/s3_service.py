@@ -218,6 +218,7 @@ def optimize_media_object(key, max_width=1920, jpeg_quality=82, prefix_override=
     Only re-uploads if the optimized version is actually smaller.
     Returns a dict with original_size, new_size, saved (bytes), skipped (bool).
     """
+    import gc
     from io import BytesIO
     try:
         from PIL import Image, ImageOps
@@ -247,21 +248,30 @@ def optimize_media_object(key, max_width=1920, jpeg_quality=82, prefix_override=
         raise RuntimeError("No se pudo descargar la imagen") from exc
 
     original_data = response["Body"].read()
+    response["Body"].close()
     original_size = len(original_data)
 
+    img = None
+    buf = None
     try:
         img = Image.open(BytesIO(original_data))
+        img.load()  # force decode before releasing original_data
+        del original_data
         img = ImageOps.exif_transpose(img)
 
         w, h = img.size
         if w > max_width:
             new_h = int(h * max_width / w)
-            img = img.resize((max_width, new_h), Image.LANCZOS)
+            resized = img.resize((max_width, new_h), Image.LANCZOS)
+            img.close()
+            img = resized
 
         buf = BytesIO()
         if ext in ("jpg", "jpeg"):
             if img.mode in ("RGBA", "P", "LA"):
-                img = img.convert("RGB")
+                converted = img.convert("RGB")
+                img.close()
+                img = converted
             img.save(buf, format="JPEG", quality=jpeg_quality, optimize=True)
             content_type = "image/jpeg"
         elif ext == "png":
@@ -272,8 +282,13 @@ def optimize_media_object(key, max_width=1920, jpeg_quality=82, prefix_override=
             content_type = "image/webp"
     except Exception as exc:
         raise RuntimeError(f"No se pudo procesar la imagen: {exc}") from exc
+    finally:
+        if img is not None:
+            img.close()
+        gc.collect()
 
     optimized_data = buf.getvalue()
+    buf.close()
     new_size = len(optimized_data)
 
     if new_size >= original_size:

@@ -1108,6 +1108,7 @@ def api_media_optimize_all():
         app.logger.exception("Error listing media for optimize-all")
         return jsonify(error="No se pudo listar las imágenes"), 500
 
+    import gc
     stats = {"optimized": 0, "skipped": 0, "errors": 0, "saved_bytes": 0, "total": len(all_keys)}
     for key in all_keys:
         try:
@@ -1120,6 +1121,8 @@ def api_media_optimize_all():
         except Exception as exc:
             app.logger.warning("optimize-all failed for %s: %s", key, exc)
             stats["errors"] += 1
+        finally:
+            gc.collect()
     return jsonify(stats), 200
 
 
