@@ -2317,20 +2317,23 @@ let currentAdminUserId = null;
             ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="small" style="color:var(--brand-blue);">📎 Ver constancia</a>`
             : '';
           const pmLabel = o.payment_method ? `<br><small class="muted">${escHtml(o.payment_method)}</small>` : '';
+          const opNumLabel = o.operation_number ? `<br><small class="muted">Op: ${escHtml(o.operation_number)}</small>` : '';
           return `<tr data-order-id="${o.id}">
             <td class="small">${escHtml(ordRef)}</td>
             <td class="small">${d}</td>
             <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small">${escHtml(o.student_email)}</a></td>
             <td class="small">${escHtml(o.course_title || o.course_slug || '—')}</td>
-            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong>${pmLabel}${voucherLink ? '<br>' + voucherLink : ''}</td>
+            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong>${pmLabel}${opNumLabel}${voucherLink ? '<br>' + voucherLink : ''}</td>
             <td>${compLabel}${taxpayerInfo}<br>${compNumBadge}</td>
             <td>${paidBadge}</td>
             <td>${moodleBadge}</td>
             <td>
               <div style="display:flex;flex-direction:column;gap:.3rem;">
-                ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-paid" data-id="${o.id}">✓ Pago confirmado</button>` : ''}
+                ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-paid" data-id="${o.id}">✓ Confirmar pago</button>` : ''}
                 ${!o.comprobante_number ? `<button class="secondary small-btn ac-ord-comp" data-id="${o.id}">📄 Registrar comprobante</button>` : ''}
+                ${!o.voucher_url && o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-req-voucher" data-id="${o.id}" data-email="${escHtml(o.student_email)}">📩 Solicitar comprobante</button>` : ''}
                 ${o.status === 'paid' && !o.moodle_enrolled ? `<button class="btn-provision small-btn ac-ord-provision" data-id="${o.id}" data-email="${escHtml(o.student_email)}" data-name="${escHtml(o.student_name)}">📧 Enviar credenciales</button>` : ''}
+                ${o.moodle_enrolled ? `<button class="secondary small-btn ac-ord-unenroll" data-id="${o.id}" data-name="${escHtml(o.student_name)}">🚫 Desmatricular</button>` : ''}
               </div>
             </td>
           </tr>`;
@@ -2338,13 +2341,43 @@ let currentAdminUserId = null;
 
         // Bind order action buttons
         ordTbody.querySelectorAll('.ac-ord-paid').forEach(btn => {
+          btn.addEventListener('click', () => {
+            q('ac-pay-order-id').value = btn.dataset.id;
+            q('ac-pay-opnum').value = '';
+            q('ac-pay-status').textContent = '';
+            q('ac-pay-modal').classList.remove('hidden');
+          });
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-req-voucher').forEach(btn => {
           btn.addEventListener('click', async () => {
-            btn.disabled = true; btn.textContent = '…';
-            const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, {
-              method: 'PUT', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: 'paid', payment_method: 'manual' }),
-            });
-            if (res.ok) loadAcademiaAdmin(); else btn.disabled = false;
+            const { id, email } = btn.dataset;
+            if (!confirm(`¿Enviar correo a ${email} solicitando el comprobante de pago?`)) return;
+            btn.disabled = true; btn.textContent = 'Enviando…';
+            const res = await apiFetch(`/api/admin/orders/${id}/request_voucher`, { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              btn.textContent = '✓ Enviado';
+            } else {
+              alert(data.error || 'Error al enviar correo.');
+              btn.disabled = false; btn.textContent = '📩 Solicitar comprobante';
+            }
+          });
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-unenroll').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const { id, name } = btn.dataset;
+            if (!confirm(`¿Desmatricular a ${name} del curso en Moodle?\n\nEsto revocará su acceso al curso.`)) return;
+            btn.disabled = true; btn.textContent = 'Desmatriculando…';
+            const res = await apiFetch(`/api/admin/orders/${id}/unenroll`, { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              loadAcademiaAdmin();
+            } else {
+              alert(data.error || 'Error al desmatricular.');
+              btn.disabled = false; btn.textContent = '🚫 Desmatricular';
+            }
           });
         });
 
@@ -2466,6 +2499,26 @@ let currentAdminUserId = null;
     bindOnce('ac-form-cancel', acCloseForm);
     bindOnce('ac-form-cancel2', acCloseForm);
     bindOnce('ac-save-btn', acSaveCourse);
+
+    // Confirmar pago modal
+    bindOnce('ac-pay-cancel', () => q('ac-pay-modal').classList.add('hidden'));
+    bindOnce('ac-pay-save', async () => {
+      const id  = q('ac-pay-order-id').value;
+      const opnum = (q('ac-pay-opnum').value || '').trim();
+      q('ac-pay-status').textContent = 'Guardando…';
+      const body = { status: 'paid', payment_method: 'manual' };
+      if (opnum) body.operation_number = opnum;
+      const res = await apiFetch(`/api/admin/orders/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        q('ac-pay-modal').classList.add('hidden');
+        loadAcademiaAdmin();
+      } else {
+        q('ac-pay-status').textContent = 'Error al confirmar pago.';
+      }
+    });
 
     // Comprobante modal
     bindOnce('ac-comp-cancel', () => q('ac-comp-modal').classList.add('hidden'));

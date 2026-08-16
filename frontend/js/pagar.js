@@ -338,14 +338,15 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            course_slug:      course.slug,
-            student_name:     document.getElementById('student_name').value.trim(),
-            student_email:    document.getElementById('student_email').value.trim().toLowerCase(),
-            comprobante_type: isFact ? 'factura' : 'boleta',
+            course_slug:        course.slug,
+            student_name:       document.getElementById('student_name').value.trim(),
+            student_email:      document.getElementById('student_email').value.trim().toLowerCase(),
+            comprobante_type:   isFact ? 'factura' : 'boleta',
             taxpayer_id,
             taxpayer_name,
             payment_method,
-            voucher_url:      voucherUrl || undefined,
+            operation_number:   (document.getElementById('operation-number')?.value || '').trim() || undefined,
+            voucher_url:        voucherUrl || undefined,
           }),
         });
 

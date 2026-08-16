@@ -1175,11 +1175,13 @@ def create_order(payload):
             """
             INSERT INTO orders (
               course_id, course_title, student_name, student_email,
-              amount, status, payment_method, gateway_ref, notes,
+              amount, status, payment_method, payment_method_detail,
+              operation_number, voucher_url,
+              gateway_ref, notes,
               comprobante_type, taxpayer_id, taxpayer_name,
               created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload.get("course_id"),
@@ -1187,7 +1189,10 @@ def create_order(payload):
                 payload.get("student_name"),
                 payload.get("student_email"),
                 payload.get("amount", 0),
-                payload.get("payment_method", "simulation"),
+                payload.get("payment_method", "transferencia"),
+                payload.get("payment_method_detail"),
+                payload.get("operation_number") or None,
+                payload.get("voucher_url") or None,
                 payload.get("gateway_ref"),
                 payload.get("notes"),
                 payload.get("comprobante_type", "boleta"),
@@ -1225,8 +1230,8 @@ def admin_update_order(order_id, data):
     allowed = {
         "status", "gateway_ref", "notes",
         "comprobante_number", "comprobante_issued_at",
-        "moodle_enrolled", "moodle_enrolled_at", "moodle_user_email",
-        "payment_method",
+        "moodle_enrolled", "moodle_enrolled_at", "moodle_user_email", "moodle_user_id",
+        "payment_method", "operation_number",
     }
     sets = []
     params = []

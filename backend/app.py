@@ -1759,6 +1759,7 @@ def _provision_moodle_and_notify(order_id):
             "moodle_enrolled": 1,
             "moodle_enrolled_at": __import__("datetime").datetime.utcnow().isoformat(),
             "moodle_user_email": email,
+            "moodle_user_id": result["moodle_user_id"],
         }
         admin_update_order(order_id, updates)
         app.logger.info("provision_moodle: orden %s matriculada user_id=%s", order_id, result["moodle_user_id"])
@@ -1939,6 +1940,7 @@ def api_checkout():
     taxpayer_name = (data.get("taxpayer_name") or "").strip()
     payment_method = (data.get("payment_method") or "transferencia").strip().lower()
     payment_method_detail = (data.get("payment_method_detail") or "").strip()
+    operation_number = (data.get("operation_number") or "").strip()
     voucher_url = (data.get("voucher_url") or "").strip()
 
     if not student_name or not student_email or not course_slug:
@@ -1961,7 +1963,8 @@ def api_checkout():
         "student_email": student_email,
         "amount": course["price"],
         "payment_method": payment_method,
-        "payment_method_detail": payment_method_detail,
+        "payment_method_detail": payment_method_detail or None,
+        "operation_number": operation_number or None,
         "voucher_url": voucher_url or None,
         "comprobante_type": comprobante_type,
         "taxpayer_id": taxpayer_id,
@@ -2049,6 +2052,117 @@ def api_admin_provision_order(order_id):
         daemon=True,
     ).start()
     return jsonify(message="Procesando matrícula y envío de credenciales..."), 200
+
+
+@app.route("/api/admin/orders/<int:order_id>/unenroll", methods=["POST"])
+@require_admin()
+def api_admin_unenroll_order(order_id):
+    """Desmatricula al alumno del curso en Moodle y marca la orden como no inscrita."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    if not order.get("moodle_enrolled"):
+        return jsonify(error="El alumno no está inscrito en Moodle"), 400
+
+    moodle_course_id = order.get("moodle_course_id")
+    if not moodle_course_id:
+        return jsonify(error="La orden no tiene moodle_course_id"), 400
+
+    # Get moodle_user_id: stored in order or look up by email
+    moodle_user_id = order.get("moodle_user_id")
+    if not moodle_user_id:
+        moodle_email = order.get("moodle_user_email") or order.get("student_email")
+        if not moodle_email:
+            return jsonify(error="No hay email Moodle asociado a esta orden"), 400
+        try:
+            from moodle_service import _call as moodle_call
+            result = moodle_call(
+                "core_user_get_users",
+                **{"criteria[0][key]": "email", "criteria[0][value]": moodle_email},
+            )
+            users = result.get("users", [])
+            if not users:
+                return jsonify(error=f"No se encontró usuario Moodle con email {moodle_email}"), 404
+            moodle_user_id = users[0]["id"]
+        except Exception as exc:
+            app.logger.error("unenroll: lookup error order %s: %s", order_id, exc)
+            return jsonify(error=f"Error al buscar usuario en Moodle: {exc}"), 500
+
+    try:
+        from moodle_service import unenroll_user_from_course
+        unenroll_user_from_course(moodle_user_id, moodle_course_id)
+    except Exception as exc:
+        app.logger.error("unenroll: error order %s: %s", order_id, exc)
+        return jsonify(error=f"Error al desmatricular en Moodle: {exc}"), 500
+
+    admin_update_order(order_id, {"moodle_enrolled": 0})
+    return jsonify(message="Alumno desmatriculado correctamente"), 200
+
+
+@app.route("/api/admin/orders/<int:order_id>/request_voucher", methods=["POST"])
+@require_admin()
+def api_admin_request_voucher(order_id):
+    """Envía un correo al alumno solicitando que envíe su comprobante/voucher de pago."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    if order.get("voucher_url"):
+        return jsonify(error="Esta orden ya tiene un comprobante adjunto"), 400
+
+    cfg = _mail_config()
+    if not cfg["enabled"]:
+        return jsonify(error="El envío de correos no está habilitado en este servidor"), 400
+
+    student_email = order.get("student_email", "")
+    student_name = order.get("student_name", "")
+    course_title = order.get("course_title", "") or order.get("course_slug", "")
+    order_ref = f"ORD-{order_id:04d}"
+
+    msg = EmailMessage()
+    msg["Subject"] = f"Necesitamos tu comprobante de pago — {order_ref}"
+    msg["From"] = cfg["from"]
+    msg["To"] = student_email
+    msg.set_content("\n".join([
+        f"Hola {student_name},",
+        "",
+        f"Gracias por inscribirte al curso \"{course_title}\" (Orden: {order_ref}).",
+        "",
+        "Para confirmar tu inscripción, necesitamos que nos envíes el comprobante o",
+        "captura de tu pago (Yape, Plin, transferencia bancaria, etc.).",
+        "",
+        "Por favor responde este correo adjuntando:",
+        "  • Captura o foto del comprobante de pago",
+        "  • El número de operación si lo tienes disponible",
+        "",
+        "Una vez verificado, recibirás tus credenciales de acceso al curso.",
+        "",
+        "Si ya realizaste el pago y tienes dudas, escríbenos a contacto@katarzyna.pe",
+        f"indicando tu número de orden: {order_ref}",
+        "",
+        "Gracias,",
+        "Equipo Katarzyna Legal & Tributario",
+        "https://katarzyna.pe",
+    ]))
+    try:
+        if cfg["use_ssl"]:
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15) as server:
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
+                if cfg["use_tls"]:
+                    server.starttls(context=ssl.create_default_context())
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        app.logger.info("request_voucher: correo enviado a %s para orden %s", student_email, order_id)
+        return jsonify(message=f"Correo enviado a {student_email}"), 200
+    except Exception as exc:
+        app.logger.error("request_voucher: error sending email order %s: %s", order_id, exc)
+        return jsonify(error=f"Error al enviar correo: {exc}"), 500
 
 
 @app.before_request

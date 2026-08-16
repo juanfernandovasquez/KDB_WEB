@@ -305,6 +305,18 @@
 .bank-table td:first-child { color: #5b6474; width: 110px; }
 .bank-table td:last-child { font-weight: 600; color: #2b2b2b; }
 
+/* N° de operación */
+.operation-number-section { margin-top: 1.25rem; }
+.op-num-input {
+  width: 100%; padding: .55rem .75rem;
+  border: 1px solid #dde1eb; border-radius: 8px;
+  font-size: .875rem; color: #2b2b2b;
+  background: #fff; outline: none;
+  transition: border-color .15s;
+}
+.op-num-input:focus { border-color: var(--brand-blue, #06186d); }
+.field-hint { display: block; margin-top: .35rem; }
+
 /* Voucher upload */
 .voucher-upload-section { margin-top: 1.25rem; }
 .voucher-upload-label {

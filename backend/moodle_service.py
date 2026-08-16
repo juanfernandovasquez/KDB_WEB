@@ -110,6 +110,18 @@ def enroll_user_in_course(moodle_user_id, moodle_course_id):
     )
 
 
+def unenroll_user_from_course(moodle_user_id, moodle_course_id):
+    """Desmatricula al usuario del curso en Moodle."""
+    _call(
+        "enrol_manual_unenrol_users",
+        **{
+            "enrolments[0][userid]": moodle_user_id,
+            "enrolments[0][courseid]": moodle_course_id,
+        },
+    )
+    logger.info("Moodle: usuario %s desmatriculado de curso %s", moodle_user_id, moodle_course_id)
+
+
 def set_course_visibility(moodle_course_id, visible: bool):
     """Hace visible (True) o invisible (False) un curso en Moodle."""
     _call(
