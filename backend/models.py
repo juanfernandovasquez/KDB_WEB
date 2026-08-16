@@ -1245,6 +1245,16 @@ def admin_update_order(order_id, data):
     conn.close()
 
 
+def fetch_order_by_id(order_id):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT o.*, c.slug AS course_slug, c.moodle_course_id FROM orders o LEFT JOIN courses c ON o.course_id = c.id WHERE o.id = ?",
+        (order_id,),
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def fetch_orders(status=None):
     conn = get_conn()
     q = "SELECT o.*, c.slug AS course_slug FROM orders o LEFT JOIN courses c ON o.course_id = c.id"

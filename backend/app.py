@@ -76,6 +76,7 @@ from models import (
     update_order_status,
     admin_update_order,
     fetch_orders,
+    fetch_order_by_id,
 )
 from s3_service import (
     create_media_folder,
@@ -1615,6 +1616,103 @@ def api_admin_delete_course(course_id):
 
 # ─── Academia: Checkout (simulación) ─────────────────────────────────────────
 
+def _send_moodle_credentials(student_email, student_name, course_title,
+                              moodle_username, moodle_password, moodle_url, order_ref):
+    """Envía las credenciales de Moodle al alumno cuando se le crea cuenta nueva."""
+    cfg = _mail_config()
+    if not cfg["enabled"]:
+        return
+    msg = EmailMessage()
+    msg["Subject"] = f"Tus credenciales de acceso — {course_title}"
+    msg["From"] = cfg["from"]
+    msg["To"] = student_email
+    msg.set_content("\n".join([
+        f"Hola {student_name},",
+        "",
+        "¡Tu inscripción ha sido confirmada! Ya puedes acceder a tu curso.",
+        "",
+        f"  Curso: {course_title}",
+        f"  Orden: {order_ref}",
+        "",
+        "DATOS DE ACCESO A LA PLATAFORMA:",
+        f"  URL:         {moodle_url}",
+        f"  Usuario:     {moodle_username}",
+        f"  Contraseña:  {moodle_password}",
+        "",
+        "Te recomendamos cambiar tu contraseña en el primer ingreso.",
+        "Puedes recuperar tu acceso en cualquier momento usando",
+        "la opción \"¿Olvidó su contraseña?\" con tu dirección de correo.",
+        "",
+        "Cualquier consulta: contacto@katarzyna.pe",
+        "",
+        "Equipo Katarzyna Legal & Tributario",
+        "https://katarzyna.pe",
+    ]))
+    try:
+        if cfg["use_ssl"]:
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15) as server:
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
+                if cfg["use_tls"]:
+                    server.starttls(context=ssl.create_default_context())
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+    except Exception as exc:
+        app.logger.error("moodle credentials email error: %s", exc)
+
+
+def _provision_moodle_and_notify(order_id):
+    """
+    Crea cuenta Moodle + matricula + envía credenciales.
+    Se llama en background thread cuando el admin confirma el pago.
+    """
+    try:
+        from moodle_service import provision_student
+        order = fetch_order_by_id(order_id)
+        if not order:
+            app.logger.error("provision_moodle: orden %s no encontrada", order_id)
+            return
+        moodle_course_id = order.get("moodle_course_id")
+        if not moodle_course_id:
+            app.logger.warning("provision_moodle: orden %s sin moodle_course_id", order_id)
+            return
+
+        email = order["student_email"]
+        name_parts = (order.get("student_name") or "").split(" ", 1)
+        firstname = name_parts[0]
+        lastname = name_parts[1] if len(name_parts) > 1 else "."
+
+        result = provision_student(email, firstname, lastname, moodle_course_id)
+
+        updates = {
+            "moodle_enrolled": 1,
+            "moodle_enrolled_at": __import__("datetime").datetime.utcnow().isoformat(),
+            "moodle_user_email": email,
+        }
+        admin_update_order(order_id, updates)
+        app.logger.info("provision_moodle: orden %s matriculada user_id=%s", order_id, result["moodle_user_id"])
+
+        if result["was_created"] and result["password"]:
+            moodle_url = (
+                f"https://cursos.katarzyna.pe/course/view.php?id={moodle_course_id}"
+            )
+            _send_moodle_credentials(
+                student_email=email,
+                student_name=order.get("student_name", ""),
+                course_title=order.get("course_title", ""),
+                moodle_username=result["username"],
+                moodle_password=result["password"],
+                moodle_url=moodle_url,
+                order_ref=f"ORD-{order_id:04d}",
+            )
+    except Exception as exc:
+        app.logger.error("provision_moodle error order %s: %s", order_id, exc)
+
+
 def _send_checkout_emails(order_id, student_name, student_email, course_title, amount,
                           comprobante_type="boleta", taxpayer_id="", taxpayer_name="",
                           moodle_course_id=None):
@@ -1788,12 +1886,24 @@ def api_admin_update_order(order_id):
     ensure_db()
     data = request.get_json(silent=True) or {}
     from datetime import datetime as _dt
-    # Auto-set timestamps for specific actions
+
+    confirm_payment = data.get("status") == "paid"
+
     if data.get("comprobante_number") and not data.get("comprobante_issued_at"):
         data["comprobante_issued_at"] = _dt.utcnow().isoformat()
     if data.get("moodle_enrolled") and not data.get("moodle_enrolled_at"):
         data["moodle_enrolled_at"] = _dt.utcnow().isoformat()
+
     admin_update_order(order_id, data)
+
+    if confirm_payment:
+        threading.Thread(
+            target=_provision_moodle_and_notify,
+            args=(order_id,),
+            daemon=True,
+        ).start()
+        return jsonify(message="Pago confirmado. Creando cuenta Moodle y enviando credenciales..."), 200
+
     return jsonify(message="Orden actualizada"), 200
 
 
