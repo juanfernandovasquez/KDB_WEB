@@ -4,6 +4,7 @@
   const slug = params.get('slug') || '';
 
   let course = null;
+  let voucherUrl = null;
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   const form         = document.getElementById('pagar-form');
@@ -52,17 +53,155 @@
     });
   });
 
-  // ── Card number formatting ───────────────────────────────────────────────────
-  document.getElementById('card_number')?.addEventListener('input', function () {
-    let v = this.value.replace(/\D/g, '').slice(0, 16);
-    this.value = v.replace(/(.{4})/g, '$1 ').trim();
+  // ── Payment tabs ─────────────────────────────────────────────────────────────
+  const transferPanel = document.getElementById('pay-panel-transfer');
+  const cardPanel     = document.getElementById('pay-panel-card');
+
+  document.querySelectorAll('.pay-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.pay-tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+
+      const isCard = tab.dataset.tab === 'card';
+      transferPanel.classList.toggle('hidden', isCard);
+      cardPanel.classList.toggle('hidden', !isCard);
+    });
   });
 
-  document.getElementById('card_expiry')?.addEventListener('input', function () {
-    let v = this.value.replace(/\D/g, '').slice(0, 4);
-    if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
-    this.value = v;
+  // ── Payment method picker (Yape / Plin / Transferencia) ───────────────────
+  const instrYape = document.getElementById('instr-yape');
+  const instrPlin = document.getElementById('instr-plin');
+  const instrBank = document.getElementById('instr-bank');
+
+  document.querySelectorAll('input[name="pay_method"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.pay-method-opt').forEach(el => el.classList.remove('selected'));
+      radio.closest('.pay-method-opt')?.classList.add('selected');
+
+      instrYape?.classList.add('hidden');
+      instrPlin?.classList.add('hidden');
+      instrBank?.classList.add('hidden');
+
+      if (radio.value === 'yape')         instrYape?.classList.remove('hidden');
+      else if (radio.value === 'plin')    instrPlin?.classList.remove('hidden');
+      else if (radio.value === 'transferencia') instrBank?.classList.remove('hidden');
+    });
   });
+
+  // ── Voucher upload ───────────────────────────────────────────────────────────
+  const voucherFile     = document.getElementById('voucher-file');
+  const voucherDropzone = document.getElementById('voucher-dropzone');
+  const voucherEmpty    = document.getElementById('voucher-empty');
+  const voucherPreview  = document.getElementById('voucher-preview');
+  const voucherUploading = document.getElementById('voucher-uploading');
+  const voucherThumb    = document.getElementById('voucher-thumb');
+  const voucherUrlInput = document.getElementById('voucher-url');
+  const voucherBrowse   = document.getElementById('voucher-browse');
+  const voucherRemove   = document.getElementById('voucher-remove');
+
+  if (voucherBrowse) voucherBrowse.addEventListener('click', () => voucherFile?.click());
+
+  if (voucherDropzone) {
+    voucherDropzone.addEventListener('dragover', e => { e.preventDefault(); voucherDropzone.classList.add('dragover'); });
+    voucherDropzone.addEventListener('dragleave', () => voucherDropzone.classList.remove('dragover'));
+    voucherDropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      voucherDropzone.classList.remove('dragover');
+      const file = e.dataTransfer?.files?.[0];
+      if (file) handleVoucherFile(file);
+    });
+  }
+
+  if (voucherFile) {
+    voucherFile.addEventListener('change', () => {
+      const file = voucherFile.files?.[0];
+      if (file) handleVoucherFile(file);
+    });
+  }
+
+  if (voucherRemove) {
+    voucherRemove.addEventListener('click', () => {
+      voucherUrl = null;
+      voucherUrlInput.value = '';
+      voucherFile.value = '';
+      voucherPreview?.classList.add('hidden');
+      voucherEmpty?.classList.remove('hidden');
+    });
+  }
+
+  async function handleVoucherFile(file) {
+    const MAX_MB = 5;
+    const allowed = ['image/jpeg','image/png','image/webp','application/pdf'];
+    const errEl = document.getElementById('err-voucher');
+
+    if (!allowed.includes(file.type)) {
+      if (errEl) errEl.textContent = 'Formato no permitido. Usa JPG, PNG, WebP o PDF.';
+      return;
+    }
+    if (file.size > MAX_MB * 1024 * 1024) {
+      if (errEl) errEl.textContent = `El archivo supera ${MAX_MB} MB.`;
+      return;
+    }
+    if (errEl) errEl.textContent = '';
+
+    voucherEmpty?.classList.add('hidden');
+    voucherPreview?.classList.add('hidden');
+    voucherUploading?.classList.remove('hidden');
+
+    try {
+      const presignRes = await fetch(`${window.API_BASE}/api/checkout/voucher-presign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, content_type: file.type }),
+      });
+
+      if (!presignRes.ok) {
+        const err = await presignRes.json().catch(() => ({}));
+        throw new Error(err.error || 'Error al obtener URL de subida.');
+      }
+
+      const { upload_url, public_url } = await presignRes.json();
+
+      const uploadRes = await fetch(upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (!uploadRes.ok) throw new Error('Error al subir el archivo.');
+
+      voucherUrl = public_url;
+      voucherUrlInput.value = public_url;
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => { if (voucherThumb) voucherThumb.src = e.target.result; };
+        reader.readAsDataURL(file);
+      } else {
+        if (voucherThumb) {
+          voucherThumb.src = '';
+          voucherThumb.alt = '';
+          voucherThumb.style.display = 'none';
+        }
+      }
+
+      voucherUploading?.classList.add('hidden');
+      voucherPreview?.classList.remove('hidden');
+      if (file.type === 'application/pdf') {
+        const nameEl = voucherPreview?.querySelector('#voucher-filename');
+        if (nameEl) nameEl.textContent = file.name;
+      }
+
+    } catch (err) {
+      voucherUploading?.classList.add('hidden');
+      voucherEmpty?.classList.remove('hidden');
+      if (errEl) errEl.textContent = err.message || 'Error al subir el archivo. Intenta de nuevo.';
+    }
+  }
 
   // ── Load course ─────────────────────────────────────────────────────────────
   async function loadCourse() {
@@ -97,7 +236,7 @@
         if (orig) { orig.textContent = fmt(course.original_price); orig.classList.remove('hidden'); }
       }
 
-      btnPayText.textContent = `Pagar ${fmt(course.price)}`;
+      btnPayText.textContent = `Confirmar inscripción · ${fmt(course.price)}`;
 
       if (course.moodle_course_id) {
         const moodleBtn = document.getElementById('btn-go-moodle');
@@ -119,7 +258,6 @@
     const email2 = document.getElementById('student_email2');
     const isFact = document.querySelector('input[name="comprobante_type"]:checked')?.value === 'factura';
 
-    // Clear all errors
     ['err-name','err-email','err-email2','err-taxpayer-boleta','err-ruc','err-razon']
       .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
     [name, email, email2].forEach(el => el?.classList.remove('invalid'));
@@ -163,6 +301,15 @@
     return ok;
   }
 
+  // ── Get active payment method ────────────────────────────────────────────────
+  function getPaymentMethod() {
+    const activeTab = document.querySelector('.pay-tab.active');
+    if (activeTab?.dataset?.tab === 'card') return { method: 'tarjeta', detail: null };
+
+    const checked = document.querySelector('input[name="pay_method"]:checked');
+    return { method: checked?.value || 'yape', detail: null };
+  }
+
   // ── Form submit ──────────────────────────────────────────────────────────────
   if (!form) {
     console.error('[pagar] #pagar-form not found in DOM');
@@ -181,12 +328,10 @@
         ? (document.getElementById('taxpayer_razon')?.value || '').trim()
         : (document.getElementById('student_name')?.value || '').trim();
 
-      // Show processing overlay
+      const { method: payment_method } = getPaymentMethod();
+
       overlay?.classList.remove('hidden');
       btnPay.disabled = true;
-
-      // Simulate 2-second processing delay for realistic UX
-      await new Promise(r => setTimeout(r, 2000));
 
       try {
         const resp = await fetch(`${window.API_BASE}/api/checkout`, {
@@ -199,6 +344,8 @@
             comprobante_type: isFact ? 'factura' : 'boleta',
             taxpayer_id,
             taxpayer_name,
+            payment_method,
+            voucher_url:      voucherUrl || undefined,
           }),
         });
 
@@ -212,7 +359,6 @@
           return;
         }
 
-        // ── Success ──
         document.getElementById('success-order-ref').textContent  = data.order_ref || `#${data.order_id}`;
         document.getElementById('success-course-name').textContent = data.course_title || course.title;
         document.getElementById('success-email-addr').textContent  =
@@ -227,7 +373,6 @@
         successBox.classList.remove('hidden');
         successBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Mark steps done
         document.querySelectorAll('.pagar-step').forEach(s => {
           s.classList.add('done');
           s.classList.remove('active');

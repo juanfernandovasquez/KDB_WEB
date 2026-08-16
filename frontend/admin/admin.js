@@ -2313,12 +2313,16 @@ let currentAdminUserId = null;
           const moodleBadge = o.moodle_enrolled
             ? `<span class="badge-active">Inscrito</span>`
             : `<span class="badge-inactive">Pendiente</span>`;
+          const voucherLink = o.voucher_url
+            ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="small" style="color:var(--brand-blue);">📎 Ver constancia</a>`
+            : '';
+          const pmLabel = o.payment_method ? `<br><small class="muted">${escHtml(o.payment_method)}</small>` : '';
           return `<tr data-order-id="${o.id}">
             <td class="small">${escHtml(ordRef)}</td>
             <td class="small">${d}</td>
             <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small">${escHtml(o.student_email)}</a></td>
             <td class="small">${escHtml(o.course_title || o.course_slug || '—')}</td>
-            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong></td>
+            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong>${pmLabel}${voucherLink ? '<br>' + voucherLink : ''}</td>
             <td>${compLabel}${taxpayerInfo}<br>${compNumBadge}</td>
             <td>${paidBadge}</td>
             <td>${moodleBadge}</td>
@@ -2326,7 +2330,7 @@ let currentAdminUserId = null;
               <div style="display:flex;flex-direction:column;gap:.3rem;">
                 ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-paid" data-id="${o.id}">✓ Pago confirmado</button>` : ''}
                 ${!o.comprobante_number ? `<button class="secondary small-btn ac-ord-comp" data-id="${o.id}">📄 Registrar comprobante</button>` : ''}
-                ${!o.moodle_enrolled ? `<button class="secondary small-btn ac-ord-moodle" data-id="${o.id}" data-email="${escHtml(o.student_email)}">🎓 Inscribir en Moodle</button>` : ''}
+                ${o.status === 'paid' && !o.moodle_enrolled ? `<button class="btn-provision small-btn ac-ord-provision" data-id="${o.id}" data-email="${escHtml(o.student_email)}" data-name="${escHtml(o.student_name)}">📧 Enviar credenciales</button>` : ''}
               </div>
             </td>
           </tr>`;
@@ -2338,7 +2342,7 @@ let currentAdminUserId = null;
             btn.disabled = true; btn.textContent = '…';
             const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, {
               method: 'PUT', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: 'paid', payment_method: 'simulation' }),
+              body: JSON.stringify({ status: 'paid', payment_method: 'manual' }),
             });
             if (res.ok) loadAcademiaAdmin(); else btn.disabled = false;
           });
@@ -2353,16 +2357,25 @@ let currentAdminUserId = null;
           });
         });
 
-        ordTbody.querySelectorAll('.ac-ord-moodle').forEach(btn => {
+        ordTbody.querySelectorAll('.ac-ord-provision').forEach(btn => {
           btn.addEventListener('click', async () => {
-            const email = btn.dataset.email;
-            if (!confirm(`¿Marcar a ${email} como inscrito en Moodle?\n\nAsegúrate de haber creado su cuenta y matriculado el curso en cursos.katarzyna.pe`)) return;
-            btn.disabled = true;
-            const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, {
-              method: 'PUT', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ moodle_enrolled: 1, moodle_user_email: email }),
-            });
-            if (res.ok) loadAcademiaAdmin(); else btn.disabled = false;
+            const { id, name, email } = btn.dataset;
+            if (!confirm(`¿Enviar credenciales y matricular en Moodle a:\n${name} (${email})?\n\nEsto enviará el correo de bienvenida con acceso al curso.`)) return;
+            btn.disabled = true; btn.textContent = 'Enviando…';
+            try {
+              const res = await apiFetch(`/api/admin/orders/${id}/provision`, { method: 'POST' });
+              const data = await res.json().catch(() => ({}));
+              if (res.ok) {
+                btn.textContent = '✓ Enviado';
+                setTimeout(() => loadAcademiaAdmin(), 1500);
+              } else {
+                alert(data.error || 'Error al enviar credenciales.');
+                btn.disabled = false; btn.textContent = '📧 Enviar credenciales';
+              }
+            } catch {
+              alert('Error de conexión.');
+              btn.disabled = false; btn.textContent = '📧 Enviar credenciales';
+            }
           });
         });
       }

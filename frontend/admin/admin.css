@@ -1459,6 +1459,14 @@ button.secondary.small-btn {
   border-radius: var(--r-sm);
 }
 
+.btn-provision {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.btn-provision:hover { background: #071331; border-color: #071331; color: #fff; }
+.btn-provision:disabled { background: #b0b8cc; border-color: #b0b8cc; cursor: not-allowed; }
+
 /* ── Barra de herramientas enriquecida (publicaciones) ───────────── */
 .editor-toolbar--publication {
   gap: 0.55rem;
@@ -1842,9 +1850,12 @@ button.secondary.small-btn {
   /* ── Toggle grid ──────────────────────────────────────────────── */
   .page-toggle-grid { grid-template-columns: 1fr; }
 
-  /* ── Pub-card: ocultar label, mostrar ID corto ────────────────── */
-  .subs-table th:nth-child(n+4),
-  .subs-table td:nth-child(n+4) { display: none; }
+  /* ── Contactos: ocultar columnas extra en pantalla muy pequeña ── */
+  .contact-table th:nth-child(n+4),
+  .contact-table td:nth-child(n+4) { display: none; }
+  /* Tablas con scroll no colapsan columnas */
+  .scroll-table th,
+  .scroll-table td { display: table-cell !important; }
 
   /* ── Editor: textarea más compacta ───────────────────────────── */
   .editor-surface { min-height: 120px; }

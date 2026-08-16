@@ -32,7 +32,8 @@
   backdrop-filter: none !important;
 }
 
-.header-container.is-scrolled {
+.header-container.is-scrolled,
+body[data-header-solid] .header-container {
   background: var(--brand-blue) !important;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16) !important;
 }

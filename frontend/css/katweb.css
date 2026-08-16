@@ -16,6 +16,13 @@
   --kw-section-padding: 4rem 1.5rem;
 }
 
+/* ─── Header siempre sólido en páginas KATWeb ───────────── */
+body[data-page="kdbweb"] .header-container,
+body[data-page="kdbweb-detail"] .header-container {
+  background: var(--brand-blue, #06186d) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16) !important;
+}
+
 /* ─── PÁGINA PRINCIPAL KATWeb ────────────────────────────── */
 
 /* Hero KATWeb — split layout */

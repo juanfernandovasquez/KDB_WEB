@@ -1656,6 +1656,31 @@ def api_admin_student_orders(email):
     return jsonify(fetch_student_orders(email))
 
 
+# ─── Academia: Voucher upload presign (público) ───────────────────────────────
+
+@app.route("/api/checkout/voucher-presign", methods=["POST"])
+def api_voucher_presign():
+    """Genera presigned POST para que el alumno suba su comprobante de pago a S3."""
+    if _is_rate_limited("contact"):
+        return jsonify(error="Demasiadas solicitudes"), 429
+    data = request.get_json(silent=True) or {}
+    filename = (data.get("filename") or "voucher.jpg").strip()
+    content_type = data.get("content_type") or "image/jpeg"
+    if content_type not in ("image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"):
+        return jsonify(error="Tipo de archivo no permitido"), 400
+    try:
+        result = create_presigned_post(
+            filename,
+            content_type=content_type,
+            max_bytes=5 * 1024 * 1024,  # 5 MB
+            prefix_override="vouchers/",
+        )
+        return jsonify(result)
+    except Exception as exc:
+        app.logger.exception("Error generating voucher presign")
+        return jsonify(error=str(exc)), 500
+
+
 # ─── Academia: Checkout (simulación) ─────────────────────────────────────────
 
 def _send_moodle_credentials(student_email, student_name, course_title,
@@ -1912,6 +1937,9 @@ def api_checkout():
     comprobante_type = (data.get("comprobante_type") or "boleta").strip().lower()
     taxpayer_id = (data.get("taxpayer_id") or "").strip()
     taxpayer_name = (data.get("taxpayer_name") or "").strip()
+    payment_method = (data.get("payment_method") or "transferencia").strip().lower()
+    payment_method_detail = (data.get("payment_method_detail") or "").strip()
+    voucher_url = (data.get("voucher_url") or "").strip()
 
     if not student_name or not student_email or not course_slug:
         return jsonify(error="Datos incompletos"), 400
@@ -1919,6 +1947,8 @@ def api_checkout():
         return jsonify(error="Email inválido"), 400
     if comprobante_type not in ("boleta", "factura"):
         comprobante_type = "boleta"
+    if payment_method not in ("yape", "plin", "transferencia", "tarjeta"):
+        payment_method = "transferencia"
 
     course = fetch_course_by_slug(course_slug, published_only=True)
     if not course:
@@ -1930,7 +1960,9 @@ def api_checkout():
         "student_name": student_name,
         "student_email": student_email,
         "amount": course["price"],
-        "payment_method": "simulation",
+        "payment_method": payment_method,
+        "payment_method_detail": payment_method_detail,
+        "voucher_url": voucher_url or None,
         "comprobante_type": comprobante_type,
         "taxpayer_id": taxpayer_id,
         "taxpayer_name": taxpayer_name,
@@ -1998,16 +2030,25 @@ def api_admin_update_order(order_id):
         data["moodle_enrolled_at"] = _dt.utcnow().isoformat()
 
     admin_update_order(order_id, data)
-
-    if confirm_payment:
-        threading.Thread(
-            target=_provision_moodle_and_notify,
-            args=(order_id,),
-            daemon=True,
-        ).start()
-        return jsonify(message="Pago confirmado. Creando cuenta Moodle y enviando credenciales..."), 200
-
     return jsonify(message="Orden actualizada"), 200
+
+
+@app.route("/api/admin/orders/<int:order_id>/provision", methods=["POST"])
+@require_admin()
+def api_admin_provision_order(order_id):
+    """Crea cuenta Moodle, matricula y envía credenciales manualmente."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    if order.get("status") != "paid":
+        return jsonify(error="La orden debe estar en estado 'paid' antes de enviar credenciales"), 400
+    threading.Thread(
+        target=_provision_moodle_and_notify,
+        args=(order_id,),
+        daemon=True,
+    ).start()
+    return jsonify(message="Procesando matrícula y envío de credenciales..."), 200
 
 
 @app.before_request
