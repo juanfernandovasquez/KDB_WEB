@@ -998,6 +998,233 @@ def is_page_enabled(page):
     return bool(row["enabled"])
 
 
+# ─── Academia: Courses ────────────────────────────────────────────────────────
+
+def _course_row_to_dict(row):
+    d = dict(row)
+    return d
+
+
+def _attach_modules(conn, course_id):
+    modules = conn.execute(
+        "SELECT * FROM course_modules WHERE course_id = ? ORDER BY position",
+        (course_id,),
+    ).fetchall()
+    result = []
+    for m in modules:
+        md = dict(m)
+        lessons = conn.execute(
+            "SELECT * FROM course_lessons WHERE module_id = ? ORDER BY position",
+            (m["id"],),
+        ).fetchall()
+        md["lessons"] = [dict(l) for l in lessons]
+        result.append(md)
+    return result
+
+
+def fetch_courses(published_only=True, category=None):
+    conn = get_conn()
+    q = "SELECT * FROM courses"
+    params = []
+    conditions = []
+    if published_only:
+        conditions.append("is_published = 1")
+    if category:
+        conditions.append("category = ?")
+        params.append(category)
+    if conditions:
+        q += " WHERE " + " AND ".join(conditions)
+    q += " ORDER BY position ASC, id ASC"
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    return [_course_row_to_dict(r) for r in rows]
+
+
+def fetch_course_by_slug(slug, published_only=True):
+    conn = get_conn()
+    q = "SELECT * FROM courses WHERE slug = ?"
+    params = [slug]
+    if published_only:
+        q += " AND is_published = 1"
+    row = conn.execute(q, params).fetchone()
+    if not row:
+        conn.close()
+        return None
+    course = _course_row_to_dict(row)
+    course["modules"] = _attach_modules(conn, course["id"])
+    conn.close()
+    return course
+
+
+def fetch_course_by_id(course_id):
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM courses WHERE id = ?", (course_id,)).fetchone()
+    if not row:
+        conn.close()
+        return None
+    course = _course_row_to_dict(row)
+    course["modules"] = _attach_modules(conn, course["id"])
+    conn.close()
+    return course
+
+
+def save_course(payload, course_id=None):
+    now = datetime.utcnow().isoformat()
+    conn = get_conn()
+    with conn:
+        if course_id:
+            conn.execute(
+                """
+                UPDATE courses SET
+                  slug=?, title=?, subtitle=?, description=?, category=?,
+                  price=?, original_price=?, image_url=?, duration=?,
+                  modules_count=?, lessons_count=?, level=?, is_published=?,
+                  position=?, moodle_course_id=?, updated_at=?
+                WHERE id=?
+                """,
+                (
+                    payload.get("slug"),
+                    payload.get("title"),
+                    payload.get("subtitle"),
+                    payload.get("description"),
+                    payload.get("category"),
+                    payload.get("price", 0),
+                    payload.get("original_price"),
+                    payload.get("image_url"),
+                    payload.get("duration"),
+                    payload.get("modules_count", 0),
+                    payload.get("lessons_count", 0),
+                    payload.get("level", "Todos los niveles"),
+                    1 if payload.get("is_published") else 0,
+                    payload.get("position", 0),
+                    payload.get("moodle_course_id"),
+                    now,
+                    course_id,
+                ),
+            )
+            cid = course_id
+        else:
+            cur = conn.execute(
+                """
+                INSERT INTO courses (slug, title, subtitle, description, category,
+                  price, original_price, image_url, duration,
+                  modules_count, lessons_count, level, is_published,
+                  position, moodle_course_id, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    payload.get("slug"),
+                    payload.get("title"),
+                    payload.get("subtitle"),
+                    payload.get("description"),
+                    payload.get("category"),
+                    payload.get("price", 0),
+                    payload.get("original_price"),
+                    payload.get("image_url"),
+                    payload.get("duration"),
+                    payload.get("modules_count", 0),
+                    payload.get("lessons_count", 0),
+                    payload.get("level", "Todos los niveles"),
+                    1 if payload.get("is_published") else 0,
+                    payload.get("position", 0),
+                    payload.get("moodle_course_id"),
+                    now,
+                    now,
+                ),
+            )
+            cid = cur.lastrowid
+
+        # Replace modules + lessons if provided
+        if "modules" in payload:
+            conn.execute("DELETE FROM course_modules WHERE course_id = ?", (cid,))
+            for mi, mod in enumerate(payload.get("modules") or []):
+                mod_cur = conn.execute(
+                    """
+                    INSERT INTO course_modules (course_id, position, title, duration, lessons_count)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (cid, mi, mod.get("title"), mod.get("duration"), mod.get("lessons_count", 0)),
+                )
+                mid = mod_cur.lastrowid
+                for li, lesson in enumerate(mod.get("lessons") or []):
+                    conn.execute(
+                        """
+                        INSERT INTO course_lessons (module_id, position, title, duration, type)
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
+                        (mid, li, lesson.get("title"), lesson.get("duration"), lesson.get("type", "video")),
+                    )
+    conn.close()
+    return cid
+
+
+def delete_course(course_id):
+    conn = get_conn()
+    with conn:
+        conn.execute("DELETE FROM courses WHERE id = ?", (course_id,))
+    conn.close()
+
+
+# ─── Academia: Orders ─────────────────────────────────────────────────────────
+
+def create_order(payload):
+    now = datetime.utcnow().isoformat()
+    conn = get_conn()
+    with conn:
+        cur = conn.execute(
+            """
+            INSERT INTO orders (course_id, course_title, student_name, student_email,
+              amount, status, payment_method, gateway_ref, notes, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)
+            """,
+            (
+                payload.get("course_id"),
+                payload.get("course_title"),
+                payload.get("student_name"),
+                payload.get("student_email"),
+                payload.get("amount", 0),
+                payload.get("payment_method"),
+                payload.get("gateway_ref"),
+                payload.get("notes"),
+                now,
+                now,
+            ),
+        )
+        order_id = cur.lastrowid
+    conn.close()
+    return order_id
+
+
+def update_order_status(order_id, status, gateway_ref=None):
+    now = datetime.utcnow().isoformat()
+    conn = get_conn()
+    with conn:
+        if gateway_ref:
+            conn.execute(
+                "UPDATE orders SET status=?, gateway_ref=?, updated_at=? WHERE id=?",
+                (status, gateway_ref, now, order_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE orders SET status=?, updated_at=? WHERE id=?",
+                (status, now, order_id),
+            )
+    conn.close()
+
+
+def fetch_orders(status=None):
+    conn = get_conn()
+    q = "SELECT o.*, c.slug AS course_slug FROM orders o LEFT JOIN courses c ON o.course_id = c.id"
+    params = []
+    if status:
+        q += " WHERE o.status = ?"
+        params.append(status)
+    q += " ORDER BY o.created_at DESC"
+    rows = conn.execute(q, params).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 # --- Admin auth helpers ---
 
 def fetch_admin_by_username(username):

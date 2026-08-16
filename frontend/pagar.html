@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pago | Katarzyna Academia</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/header.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/pagar.css" />
+</head>
+<body data-page="academia">
+  <div id="site-header"></div>
+
+  <main class="pagar-main">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+      <div class="breadcrumb-inner">
+        <a href="index.html">Inicio</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="academia.html">Academia</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="#" id="breadcrumb-course">Curso</a>
+        <span class="breadcrumb-sep">›</span>
+        <span>Pago</span>
+      </div>
+    </div>
+
+    <div class="pagar-inner">
+
+      <!-- Form column -->
+      <div class="pagar-form-col">
+
+        <!-- Step indicator -->
+        <div class="pagar-steps">
+          <div class="pagar-step active">
+            <span class="step-num">1</span>
+            <span class="step-label">Tus datos</span>
+          </div>
+          <div class="step-sep"></div>
+          <div class="pagar-step" id="step2">
+            <span class="step-num">2</span>
+            <span class="step-label">Pago</span>
+          </div>
+          <div class="step-sep"></div>
+          <div class="pagar-step" id="step3">
+            <span class="step-num">3</span>
+            <span class="step-label">Confirmación</span>
+          </div>
+        </div>
+
+        <!-- Payment form -->
+        <form id="pagar-form" class="pagar-form" novalidate>
+
+          <section class="form-section" id="section-datos">
+            <h2 class="form-section-title">Tus datos</h2>
+
+            <div class="form-group">
+              <label for="student_name">Nombre completo *</label>
+              <input type="text" id="student_name" name="student_name" required autocomplete="name" placeholder="Ej. Juan Pérez García" />
+              <span class="field-error" id="err-name"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="student_email">Correo electrónico *</label>
+              <input type="email" id="student_email" name="student_email" required autocomplete="email" placeholder="tu@correo.com" />
+              <span class="field-error" id="err-email"></span>
+              <span class="field-hint">Te enviaremos los accesos al curso a este correo.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="student_email2">Confirmar correo *</label>
+              <input type="email" id="student_email2" name="student_email2" required autocomplete="email" placeholder="tu@correo.com" />
+              <span class="field-error" id="err-email2"></span>
+            </div>
+          </section>
+
+          <section class="form-section" id="section-pago">
+            <h2 class="form-section-title">
+              Pago
+              <span class="simulation-badge">SIMULACIÓN</span>
+            </h2>
+            <p class="simulation-note">Esta es una simulación de pago. No se realizará ningún cargo real. Ingresa cualquier dato para completar el proceso.</p>
+
+            <div class="form-group">
+              <label for="card_number">Número de tarjeta</label>
+              <div class="card-input-wrap">
+                <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" />
+                <div class="card-brands">
+                  <svg viewBox="0 0 48 30" width="38"><rect width="48" height="30" rx="4" fill="#1a1f71"/><rect x="0" y="10" width="48" height="10" fill="#f7bc00"/></svg>
+                  <svg viewBox="0 0 48 30" width="38"><rect width="48" height="30" rx="4" fill="#eb001b" opacity=".9"/><circle cx="18" cy="15" r="9" fill="#eb001b"/><circle cx="30" cy="15" r="9" fill="#f79e1b"/><path d="M24 7.8a9 9 0 0 1 0 14.4A9 9 0 0 1 24 7.8z" fill="#ff5f00"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="card_expiry">Vencimiento</label>
+                <input type="text" id="card_expiry" name="card_expiry" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" />
+              </div>
+              <div class="form-group">
+                <label for="card_cvv">CVV</label>
+                <input type="text" id="card_cvv" name="card_cvv" placeholder="123" maxlength="4" autocomplete="cc-csc" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="card_name">Nombre en la tarjeta</label>
+              <input type="text" id="card_name" name="card_name" placeholder="Como aparece en la tarjeta" autocomplete="cc-name" />
+            </div>
+          </section>
+
+          <div class="pagar-security">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Pago seguro con cifrado SSL de 256 bits</span>
+          </div>
+
+          <button type="submit" class="btn-pay" id="btn-pay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span id="btn-pay-text">Confirmar compra</span>
+          </button>
+
+          <div class="pagar-terms">
+            Al confirmar aceptas nuestros <a href="terminos.html" target="_blank">Términos y condiciones</a>
+            y <a href="privacidad.html" target="_blank">Política de privacidad</a>.
+          </div>
+
+        </form>
+
+        <!-- Success state -->
+        <div class="pagar-success hidden" id="pagar-success">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>¡Compra completada!</h2>
+          <p class="success-desc">Hemos recibido tu inscripción al curso <strong id="success-course-name"></strong>.</p>
+          <p class="success-email">Recibirás un correo en <strong id="success-email-addr"></strong> con tus credenciales de acceso en las próximas horas.</p>
+          <div class="success-actions">
+            <a href="https://cursos.katarzyna.pe" class="btn-success-primary" target="_blank" rel="noopener">Ir a cursos.katarzyna.pe</a>
+            <a href="academia.html" class="btn-success-secondary">Ver más cursos</a>
+          </div>
+          <div class="success-next">
+            <h4>Próximos pasos</h4>
+            <ol>
+              <li>Revisa tu correo (incluido el spam).</li>
+              <li>Recibirás tus credenciales para acceder a la plataforma.</li>
+              <li>Ingresa a <a href="https://cursos.katarzyna.pe" target="_blank">cursos.katarzyna.pe</a> y busca tu curso.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Error banner -->
+        <div class="pagar-error hidden" id="pagar-error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="pagar-error-msg">Error al procesar la solicitud.</span>
+        </div>
+
+      </div>
+
+      <!-- Summary column -->
+      <aside class="pagar-summary-col">
+        <div class="pagar-summary sticky-summary" id="pagar-summary">
+          <div class="summary-loading" id="summary-loading">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="summary-content hidden" id="summary-content">
+            <div class="summary-thumb">
+              <img id="summary-img" src="" alt="" />
+            </div>
+            <h3 id="summary-title">Cargando curso…</h3>
+            <div class="summary-price-row">
+              <span class="summary-currency">PEN</span>
+              <span class="summary-price" id="summary-price">—</span>
+              <span class="summary-original hidden" id="summary-original"></span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-line">
+              <span>Subtotal</span>
+              <span id="summary-subtotal">—</span>
+            </div>
+            <div class="summary-line summary-total">
+              <span>Total</span>
+              <span id="summary-total">—</span>
+            </div>
+            <div class="summary-guarantee">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Garantía de 7 días
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/header.js"></script>
+  <script src="./js/footer.js"></script>
+  <script src="./js/pagar.js"></script>
+</body>
+</html>

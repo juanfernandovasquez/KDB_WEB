@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academia | Katarzyna Legal & Tributario</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/header.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/academia.css" />
+</head>
+<body data-page="academia">
+  <div id="site-header"></div>
+
+  <main>
+    <!-- Hero -->
+    <section class="academia-hero">
+      <div class="academia-hero-bg"></div>
+      <div class="academia-hero-overlay"></div>
+      <div class="academia-hero-inner">
+        <p class="academia-hero-kicker">FORMACIÓN ESPECIALIZADA</p>
+        <h1>Academia Katarzyna</h1>
+        <p class="academia-hero-desc">Cursos prácticos en derecho tributario, laboral y corporativo impartidos por abogados especializados con más de 12 años de experiencia.</p>
+        <div class="academia-stats">
+          <div class="academia-stat"><span class="stat-num">6+</span><span class="stat-label">Cursos</span></div>
+          <div class="academia-stat-div"></div>
+          <div class="academia-stat"><span class="stat-num">150+</span><span class="stat-label">Estudiantes</span></div>
+          <div class="academia-stat-div"></div>
+          <div class="academia-stat"><span class="stat-num">12+</span><span class="stat-label">Años de exp.</span></div>
+          <div class="academia-stat-div"></div>
+          <div class="academia-stat"><span class="stat-num">100%</span><span class="stat-label">Online</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cursos -->
+    <section class="academia-courses-section">
+      <div class="academia-courses-inner">
+        <!-- Filtros -->
+        <div class="academia-filters" id="academia-filters">
+          <button class="filter-btn active" data-cat="">Todos</button>
+          <button class="filter-btn" data-cat="tributario">Tributario</button>
+          <button class="filter-btn" data-cat="laboral">Laboral</button>
+          <button class="filter-btn" data-cat="corporativo">Corporativo</button>
+          <button class="filter-btn" data-cat="sunat">SUNAT</button>
+        </div>
+
+        <!-- Grid -->
+        <div class="courses-grid" id="courses-grid">
+          <div class="courses-loading" id="courses-loading">
+            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+          </div>
+          <div class="courses-empty hidden" id="courses-empty">
+            <p>No hay cursos disponibles en esta categoría aún.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Beneficios -->
+    <section class="academia-benefits">
+      <div class="academia-benefits-inner">
+        <h2>¿Por qué elegir Academia Katarzyna?</h2>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <h3>Docentes en ejercicio</h3>
+            <p>Abogados que actualmente litigan y asesoran. No solo teoría — casos reales de su práctica.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3>Acceso de por vida</h3>
+            <p>Una vez inscrito, el contenido es tuyo para siempre. Vuelve cuando lo necesites.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3>Certificado incluido</h3>
+            <p>Al completar el curso obtienes un certificado digital avalado por Katarzyna Legal.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3>Aprende a tu ritmo</h3>
+            <p>Videos bajo demanda, disponibles desde cualquier dispositivo, a cualquier hora.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>Material descargable</h3>
+            <p>Plantillas, checklists y guías prácticas que puedes aplicar de inmediato en tu trabajo.</p>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>Soporte de consultas</h3>
+            <p>Resuelve tus dudas con el equipo docente durante 30 días después del curso.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="academia-cta">
+      <div class="academia-cta-inner">
+        <div>
+          <h2>¿Formación para tu equipo completo?</h2>
+          <p>Ofrecemos planes corporativos con precios especiales y seguimiento personalizado.</p>
+        </div>
+        <a href="contacto.html" class="btn-cta-gold">Solicitar plan corporativo</a>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/header.js"></script>
+  <script src="./js/footer.js"></script>
+  <script src="./js/academia.js"></script>
+  <script src="./js/page-reveal.js"></script>
+  <script src="./js/img-reveal.js"></script>
+</body>
+</html>

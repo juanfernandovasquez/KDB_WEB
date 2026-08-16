@@ -922,6 +922,74 @@ def init_db():
         conn.execute("DROP TABLE IF EXISTS post_tags")
         conn.execute("DROP TABLE IF EXISTS tags")
 
+        # ── Academia: cursos, módulos, lecciones y órdenes ──────────────────
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS courses (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug TEXT NOT NULL UNIQUE,
+              title TEXT NOT NULL,
+              subtitle TEXT,
+              description TEXT,
+              category TEXT,
+              price REAL NOT NULL DEFAULT 0,
+              original_price REAL,
+              image_url TEXT,
+              duration TEXT,
+              modules_count INTEGER DEFAULT 0,
+              lessons_count INTEGER DEFAULT 0,
+              level TEXT DEFAULT 'Todos los niveles',
+              is_published INTEGER NOT NULL DEFAULT 0,
+              position INTEGER NOT NULL DEFAULT 0,
+              moodle_course_id INTEGER,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS course_modules (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+              position INTEGER NOT NULL DEFAULT 0,
+              title TEXT NOT NULL,
+              duration TEXT,
+              lessons_count INTEGER DEFAULT 0
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS course_lessons (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              module_id INTEGER NOT NULL REFERENCES course_modules(id) ON DELETE CASCADE,
+              position INTEGER NOT NULL DEFAULT 0,
+              title TEXT NOT NULL,
+              duration TEXT,
+              type TEXT DEFAULT 'video'
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              course_id INTEGER NOT NULL REFERENCES courses(id),
+              course_title TEXT,
+              student_name TEXT NOT NULL,
+              student_email TEXT NOT NULL,
+              amount REAL NOT NULL,
+              status TEXT NOT NULL DEFAULT 'pending',
+              payment_method TEXT,
+              gateway_ref TEXT,
+              notes TEXT,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """
+        )
+
         # Admin auth tables
         conn.execute(
             """

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curso | Katarzyna Academia</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/header.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/curso.css" />
+</head>
+<body data-page="academia">
+  <div id="site-header"></div>
+
+  <main id="curso-main" class="curso-loading-state">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+      <div class="breadcrumb-inner">
+        <a href="index.html">Inicio</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="academia.html">Academia</a>
+        <span class="breadcrumb-sep">›</span>
+        <span id="breadcrumb-title">Cargando…</span>
+      </div>
+    </div>
+
+    <!-- Course Hero -->
+    <section class="curso-hero">
+      <div class="curso-hero-bg" id="curso-hero-bg"></div>
+      <div class="curso-hero-overlay"></div>
+      <div class="curso-hero-inner">
+
+        <div class="curso-hero-text">
+          <div class="curso-hero-badges" id="curso-badges"></div>
+          <h1 id="curso-title">Cargando…</h1>
+          <p class="curso-hero-desc" id="curso-subtitle"></p>
+          <div class="curso-hero-meta" id="curso-meta"></div>
+        </div>
+
+        <!-- Purchase card -->
+        <div class="purchase-card" id="purchase-card">
+          <div class="purchase-card-img" id="purchase-card-img">
+            <img id="purchase-card-thumb" src="" alt="" />
+            <div class="play-overlay">
+              <div class="play-circle">
+                <svg viewBox="0 0 24 24" fill="var(--brand-blue,#06186d)"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="purchase-body">
+            <div class="purchase-price-row">
+              <span class="purchase-currency">PEN</span>
+              <span class="purchase-price" id="purchase-price">—</span>
+              <span class="purchase-original" id="purchase-original"></span>
+              <span class="purchase-discount hidden" id="purchase-discount"></span>
+            </div>
+            <p class="purchase-subtitle">Acceso de por vida.</p>
+            <a href="#" id="btn-comprar" class="btn-comprar-full">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Comprar ahora
+            </a>
+            <div class="purchase-guarantees">
+              <div class="guarantee-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Garantía de satisfacción de 7 días
+              </div>
+              <div class="guarantee-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Acceso inmediato e ilimitado al contenido
+              </div>
+              <div class="guarantee-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Certificado al completar el curso
+              </div>
+            </div>
+            <div class="purchase-includes">
+              <h4>Este curso incluye</h4>
+              <div id="purchase-includes-list"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <div class="curso-content-area">
+
+      <div class="curso-main">
+        <!-- Tabs -->
+        <div class="curso-tabs">
+          <button class="curso-tab active" data-tab="about">Descripción</button>
+          <button class="curso-tab" data-tab="modules">Contenido del curso</button>
+        </div>
+
+        <!-- About tab -->
+        <div class="tab-content active" id="tab-about">
+          <div class="about-section">
+            <h2>Acerca de este curso</h2>
+            <p id="about-description"></p>
+          </div>
+          <div class="about-section" id="audience-section">
+            <h2>¿Para quién es este curso?</h2>
+            <div class="audience-tags" id="audience-tags"></div>
+          </div>
+        </div>
+
+        <!-- Modules tab -->
+        <div class="tab-content" id="tab-modules">
+          <div class="module-accordion" id="module-accordion"></div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="curso-sidebar">
+        <div class="sidebar-sticky">
+          <div class="sidebar-related" id="sidebar-related" style="display:none;">
+            <h4>Cursos relacionados</h4>
+            <div id="related-list"></div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- CTA Band -->
+    <div class="cta-band">
+      <div class="cta-inner">
+        <div>
+          <h2>¿Necesitas formación para tu equipo completo?</h2>
+          <p>Ofrecemos planes corporativos con precios especiales y seguimiento personalizado.</p>
+        </div>
+        <a href="contacto.html" class="btn-cta-gold">Solicitar plan corporativo</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Error state -->
+  <div id="curso-not-found" class="curso-not-found hidden">
+    <div class="not-found-inner">
+      <h2>Curso no encontrado</h2>
+      <p>El curso que buscas no existe o no está disponible.</p>
+      <a href="academia.html" class="btn-cta-gold">Ver todos los cursos</a>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/header.js"></script>
+  <script src="./js/footer.js"></script>
+  <script src="./js/curso.js"></script>
+  <script src="./js/page-reveal.js"></script>
+  <script src="./js/img-reveal.js"></script>
+</body>
+</html>

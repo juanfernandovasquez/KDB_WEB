@@ -66,6 +66,15 @@ from models import (
     revoke_admin_session,
     update_admin_user,
     update_all_url_references,
+    # academia
+    fetch_courses,
+    fetch_course_by_slug,
+    fetch_course_by_id,
+    save_course,
+    delete_course,
+    create_order,
+    update_order_status,
+    fetch_orders,
 )
 from s3_service import (
     create_media_folder,
@@ -1515,6 +1524,207 @@ def swagger_json():
         },
     }
     return jsonify(spec)
+
+
+# ─── Academia: Courses (público) ─────────────────────────────────────────────
+
+@app.route("/api/courses", methods=["GET"])
+def api_courses():
+    ensure_db()
+    category = request.args.get("category") or None
+    courses = fetch_courses(published_only=True, category=category)
+    return jsonify(courses)
+
+
+@app.route("/api/courses/<slug>", methods=["GET"])
+def api_course_by_slug(slug):
+    ensure_db()
+    course = fetch_course_by_slug(slug, published_only=True)
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+    return jsonify(course)
+
+
+# ─── Academia: Courses (admin CRUD) ──────────────────────────────────────────
+
+@app.route("/api/admin/courses", methods=["GET"])
+@require_admin()
+def api_admin_courses():
+    ensure_db()
+    courses = fetch_courses(published_only=False)
+    return jsonify(courses)
+
+
+@app.route("/api/admin/courses", methods=["POST"])
+@require_admin()
+def api_admin_create_course():
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    if not data.get("title") or not data.get("slug"):
+        return jsonify(error="title y slug son requeridos"), 400
+    try:
+        cid = save_course(data)
+        return jsonify(id=cid, message="Curso creado"), 201
+    except Exception as exc:
+        return jsonify(error=str(exc)), 400
+
+
+@app.route("/api/admin/courses/<int:course_id>", methods=["PUT"])
+@require_admin()
+def api_admin_update_course(course_id):
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    existing = fetch_course_by_id(course_id)
+    if not existing:
+        return jsonify(error="Curso no encontrado"), 404
+    try:
+        save_course(data, course_id=course_id)
+        return jsonify(message="Curso actualizado"), 200
+    except Exception as exc:
+        return jsonify(error=str(exc)), 400
+
+
+@app.route("/api/admin/courses/<int:course_id>", methods=["DELETE"])
+@require_admin()
+def api_admin_delete_course(course_id):
+    ensure_db()
+    existing = fetch_course_by_id(course_id)
+    if not existing:
+        return jsonify(error="Curso no encontrado"), 404
+    delete_course(course_id)
+    return jsonify(message="Curso eliminado"), 200
+
+
+# ─── Academia: Checkout (simulación) ─────────────────────────────────────────
+
+def _send_checkout_emails(order_id, student_name, student_email, course_title, amount):
+    cfg = _mail_config()
+    if not cfg["enabled"]:
+        return
+
+    # Email to admin
+    admin_msg = EmailMessage()
+    admin_msg["Subject"] = f"[Academia] Nueva compra: {course_title}"
+    admin_msg["From"] = cfg["from"]
+    admin_msg["To"] = cfg["to"]
+    admin_msg.set_content(
+        "\n".join([
+            "Se ha registrado una nueva compra en Academia.",
+            "",
+            f"Orden #: {order_id}",
+            f"Curso: {course_title}",
+            f"Estudiante: {student_name}",
+            f"Email: {student_email}",
+            f"Monto: S/ {amount:.2f}",
+            "",
+            "ACCION REQUERIDA: Crear cuenta en cursos.katarzyna.pe y matricular al estudiante.",
+            "URL Moodle: https://cursos.katarzyna.pe/admin/",
+        ])
+    )
+
+    # Confirmation email to student
+    student_msg = EmailMessage()
+    student_msg["Subject"] = f"Confirmación de compra — {course_title}"
+    student_msg["From"] = cfg["from"]
+    student_msg["To"] = student_email
+    student_msg.set_content(
+        "\n".join([
+            f"Hola {student_name},",
+            "",
+            f"Hemos recibido tu compra del curso \"{course_title}\" por S/ {amount:.2f}.",
+            "",
+            "En las próximas horas recibirás un correo con tus credenciales de acceso",
+            "a nuestra plataforma de cursos en cursos.katarzyna.pe.",
+            "",
+            "Si tienes alguna consulta, escríbenos a contacto@katarzyna.pe.",
+            "",
+            "Gracias,",
+            "Equipo Katarzyna Legal & Tributario",
+        ])
+    )
+
+    try:
+        if cfg["use_ssl"]:
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15) as server:
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(admin_msg)
+                server.send_message(student_msg)
+        else:
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
+                if cfg["use_tls"]:
+                    server.starttls(context=ssl.create_default_context())
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(admin_msg)
+                server.send_message(student_msg)
+    except Exception as exc:
+        app.logger.error("checkout email error: %s", exc)
+
+
+@app.route("/api/checkout", methods=["POST"])
+def api_checkout():
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+
+    student_name = (data.get("student_name") or "").strip()
+    student_email = (data.get("student_email") or "").strip().lower()
+    course_slug = (data.get("course_slug") or "").strip()
+
+    if not student_name or not student_email or not course_slug:
+        return jsonify(error="Datos incompletos"), 400
+    if not EMAIL_REGEX.match(student_email):
+        return jsonify(error="Email inválido"), 400
+
+    course = fetch_course_by_slug(course_slug, published_only=True)
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+
+    order_id = create_order({
+        "course_id": course["id"],
+        "course_title": course["title"],
+        "student_name": student_name,
+        "student_email": student_email,
+        "amount": course["price"],
+        "payment_method": "simulation",
+    })
+
+    threading.Thread(
+        target=_send_checkout_emails,
+        args=(order_id, student_name, student_email, course["title"], course["price"]),
+        daemon=True,
+    ).start()
+
+    return jsonify(
+        order_id=order_id,
+        message="Orden registrada",
+        course_title=course["title"],
+        amount=course["price"],
+    ), 201
+
+
+# Webhook stub: listo para conectar gateway real (Culqi/Izipay)
+@app.route("/api/payment/webhook", methods=["POST"])
+def api_payment_webhook():
+    # TODO: validar firma del gateway, actualizar estado de la orden a 'paid'
+    # y llamar a moodle_service.enroll_student() para matrícula automática.
+    data = request.get_json(silent=True) or {}
+    order_id = data.get("order_id")
+    gateway_ref = data.get("gateway_ref")
+    if order_id and gateway_ref:
+        update_order_status(order_id, "paid", gateway_ref=gateway_ref)
+    return jsonify(received=True), 200
+
+
+# ─── Academia: Orders (admin) ─────────────────────────────────────────────────
+
+@app.route("/api/admin/orders", methods=["GET"])
+@require_admin()
+def api_admin_orders():
+    ensure_db()
+    status = request.args.get("status") or None
+    orders = fetch_orders(status=status)
+    return jsonify(orders)
 
 
 @app.before_request
