@@ -112,6 +112,7 @@ PAGE_VISIBILITY_KEYS = {
     "cookies",
     "terminos",
     "privacidad",
+    "academia",
 }
 
 
