@@ -2280,22 +2280,77 @@ let currentAdminUserId = null;
       const orders = await oRes.json().catch(() => []);
       ordCount.textContent = Array.isArray(orders) ? orders.length : 0;
       if (!Array.isArray(orders) || !orders.length) {
-        ordTbody.innerHTML = '<tr><td colspan="6" class="muted small">Sin órdenes aún.</td></tr>';
+        ordTbody.innerHTML = '<tr><td colspan="9" class="muted small">Sin órdenes aún.</td></tr>';
       } else {
         ordTbody.innerHTML = orders.map(o => {
-          const d = new Date(o.created_at).toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
-          return `<tr>
+          const d = new Date(o.created_at + 'Z').toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+          const ordRef = `ORD-${String(o.id).padStart(4,'0')}`;
+          const compLabel = o.comprobante_type === 'factura' ? 'Factura' : 'Boleta';
+          const taxpayerInfo = o.taxpayer_id ? `<br><small class="muted">${escHtml(o.taxpayer_id)}${o.taxpayer_name ? ' · ' + escHtml(o.taxpayer_name) : ''}</small>` : '';
+          const compNumBadge = o.comprobante_number
+            ? `<span class="badge-active small">${escHtml(o.comprobante_number)}</span>`
+            : `<span class="badge-inactive small">Pendiente</span>`;
+          const paidBadge = o.status === 'paid'
+            ? `<span class="badge-active">Pagado</span>`
+            : `<span class="badge-inactive">Pendiente</span>`;
+          const moodleBadge = o.moodle_enrolled
+            ? `<span class="badge-active">Inscrito</span>`
+            : `<span class="badge-inactive">Pendiente</span>`;
+          return `<tr data-order-id="${o.id}">
+            <td class="small">${escHtml(ordRef)}</td>
             <td class="small">${d}</td>
-            <td>${escHtml(o.student_name)}</td>
-            <td><a href="mailto:${escHtml(o.student_email)}">${escHtml(o.student_email)}</a></td>
+            <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small">${escHtml(o.student_email)}</a></td>
             <td class="small">${escHtml(o.course_title || o.course_slug || '—')}</td>
-            <td>S/ ${Number(o.amount).toFixed(0)}</td>
-            <td><span class="${o.status === 'paid' ? 'badge-active' : (o.status === 'pending' ? 'badge-inactive' : '')}">${escHtml(o.status)}</span></td>
+            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong></td>
+            <td>${compLabel}${taxpayerInfo}<br>${compNumBadge}</td>
+            <td>${paidBadge}</td>
+            <td>${moodleBadge}</td>
+            <td>
+              <div style="display:flex;flex-direction:column;gap:.3rem;">
+                ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-paid" data-id="${o.id}">✓ Pago confirmado</button>` : ''}
+                ${!o.comprobante_number ? `<button class="secondary small-btn ac-ord-comp" data-id="${o.id}">📄 Registrar comprobante</button>` : ''}
+                ${!o.moodle_enrolled ? `<button class="secondary small-btn ac-ord-moodle" data-id="${o.id}" data-email="${escHtml(o.student_email)}">🎓 Inscribir en Moodle</button>` : ''}
+              </div>
+            </td>
           </tr>`;
         }).join('');
+
+        // Bind order action buttons
+        ordTbody.querySelectorAll('.ac-ord-paid').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            btn.disabled = true; btn.textContent = '…';
+            const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, {
+              method: 'PUT', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'paid', payment_method: 'simulation' }),
+            });
+            if (res.ok) loadAcademiaAdmin(); else btn.disabled = false;
+          });
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-comp').forEach(btn => {
+          btn.addEventListener('click', () => {
+            q('ac-comp-order-id').value = btn.dataset.id;
+            q('ac-comp-number').value = '';
+            q('ac-comp-status').textContent = '';
+            q('ac-comp-modal').classList.remove('hidden');
+          });
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-moodle').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const email = btn.dataset.email;
+            if (!confirm(`¿Marcar a ${email} como inscrito en Moodle?\n\nAsegúrate de haber creado su cuenta y matriculado el curso en cursos.katarzyna.pe`)) return;
+            btn.disabled = true;
+            const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, {
+              method: 'PUT', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ moodle_enrolled: 1, moodle_user_email: email }),
+            });
+            if (res.ok) loadAcademiaAdmin(); else btn.disabled = false;
+          });
+        });
       }
     } catch {
-      ordTbody.innerHTML = '<tr><td colspan="6" class="muted small">Error al cargar órdenes.</td></tr>';
+      ordTbody.innerHTML = '<tr><td colspan="9" class="muted small">Error al cargar órdenes.</td></tr>';
     }
 
     // expand both cards
@@ -2313,6 +2368,25 @@ let currentAdminUserId = null;
     bindOnce('ac-form-cancel', acCloseForm);
     bindOnce('ac-form-cancel2', acCloseForm);
     bindOnce('ac-save-btn', acSaveCourse);
+
+    // Comprobante modal
+    bindOnce('ac-comp-cancel', () => q('ac-comp-modal').classList.add('hidden'));
+    bindOnce('ac-comp-save', async () => {
+      const id  = q('ac-comp-order-id').value;
+      const num = (q('ac-comp-number').value || '').trim();
+      if (!num) { q('ac-comp-status').textContent = 'Ingresa el N° de comprobante.'; return; }
+      q('ac-comp-status').textContent = 'Guardando…';
+      const res = await apiFetch(`/api/admin/orders/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comprobante_number: num }),
+      });
+      if (res.ok) {
+        q('ac-comp-modal').classList.add('hidden');
+        loadAcademiaAdmin();
+      } else {
+        q('ac-comp-status').textContent = 'Error al guardar.';
+      }
+    });
     bindOnce('ac-add-module', () => {
       const list = q('ac-modules-list');
       const mi = list.querySelectorAll('.ac-module-block').length;

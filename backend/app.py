@@ -74,6 +74,7 @@ from models import (
     delete_course,
     create_order,
     update_order_status,
+    admin_update_order,
     fetch_orders,
 )
 from s3_service import (
@@ -1613,51 +1614,71 @@ def api_admin_delete_course(course_id):
 
 # ─── Academia: Checkout (simulación) ─────────────────────────────────────────
 
-def _send_checkout_emails(order_id, student_name, student_email, course_title, amount):
+def _send_checkout_emails(order_id, student_name, student_email, course_title, amount,
+                          comprobante_type="boleta", taxpayer_id="", taxpayer_name="",
+                          moodle_course_id=None):
     cfg = _mail_config()
     if not cfg["enabled"]:
         return
 
+    order_ref = f"ORD-{order_id:04d}"
+    comp_label = "Factura" if comprobante_type == "factura" else "Boleta de Venta"
+    moodle_url = (
+        f"https://cursos.katarzyna.pe/course/view.php?id={moodle_course_id}"
+        if moodle_course_id else "https://cursos.katarzyna.pe"
+    )
+
     # Email to admin
     admin_msg = EmailMessage()
-    admin_msg["Subject"] = f"[Academia] Nueva compra: {course_title}"
+    admin_msg["Subject"] = f"[Academia] Nueva inscripción #{order_ref} — {course_title}"
     admin_msg["From"] = cfg["from"]
     admin_msg["To"] = cfg["to"]
-    admin_msg.set_content(
-        "\n".join([
-            "Se ha registrado una nueva compra en Academia.",
-            "",
-            f"Orden #: {order_id}",
-            f"Curso: {course_title}",
-            f"Estudiante: {student_name}",
-            f"Email: {student_email}",
-            f"Monto: S/ {amount:.2f}",
-            "",
-            "ACCION REQUERIDA: Crear cuenta en cursos.katarzyna.pe y matricular al estudiante.",
-            "URL Moodle: https://cursos.katarzyna.pe/admin/",
-        ])
-    )
+    admin_msg.set_content("\n".join([
+        f"Nueva inscripción registrada — {order_ref}",
+        "=" * 50,
+        f"Curso:          {course_title}",
+        f"Alumno:         {student_name}",
+        f"Email:          {student_email}",
+        f"Monto:          S/ {amount:.2f}",
+        f"Comprobante:    {comp_label}",
+        f"DNI/RUC:        {taxpayer_id or '—'}",
+        f"Razón social:   {taxpayer_name or '—'}",
+        "",
+        "ACCIONES REQUERIDAS:",
+        "1. Confirmar el pago en el panel admin: https://katarzyna.pe/admin/?section=academia",
+        "2. Crear cuenta Moodle y matricular al alumno.",
+        f"   Panel Moodle: {moodle_url}",
+        "3. Emitir el comprobante de pago y registrar el número en el panel.",
+        "4. Enviar las credenciales de acceso al alumno.",
+    ]))
 
     # Confirmation email to student
     student_msg = EmailMessage()
-    student_msg["Subject"] = f"Confirmación de compra — {course_title}"
+    student_msg["Subject"] = f"Inscripción recibida — {course_title} [{order_ref}]"
     student_msg["From"] = cfg["from"]
     student_msg["To"] = student_email
-    student_msg.set_content(
-        "\n".join([
-            f"Hola {student_name},",
-            "",
-            f"Hemos recibido tu compra del curso \"{course_title}\" por S/ {amount:.2f}.",
-            "",
-            "En las próximas horas recibirás un correo con tus credenciales de acceso",
-            "a nuestra plataforma de cursos en cursos.katarzyna.pe.",
-            "",
-            "Si tienes alguna consulta, escríbenos a contacto@katarzyna.pe.",
-            "",
-            "Gracias,",
-            "Equipo Katarzyna Legal & Tributario",
-        ])
-    )
+    student_msg.set_content("\n".join([
+        f"Hola {student_name},",
+        "",
+        f"Hemos recibido tu solicitud de inscripción al curso:",
+        f"  \"{course_title}\"",
+        f"  Monto: S/ {amount:.2f}",
+        f"  N° de orden: {order_ref}",
+        f"  Comprobante solicitado: {comp_label}",
+        "",
+        "¿Qué sigue?",
+        "  1. Nuestro equipo verificará tu pago en las próximas horas hábiles.",
+        "  2. Se emitirá tu comprobante de pago y te lo enviaremos.",
+        "  3. Recibirás un correo con tus credenciales de acceso a:",
+        f"     {moodle_url}",
+        "",
+        "Si tienes alguna consulta, escríbenos a contacto@katarzyna.pe",
+        "indicando tu número de orden: " + order_ref,
+        "",
+        "Gracias,",
+        "Equipo Katarzyna Legal & Tributario",
+        "https://katarzyna.pe",
+    ]))
 
     try:
         if cfg["use_ssl"]:
@@ -1686,11 +1707,16 @@ def api_checkout():
     student_name = (data.get("student_name") or "").strip()
     student_email = (data.get("student_email") or "").strip().lower()
     course_slug = (data.get("course_slug") or "").strip()
+    comprobante_type = (data.get("comprobante_type") or "boleta").strip().lower()
+    taxpayer_id = (data.get("taxpayer_id") or "").strip()
+    taxpayer_name = (data.get("taxpayer_name") or "").strip()
 
     if not student_name or not student_email or not course_slug:
         return jsonify(error="Datos incompletos"), 400
     if not EMAIL_REGEX.match(student_email):
         return jsonify(error="Email inválido"), 400
+    if comprobante_type not in ("boleta", "factura"):
+        comprobante_type = "boleta"
 
     course = fetch_course_by_slug(course_slug, published_only=True)
     if not course:
@@ -1703,19 +1729,31 @@ def api_checkout():
         "student_email": student_email,
         "amount": course["price"],
         "payment_method": "simulation",
+        "comprobante_type": comprobante_type,
+        "taxpayer_id": taxpayer_id,
+        "taxpayer_name": taxpayer_name,
     })
 
     threading.Thread(
         target=_send_checkout_emails,
         args=(order_id, student_name, student_email, course["title"], course["price"]),
+        kwargs={
+            "comprobante_type": comprobante_type,
+            "taxpayer_id": taxpayer_id,
+            "taxpayer_name": taxpayer_name,
+            "moodle_course_id": course.get("moodle_course_id"),
+        },
         daemon=True,
     ).start()
 
+    order_ref = f"ORD-{order_id:04d}"
     return jsonify(
         order_id=order_id,
+        order_ref=order_ref,
         message="Orden registrada",
         course_title=course["title"],
         amount=course["price"],
+        moodle_course_id=course.get("moodle_course_id"),
     ), 201
 
 
@@ -1741,6 +1779,21 @@ def api_admin_orders():
     status = request.args.get("status") or None
     orders = fetch_orders(status=status)
     return jsonify(orders)
+
+
+@app.route("/api/admin/orders/<int:order_id>", methods=["PUT"])
+@require_admin()
+def api_admin_update_order(order_id):
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    from datetime import datetime as _dt
+    # Auto-set timestamps for specific actions
+    if data.get("comprobante_number") and not data.get("comprobante_issued_at"):
+        data["comprobante_issued_at"] = _dt.utcnow().isoformat()
+    if data.get("moodle_enrolled") and not data.get("moodle_enrolled_at"):
+        data["moodle_enrolled_at"] = _dt.utcnow().isoformat()
+    admin_update_order(order_id, data)
+    return jsonify(message="Orden actualizada"), 200
 
 
 @app.before_request

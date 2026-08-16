@@ -224,6 +224,17 @@
   color: #fff;
 }
 
+.btn-outline-gold {
+  background: var(--brand-gold, #b07d2f);
+  border-color: var(--brand-gold, #b07d2f);
+  color: #fff;
+}
+.btn-outline-gold:hover {
+  background: #9a6c23;
+  border-color: #9a6c23;
+  color: #fff;
+}
+
 .header-divider {
   width: 1px;
   height: 30px;

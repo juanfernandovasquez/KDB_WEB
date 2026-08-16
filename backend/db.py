@@ -1017,6 +1017,22 @@ def init_db():
             """
         )
 
+        # ── Billing fields migration for orders ───────────────────────────────
+        for col_def in [
+            ("comprobante_type",     "TEXT"),
+            ("taxpayer_id",          "TEXT"),
+            ("taxpayer_name",        "TEXT"),
+            ("comprobante_number",   "TEXT"),
+            ("comprobante_issued_at","TEXT"),
+            ("moodle_enrolled",      "INTEGER DEFAULT 0"),
+            ("moodle_enrolled_at",   "TEXT"),
+            ("moodle_user_email",    "TEXT"),
+        ]:
+            try:
+                conn.execute(f"ALTER TABLE orders ADD COLUMN {col_def[0]} {col_def[1]}")
+            except Exception:
+                pass  # column already exists
+
         # Bootstrap admin user if none exist and env vars are provided
         admin_count = conn.execute("SELECT COUNT(*) AS c FROM admin_users").fetchone()["c"]
         admin_user = (os.environ.get("ADMIN_USER") or "").strip()

@@ -1631,22 +1631,47 @@
             <button type="button" class="collapse-btn" data-collapse-target="ac-orders-wrap">+</button>
           </div>
           <div class="collapsible-body collapsed" id="ac-orders-wrap">
-            <p class="small muted" style="margin-bottom:.75rem;">Cada fila es un alumno que completó el proceso de compra. Acción manual: crea la cuenta en <a href="https://cursos.katarzyna.pe/admin/" target="_blank">cursos.katarzyna.pe</a> y matricúlalo en el curso.</p>
+            <p class="small muted" style="margin-bottom:.75rem;">
+              Flujo de acciones por orden:
+              <strong>1)</strong> Confirmar pago recibido →
+              <strong>2)</strong> Emitir comprobante (boleta/factura) y registrar N° →
+              <strong>3)</strong> Crear cuenta en <a href="https://cursos.katarzyna.pe/admin/" target="_blank">cursos.katarzyna.pe</a> y marcar como inscrito.
+            </p>
             <div class="table-responsive">
-              <table class="subs-table">
+              <table class="subs-table" style="min-width:960px;">
                 <thead>
                   <tr>
+                    <th>Orden</th>
                     <th>Fecha</th>
-                    <th>Alumno</th>
-                    <th>Email</th>
+                    <th>Alumno / Email</th>
                     <th>Curso</th>
                     <th>Monto</th>
-                    <th>Estado</th>
+                    <th>Comprobante</th>
+                    <th>Pago</th>
+                    <th>Moodle</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="ac-orders-body"></tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- Comprobante modal -->
+        <div class="modal-overlay hidden" id="ac-comp-modal" role="dialog" aria-modal="true">
+          <div class="modal-box" style="max-width:420px;">
+            <h3 style="margin-bottom:1rem;">Registrar N° de comprobante</h3>
+            <input type="hidden" id="ac-comp-order-id" />
+            <div class="form-group">
+              <label for="ac-comp-number">N° de comprobante</label>
+              <input type="text" id="ac-comp-number" placeholder="B001-00123 o F001-00045" />
+            </div>
+            <div class="row" style="gap:.5rem;margin-top:1rem;">
+              <button type="button" class="cta" id="ac-comp-save">Guardar</button>
+              <button type="button" class="secondary" id="ac-comp-cancel">Cancelar</button>
+            </div>
+            <p class="small muted" id="ac-comp-status" style="margin-top:.5rem;"></p>
           </div>
         </div>
       </section>

@@ -1173,9 +1173,13 @@ def create_order(payload):
     with conn:
         cur = conn.execute(
             """
-            INSERT INTO orders (course_id, course_title, student_name, student_email,
-              amount, status, payment_method, gateway_ref, notes, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)
+            INSERT INTO orders (
+              course_id, course_title, student_name, student_email,
+              amount, status, payment_method, gateway_ref, notes,
+              comprobante_type, taxpayer_id, taxpayer_name,
+              created_at, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload.get("course_id"),
@@ -1183,9 +1187,12 @@ def create_order(payload):
                 payload.get("student_name"),
                 payload.get("student_email"),
                 payload.get("amount", 0),
-                payload.get("payment_method"),
+                payload.get("payment_method", "simulation"),
                 payload.get("gateway_ref"),
                 payload.get("notes"),
+                payload.get("comprobante_type", "boleta"),
+                payload.get("taxpayer_id"),
+                payload.get("taxpayer_name"),
                 now,
                 now,
             ),
@@ -1209,6 +1216,32 @@ def update_order_status(order_id, status, gateway_ref=None):
                 "UPDATE orders SET status=?, updated_at=? WHERE id=?",
                 (status, now, order_id),
             )
+    conn.close()
+
+
+def admin_update_order(order_id, data):
+    """Partial update of an order for admin actions."""
+    now = datetime.utcnow().isoformat()
+    allowed = {
+        "status", "gateway_ref", "notes",
+        "comprobante_number", "comprobante_issued_at",
+        "moodle_enrolled", "moodle_enrolled_at", "moodle_user_email",
+        "payment_method",
+    }
+    sets = []
+    params = []
+    for key, val in data.items():
+        if key in allowed:
+            sets.append(f"{key}=?")
+            params.append(val)
+    if not sets:
+        return
+    sets.append("updated_at=?")
+    params.append(now)
+    params.append(order_id)
+    conn = get_conn()
+    with conn:
+        conn.execute(f"UPDATE orders SET {', '.join(sets)} WHERE id=?", params)
     conn.close()
 
 

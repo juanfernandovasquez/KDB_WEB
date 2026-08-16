@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pago | Katarzyna Academia</title>
+  <title>Inscripción | Katarzyna Academia</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
   <link rel="stylesheet" href="./css/footer.css" />
@@ -23,7 +23,7 @@
         <span class="breadcrumb-sep">›</span>
         <a href="#" id="breadcrumb-course">Curso</a>
         <span class="breadcrumb-sep">›</span>
-        <span>Pago</span>
+        <span>Inscripción</span>
       </div>
     </div>
 
@@ -34,17 +34,17 @@
 
         <!-- Step indicator -->
         <div class="pagar-steps">
-          <div class="pagar-step active">
+          <div class="pagar-step active" id="step1">
             <span class="step-num">1</span>
             <span class="step-label">Tus datos</span>
           </div>
           <div class="step-sep"></div>
-          <div class="pagar-step" id="step2">
+          <div class="pagar-step active" id="step2">
             <span class="step-num">2</span>
-            <span class="step-label">Pago</span>
+            <span class="step-label">Comprobante</span>
           </div>
           <div class="step-sep"></div>
-          <div class="pagar-step" id="step3">
+          <div class="pagar-step active" id="step3">
             <span class="step-num">3</span>
             <span class="step-label">Confirmación</span>
           </div>
@@ -53,107 +53,205 @@
         <!-- Payment form -->
         <form id="pagar-form" class="pagar-form" novalidate>
 
-          <section class="form-section" id="section-datos">
-            <h2 class="form-section-title">Tus datos</h2>
+          <!-- SECCIÓN 1: Datos personales -->
+          <section class="form-section">
+            <h2 class="form-section-title">Datos del participante</h2>
 
             <div class="form-group">
               <label for="student_name">Nombre completo *</label>
-              <input type="text" id="student_name" name="student_name" required autocomplete="name" placeholder="Ej. Juan Pérez García" />
+              <input type="text" id="student_name" name="student_name" required
+                     autocomplete="name" placeholder="Ej. Ana García Rivas" />
               <span class="field-error" id="err-name"></span>
             </div>
 
             <div class="form-group">
               <label for="student_email">Correo electrónico *</label>
-              <input type="email" id="student_email" name="student_email" required autocomplete="email" placeholder="tu@correo.com" />
+              <input type="email" id="student_email" name="student_email" required
+                     autocomplete="email" placeholder="tucorreo@empresa.com" />
               <span class="field-error" id="err-email"></span>
-              <span class="field-hint">Te enviaremos los accesos al curso a este correo.</span>
+              <span class="field-hint">Recibirás los accesos al curso en este correo.</span>
             </div>
 
             <div class="form-group">
               <label for="student_email2">Confirmar correo *</label>
-              <input type="email" id="student_email2" name="student_email2" required autocomplete="email" placeholder="tu@correo.com" />
+              <input type="email" id="student_email2" name="student_email2" required
+                     autocomplete="off" placeholder="tucorreo@empresa.com" />
               <span class="field-error" id="err-email2"></span>
             </div>
           </section>
 
-          <section class="form-section" id="section-pago">
-            <h2 class="form-section-title">
-              Pago
-              <span class="simulation-badge">SIMULACIÓN</span>
-            </h2>
-            <p class="simulation-note">Esta es una simulación de pago. No se realizará ningún cargo real. Ingresa cualquier dato para completar el proceso.</p>
+          <!-- SECCIÓN 2: Comprobante fiscal -->
+          <section class="form-section">
+            <h2 class="form-section-title">Comprobante de pago</h2>
 
-            <div class="form-group">
-              <label for="card_number">Número de tarjeta</label>
-              <div class="card-input-wrap">
-                <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" />
-                <div class="card-brands">
-                  <svg viewBox="0 0 48 30" width="38"><rect width="48" height="30" rx="4" fill="#1a1f71"/><rect x="0" y="10" width="48" height="10" fill="#f7bc00"/></svg>
-                  <svg viewBox="0 0 48 30" width="38"><rect width="48" height="30" rx="4" fill="#eb001b" opacity=".9"/><circle cx="18" cy="15" r="9" fill="#eb001b"/><circle cx="30" cy="15" r="9" fill="#f79e1b"/><path d="M24 7.8a9 9 0 0 1 0 14.4A9 9 0 0 1 24 7.8z" fill="#ff5f00"/></svg>
-                </div>
+            <div class="comp-toggle" role="group" aria-label="Tipo de comprobante">
+              <label class="comp-option selected" id="lbl-boleta">
+                <input type="radio" name="comprobante_type" value="boleta" checked />
+                <span class="comp-icon">🧾</span>
+                <span>
+                  <strong>Boleta de Venta</strong>
+                  <small>Para personas naturales</small>
+                </span>
+              </label>
+              <label class="comp-option" id="lbl-factura">
+                <input type="radio" name="comprobante_type" value="factura" />
+                <span class="comp-icon">📋</span>
+                <span>
+                  <strong>Factura</strong>
+                  <small>Para empresas con RUC</small>
+                </span>
+              </label>
+            </div>
+
+            <!-- Boleta: solo DNI -->
+            <div id="comp-boleta-fields">
+              <div class="form-group">
+                <label for="taxpayer_id_boleta">DNI *</label>
+                <input type="text" id="taxpayer_id_boleta" name="taxpayer_id_boleta"
+                       inputmode="numeric" maxlength="8" placeholder="12345678" />
+                <span class="field-error" id="err-taxpayer-boleta"></span>
               </div>
             </div>
 
-            <div class="form-row-2">
+            <!-- Factura: RUC + Razón social -->
+            <div id="comp-factura-fields" class="hidden">
               <div class="form-group">
-                <label for="card_expiry">Vencimiento</label>
-                <input type="text" id="card_expiry" name="card_expiry" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" />
+                <label for="taxpayer_ruc">RUC *</label>
+                <input type="text" id="taxpayer_ruc" name="taxpayer_ruc"
+                       inputmode="numeric" maxlength="11" placeholder="20123456789" />
+                <span class="field-error" id="err-ruc"></span>
               </div>
               <div class="form-group">
-                <label for="card_cvv">CVV</label>
-                <input type="text" id="card_cvv" name="card_cvv" placeholder="123" maxlength="4" autocomplete="cc-csc" />
+                <label for="taxpayer_razon">Razón social *</label>
+                <input type="text" id="taxpayer_razon" name="taxpayer_razon"
+                       placeholder="EMPRESA SAC" />
+                <span class="field-error" id="err-razon"></span>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label for="card_name">Nombre en la tarjeta</label>
-              <input type="text" id="card_name" name="card_name" placeholder="Como aparece en la tarjeta" autocomplete="cc-name" />
             </div>
           </section>
 
-          <div class="pagar-security">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>Pago seguro con cifrado SSL de 256 bits</span>
-          </div>
+          <!-- SECCIÓN 3: Pago (mockup) -->
+          <section class="form-section">
+            <h2 class="form-section-title">
+              Información de pago
+              <span class="sim-badge">MODO PRUEBA</span>
+            </h2>
 
-          <button type="submit" class="btn-pay" id="btn-pay">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            <span id="btn-pay-text">Confirmar compra</span>
-          </button>
+            <div class="sim-notice">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Esta es una <strong>simulación de pago</strong>. No se realizará ningún cargo real.
+              Cuando se integre el gateway de pago, esta sección se activará automáticamente.
+            </div>
 
-          <div class="pagar-terms">
-            Al confirmar aceptas nuestros <a href="terminos.html" target="_blank">Términos y condiciones</a>
-            y <a href="privacidad.html" target="_blank">Política de privacidad</a>.
+            <div class="pay-methods">
+              <label class="pay-method selected">
+                <input type="radio" name="pay_method" value="card" checked />
+                <div class="pay-method-inner">
+                  <span class="pay-method-name">Tarjeta de crédito / débito</span>
+                  <div class="card-brands">
+                    <svg viewBox="0 0 48 30" width="36"><rect width="48" height="30" rx="4" fill="#1a1f71"/><rect x="0" y="10" width="48" height="10" fill="#f7bc00"/></svg>
+                    <svg viewBox="0 0 48 30" width="36"><rect width="48" height="30" rx="4" fill="#eb001b" opacity=".9"/><circle cx="18" cy="15" r="9" fill="#eb001b"/><circle cx="30" cy="15" r="9" fill="#f79e1b"/><path d="M24 7.8a9 9 0 0 1 0 14.4A9 9 0 0 1 24 7.8z" fill="#ff5f00"/></svg>
+                    <svg viewBox="0 0 48 30" width="36"><rect width="48" height="30" rx="4" fill="#007B5E"/><text x="24" y="20" font-size="10" text-anchor="middle" fill="#fff" font-family="sans-serif">AMEX</text></svg>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="card-fields">
+              <div class="form-group">
+                <label for="card_number">Número de tarjeta</label>
+                <div class="card-input-wrap">
+                  <input type="text" id="card_number" name="card_number"
+                         placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" />
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="card_expiry">Vencimiento</label>
+                  <input type="text" id="card_expiry" name="card_expiry"
+                         placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" />
+                </div>
+                <div class="form-group">
+                  <label for="card_cvv">CVV</label>
+                  <input type="text" id="card_cvv" name="card_cvv"
+                         placeholder="123" maxlength="4" autocomplete="cc-csc" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="card_name">Nombre en la tarjeta</label>
+                <input type="text" id="card_name" name="card_name"
+                       placeholder="Como aparece en la tarjeta" autocomplete="cc-name" />
+              </div>
+            </div>
+          </section>
+
+          <!-- Submit -->
+          <div class="pagar-submit-area">
+            <div class="pagar-security">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Transacción segura · SSL 256-bit</span>
+            </div>
+
+            <button type="submit" class="btn-pay" id="btn-pay">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <span id="btn-pay-text">Confirmar inscripción</span>
+            </button>
+
+            <p class="pagar-terms">
+              Al confirmar aceptas nuestros <a href="terminos.html" target="_blank">Términos y condiciones</a>
+              y la <a href="privacidad.html" target="_blank">Política de privacidad</a>.
+            </p>
           </div>
 
         </form>
-
-        <!-- Success state -->
-        <div class="pagar-success hidden" id="pagar-success">
-          <div class="success-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <h2>¡Compra completada!</h2>
-          <p class="success-desc">Hemos recibido tu inscripción al curso <strong id="success-course-name"></strong>.</p>
-          <p class="success-email">Recibirás un correo en <strong id="success-email-addr"></strong> con tus credenciales de acceso en las próximas horas.</p>
-          <div class="success-actions">
-            <a href="https://cursos.katarzyna.pe" id="btn-go-moodle" class="btn-success-primary" target="_blank" rel="noopener">Ir a mi curso</a>
-            <a href="academia.html" class="btn-success-secondary">Ver más cursos</a>
-          </div>
-          <div class="success-next">
-            <h4>Próximos pasos</h4>
-            <ol>
-              <li>Revisa tu correo (incluido el spam).</li>
-              <li>Recibirás tus credenciales para acceder a la plataforma.</li>
-              <li>Ingresa a <a href="https://cursos.katarzyna.pe" target="_blank">cursos.katarzyna.pe</a> y busca tu curso.</li>
-            </ol>
-          </div>
-        </div>
 
         <!-- Error banner -->
         <div class="pagar-error hidden" id="pagar-error">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span id="pagar-error-msg">Error al procesar la solicitud.</span>
+        </div>
+
+        <!-- Processing overlay -->
+        <div class="processing-overlay hidden" id="processing-overlay">
+          <div class="processing-box">
+            <div class="processing-spinner"></div>
+            <p>Procesando tu inscripción…</p>
+          </div>
+        </div>
+
+        <!-- Success state -->
+        <div class="pagar-success hidden" id="pagar-success">
+          <div class="success-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>¡Inscripción registrada!</h2>
+          <p class="success-order">Orden <strong id="success-order-ref"></strong></p>
+          <p class="success-desc">
+            Hemos recibido tu solicitud para el curso <strong id="success-course-name"></strong>.
+            Te enviamos una confirmación a <strong id="success-email-addr"></strong>.
+          </p>
+
+          <div class="success-steps">
+            <h4>¿Qué sigue?</h4>
+            <ol>
+              <li>Nuestro equipo verificará tu pago y te confirmará en las próximas <strong>horas hábiles</strong>.</li>
+              <li>Se emitirá tu comprobante de pago y te lo enviaremos por correo.</li>
+              <li>Recibirás tus <strong>credenciales de acceso</strong> a la plataforma de cursos.</li>
+            </ol>
+          </div>
+
+          <div class="success-actions">
+            <a href="https://cursos.katarzyna.pe" id="btn-go-moodle"
+               class="btn-success-primary" target="_blank" rel="noopener">
+              Ir a mis cursos →
+            </a>
+            <a href="academia.html" class="btn-success-secondary">Ver más cursos</a>
+          </div>
+
+          <p class="success-note">
+            ¿Tienes dudas? Escríbenos a <a href="mailto:contacto@katarzyna.pe">contacto@katarzyna.pe</a>
+            indicando tu N° de orden.
+          </p>
         </div>
 
       </div>
@@ -168,7 +266,7 @@
             <div class="summary-thumb">
               <img id="summary-img" src="" alt="" />
             </div>
-            <h3 id="summary-title">Cargando curso…</h3>
+            <h3 id="summary-title">Cargando…</h3>
             <div class="summary-price-row">
               <span class="summary-currency">PEN</span>
               <span class="summary-price" id="summary-price">—</span>
@@ -180,13 +278,20 @@
               <span id="summary-subtotal">—</span>
             </div>
             <div class="summary-line summary-total">
-              <span>Total</span>
+              <span>Total a pagar</span>
               <span id="summary-total">—</span>
             </div>
             <div class="summary-guarantee">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Garantía de 7 días
+              Garantía de satisfacción 7 días
             </div>
+            <div class="summary-divider"></div>
+            <ul class="summary-features">
+              <li>✓ Acceso ilimitado de por vida</li>
+              <li>✓ Certificado de participación</li>
+              <li>✓ Material descargable</li>
+              <li>✓ Comprobante electrónico</li>
+            </ul>
           </div>
         </div>
       </aside>
