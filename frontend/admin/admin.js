@@ -2193,10 +2193,17 @@ let currentAdminUserId = null;
     };
     status.textContent = 'Guardando…';
     try {
-      if (acEditId) {
-        await apiFetch(`/api/admin/courses/${acEditId}`, { method: 'PUT', body: JSON.stringify(payload) });
-      } else {
-        await apiFetch('/api/admin/courses', { method: 'POST', body: JSON.stringify(payload) });
+      const method = acEditId ? 'PUT' : 'POST';
+      const path = acEditId ? `/api/admin/courses/${acEditId}` : '/api/admin/courses';
+      const res = await apiFetch(path, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        status.textContent = `Error: ${data.error || res.status}`;
+        return;
       }
       status.textContent = '✓ Guardado';
       setTimeout(() => { acCloseForm(); loadAcademiaAdmin(); }, 800);
@@ -2208,7 +2215,12 @@ let currentAdminUserId = null;
   async function acDeleteCourse(id, title) {
     if (!confirm(`¿Eliminar el curso "${title}"? Esta acción no se puede deshacer.`)) return;
     try {
-      await apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(`Error al eliminar: ${data.error || res.status}`);
+        return;
+      }
       loadAcademiaAdmin();
     } catch (err) {
       alert(`Error al eliminar: ${err.message}`);
@@ -2221,8 +2233,9 @@ let currentAdminUserId = null;
     const countEl = q('ac-count');
     tbody.innerHTML = '<tr><td colspan="5" class="muted small">Cargando…</td></tr>';
     try {
-      acCourses = await apiFetch('/api/admin/courses');
-      const courses = acCourses;
+      const cRes = await apiFetch('/api/admin/courses');
+      acCourses = await cRes.json().catch(() => []);
+      const courses = Array.isArray(acCourses) ? acCourses : [];
       countEl.textContent = courses.length;
       if (!courses.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="muted small">Sin cursos. Haz clic en "+ Nuevo curso" para crear el primero.</td></tr>';
@@ -2243,7 +2256,8 @@ let currentAdminUserId = null;
         tbody.querySelectorAll('.ac-edit-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
             try {
-              const course = await apiFetch(`/api/admin/courses/${btn.dataset.id}`);
+              const r = await apiFetch(`/api/admin/courses/${btn.dataset.id}`);
+              const course = await r.json();
               acOpenForm(course);
             } catch {
               alert('No se pudo cargar el curso.');
@@ -2262,9 +2276,10 @@ let currentAdminUserId = null;
     const ordTbody = q('ac-orders-body');
     const ordCount = q('ac-orders-count');
     try {
-      const orders = await apiFetch('/api/admin/orders');
-      ordCount.textContent = orders.length;
-      if (!orders.length) {
+      const oRes = await apiFetch('/api/admin/orders');
+      const orders = await oRes.json().catch(() => []);
+      ordCount.textContent = Array.isArray(orders) ? orders.length : 0;
+      if (!Array.isArray(orders) || !orders.length) {
         ordTbody.innerHTML = '<tr><td colspan="6" class="muted small">Sin órdenes aún.</td></tr>';
       } else {
         ordTbody.innerHTML = orders.map(o => {
