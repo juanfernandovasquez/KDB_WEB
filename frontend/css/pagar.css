@@ -239,6 +239,14 @@
 .summary-guarantee svg { width:14px; height:14px; color:#2e7d32; }
 .summary-features { list-style:none; padding:0; display:grid; gap:.4rem; }
 .summary-features li { font-size:.78rem; color:#2b2b2b; }
+.summary-access-notice {
+  display:flex; gap:.75rem; align-items:flex-start;
+  margin-top:1.2rem; padding:1rem; border-radius:8px;
+  background:#f0f7f0; border:1px solid #c8e6c9;
+}
+.summary-access-notice svg { width:18px; height:18px; flex-shrink:0; color:#2e7d32; margin-top:2px; }
+.summary-access-notice strong { display:block; font-size:.8rem; color:#1b5e20; margin-bottom:.25rem; }
+.summary-access-notice p { margin:0; font-size:.75rem; color:#2e7d32; line-height:1.4; }
 
 /* Utils */
 .hidden { display: none !important; }
