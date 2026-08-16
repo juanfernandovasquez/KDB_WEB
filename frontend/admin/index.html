@@ -1778,26 +1778,32 @@
 
         <!-- Student detail modal -->
         <div class="modal-overlay hidden" id="ac-student-modal" role="dialog" aria-modal="true">
-          <div class="modal-box" style="max-width:860px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-              <h3 id="ac-student-modal-name" style="margin:0;">Alumno</h3>
-              <button type="button" class="secondary small-btn" id="ac-student-modal-close">Cerrar</button>
+          <div class="modal-box" style="max-width:900px;padding:0;border-radius:10px;max-height:92vh;overflow-y:auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e8e8e8;position:sticky;top:0;background:#fff;z-index:1;">
+              <div>
+                <p class="small muted" style="margin:0 0 .1rem;">Órdenes de</p>
+                <h3 id="ac-student-modal-name" style="margin:0;font-size:1.05rem;"></h3>
+              </div>
+              <button type="button" class="modal-close-x" id="ac-student-modal-close" aria-label="Cerrar">✕</button>
             </div>
-            <div class="table-responsive">
-              <table class="subs-table scroll-table" style="min-width:640px;">
-                <thead>
-                  <tr>
-                    <th>Orden</th>
-                    <th>Fecha</th>
-                    <th>Curso</th>
-                    <th>Monto</th>
-                    <th>Comprobante</th>
-                    <th>Pago</th>
-                    <th>Moodle</th>
-                  </tr>
-                </thead>
-                <tbody id="ac-student-orders-body"></tbody>
-              </table>
+            <div style="padding:.75rem 1.25rem 1.25rem;">
+              <div class="table-responsive">
+                <table class="subs-table scroll-table" style="min-width:700px;">
+                  <thead>
+                    <tr>
+                      <th>Orden / Fecha</th>
+                      <th>Curso</th>
+                      <th>Monto / N° op.</th>
+                      <th>Comprobante</th>
+                      <th>Pago</th>
+                      <th>Moodle</th>
+                      <th>Notas</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="ac-student-orders-body"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -1840,6 +1846,7 @@
                   <label class="mgmt-label">N° de operación <span class="muted">(opcional)</span></label>
                   <input type="text" id="mgmt-pay-opnum" class="mgmt-input" placeholder="Ej. 12345678" />
                   <button type="button" class="cta mgmt-btn-full" id="mgmt-confirm-pay" style="margin-top:.5rem;">✓ Confirmar pago</button>
+                  <button type="button" class="secondary mgmt-btn-full" id="mgmt-save-opnum" style="margin-top:.35rem;">Guardar N° operación</button>
                 </div>
                 <p class="small mgmt-status" id="mgmt-pay-status"></p>
               </div>

@@ -2386,29 +2386,49 @@ let currentAdminUserId = null;
     const tbody = q('ac-student-orders-body');
     if (!modal) return;
     title.textContent = name || email;
-    tbody.innerHTML = '<tr><td colspan="7" class="muted small">Cargando…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="muted small">Cargando…</td></tr>';
     modal.classList.remove('hidden');
     try {
       const res = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/orders`);
       const orders = await res.json().catch(() => []);
+      // Merge into cache so openManageModal can find them
+      orders.forEach(o => {
+        const idx = _ordersCache.findIndex(c => c.id === o.id);
+        if (idx >= 0) _ordersCache[idx] = o; else _ordersCache.push(o);
+      });
       if (!orders.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="muted small">Sin órdenes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="muted small">Sin órdenes.</td></tr>';
         return;
       }
       const compLabel = t => t === 'factura' ? 'Factura' : 'Boleta';
-      const statusBadge = s => s === 'paid' ? '<span class="badge-active">Pagado</span>' : s === 'pending' ? '<span class="badge-inactive">Pendiente</span>' : `<span class="badge-inactive">${escHtml(s)}</span>`;
-      tbody.innerHTML = orders.map(o => `
-        <tr>
-          <td>ORD-${String(o.id).padStart(4,'0')}</td>
-          <td>${escHtml((o.created_at||'').slice(0,10))}</td>
+      const statusBadge = s => s === 'paid'
+        ? '<span class="badge-active">Pagado</span>'
+        : s === 'pending'
+        ? '<span class="badge-inactive">Pendiente</span>'
+        : `<span class="badge-inactive">${escHtml(s)}</span>`;
+      tbody.innerHTML = orders.map(o => {
+        const opnum = o.operation_number ? `<br><small class="muted">#${escHtml(o.operation_number)}</small>` : '';
+        const voucherIcon = o.voucher_url ? ` <a href="${escHtml(o.voucher_url)}" target="_blank" title="Ver constancia">📎</a>` : '';
+        const compNum = o.comprobante_number ? `<br><small class="muted">${escHtml(o.comprobante_number)}</small>` : '';
+        return `<tr>
+          <td><strong>ORD-${String(o.id).padStart(4,'0')}</strong><br><small class="muted">${escHtml((o.created_at||'').slice(0,10))}</small></td>
           <td>${escHtml(o.course_title||'—')}</td>
-          <td>S/ ${Number(o.amount||0).toFixed(2)}</td>
-          <td>${compLabel(o.comprobante_type)}<br><small class="muted">${escHtml(o.taxpayer_id||'')}</small>${o.taxpayer_name ? `<br><small class="muted">${escHtml(o.taxpayer_name)}</small>` : ''}</td>
-          <td>${statusBadge(o.status)}</td>
+          <td>S/ ${Number(o.amount||0).toFixed(2)}${opnum}</td>
+          <td>${compLabel(o.comprobante_type)}${compNum}<br><small class="muted">${escHtml(o.taxpayer_id||'')}</small></td>
+          <td>${statusBadge(o.status)}${voucherIcon}</td>
           <td>${o.moodle_enrolled ? '<span class="badge-active">Matriculado</span>' : '<span class="badge-inactive">No</span>'}</td>
-        </tr>`).join('');
+          <td>${o.notes ? `<span class="small muted" title="${escHtml(o.notes)}">📝</span>` : ''}</td>
+          <td><button type="button" class="secondary small-btn ac-stud-ord-manage" data-id="${o.id}">⚙ Gestionar</button></td>
+        </tr>`;
+      }).join('');
+      tbody.querySelectorAll('.ac-stud-ord-manage').forEach(btn => {
+        btn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          openManageModal(Number(btn.dataset.id));
+        });
+      });
     } catch {
-      tbody.innerHTML = '<tr><td colspan="7" class="muted small">Error al cargar.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="muted small">Error al cargar.</td></tr>';
     }
   }
 
@@ -2439,11 +2459,18 @@ let currentAdminUserId = null;
     q('mgmt-comp-type-info').textContent = `${o.comprobante_type === 'factura' ? 'Factura' : 'Boleta'}${o.taxpayer_id ? ' · ' + o.taxpayer_id : ''}`;
 
     // Pago section
-    q('mgmt-pay-badge').innerHTML = o.status === 'paid'
+    const isPaid = o.status === 'paid';
+    q('mgmt-pay-badge').innerHTML = isPaid
       ? '<span class="badge-active">Pagado</span>'
       : '<span class="badge-inactive">Pendiente</span>';
-    q('mgmt-pay-form').style.display = o.status === 'paid' ? 'none' : '';
+    q('mgmt-pay-form').style.display = '';
+    q('mgmt-confirm-pay').style.display = isPaid ? 'none' : '';
+    q('mgmt-confirm-pay').textContent = '✓ Confirmar pago';
+    q('mgmt-confirm-pay').disabled = false;
+    const saveOpnumBtn = q('mgmt-save-opnum');
+    if (saveOpnumBtn) saveOpnumBtn.style.display = isPaid ? '' : 'none';
     q('mgmt-pay-opnum').value = o.operation_number || '';
+    q('mgmt-pay-opnum').placeholder = isPaid ? 'N° operación (editar)' : 'Ej. 12345678';
     q('mgmt-pay-status').textContent = '';
 
     // Constancia section
@@ -2456,7 +2483,7 @@ let currentAdminUserId = null;
     q('mgmt-voucher-dropzone').classList.remove('dragover');
     q('mgmt-req-voucher').textContent = '📩 Solicitar al alumno';
     q('mgmt-req-voucher').disabled = false;
-    q('mgmt-req-voucher').style.display = o.status === 'paid' ? 'none' : '';
+    q('mgmt-req-voucher').style.display = '';
 
     // Comprobante section
     q('mgmt-comp-type').textContent = o.comprobante_type === 'factura' ? 'Factura' : 'Boleta';
@@ -2505,16 +2532,22 @@ let currentAdminUserId = null;
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: file.name, content_type: file.type }),
       });
-      if (!presignRes.ok) { statusEl.textContent = 'Error al preparar subida.'; return; }
-      const { url, fields, public_url } = await presignRes.json();
+      if (!presignRes.ok) {
+        const err = await presignRes.json().catch(() => ({}));
+        statusEl.textContent = `Error al preparar subida: ${err.error || presignRes.status}`;
+        return;
+      }
+      const data = await presignRes.json();
+      const post = data.post || {};
+      const publicUrl = data.url;
       const fd = new FormData();
-      Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+      Object.entries(post.fields || {}).forEach(([k, v]) => fd.append(k, v));
       fd.append('file', file);
-      const upRes = await fetch(url, { method: 'POST', body: fd });
+      const upRes = await fetch(post.url, { method: 'POST', body: fd });
       if (!upRes.ok) { statusEl.textContent = 'Error al subir archivo.'; return; }
       const saveRes = await apiFetch(`/api/admin/orders/${id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ voucher_url: public_url }),
+        body: JSON.stringify({ voucher_url: publicUrl }),
       });
       if (saveRes.ok) {
         statusEl.textContent = '✓ Constancia guardada.';
@@ -2539,17 +2572,32 @@ let currentAdminUserId = null;
     // ── Gestionar orden modal ───────────────────────────────────────────────
     bindOnce('ac-manage-close', () => q('ac-manage-modal').classList.add('hidden'));
 
-    // Confirm pay
+    // Confirm pay / save operation number
     bindOnce('mgmt-confirm-pay', async () => {
+      const id = _managedOrderId;
+      const o = _ordersCache.find(x => x.id === id);
+      const isPaid = o?.status === 'paid';
+      const opnum = (q('mgmt-pay-opnum').value || '').trim();
+      const statusEl = q('mgmt-pay-status');
+      statusEl.textContent = 'Guardando…';
+      const body = isPaid ? {} : { status: 'paid', payment_method: 'manual' };
+      if (opnum) body.operation_number = opnum;
+      const res = await mgmtApiCall(`/api/admin/orders/${id}`, body);
+      if (res.ok) {
+        statusEl.textContent = isPaid ? '✓ N° de operación guardado.' : '✓ Pago confirmado.';
+        await mgmtRefresh();
+      } else statusEl.textContent = 'Error al guardar.';
+    });
+
+    // Save operation number (also used above - separate "Guardar N° op" button for paid orders)
+    bindOnce('mgmt-save-opnum', async () => {
       const id = _managedOrderId;
       const opnum = (q('mgmt-pay-opnum').value || '').trim();
       const statusEl = q('mgmt-pay-status');
       statusEl.textContent = 'Guardando…';
-      const body = { status: 'paid', payment_method: 'manual' };
-      if (opnum) body.operation_number = opnum;
-      const res = await mgmtApiCall(`/api/admin/orders/${id}`, body);
-      if (res.ok) { statusEl.textContent = '✓ Pago confirmado.'; await mgmtRefresh(); }
-      else statusEl.textContent = 'Error al confirmar pago.';
+      const res = await mgmtApiCall(`/api/admin/orders/${id}`, { operation_number: opnum });
+      if (res.ok) { statusEl.textContent = '✓ Guardado.'; await mgmtRefresh(); }
+      else statusEl.textContent = 'Error al guardar.';
     });
 
     // Voucher upload in modal
@@ -4613,6 +4661,7 @@ let currentAdminUserId = null;
     bind("contact-modal-close", closeContactModal);
     bind("contact-modal-backdrop", closeContactModal);
     bind("ac-student-modal-close", () => q("ac-student-modal")?.classList.add("hidden"));
+    q("ac-student-modal")?.addEventListener("click", e => { if (e.target === q("ac-student-modal")) q("ac-student-modal").classList.add("hidden"); });
     bind("media-modal-close", closeMediaModal);
     bind("media-modal-backdrop", closeMediaModal);
     bind("media-refresh", () => loadMediaLibrary());

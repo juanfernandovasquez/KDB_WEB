@@ -164,13 +164,14 @@
         throw new Error(err.error || 'Error al obtener URL de subida.');
       }
 
-      const { upload_url, public_url } = await presignRes.json();
+      const presignData = await presignRes.json();
+      const presignPost = presignData.post || {};
+      const public_url = presignData.url;
+      const fd = new FormData();
+      Object.entries(presignPost.fields || {}).forEach(([k, v]) => fd.append(k, v));
+      fd.append('file', file);
 
-      const uploadRes = await fetch(upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
+      const uploadRes = await fetch(presignPost.url, { method: 'POST', body: fd });
 
       if (!uploadRes.ok) throw new Error('Error al subir el archivo.');
 
