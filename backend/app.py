@@ -1818,6 +1818,8 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
         f"  Monto: S/ {amount:.2f}",
         f"  N° de orden: {order_ref}",
         f"  Comprobante solicitado: {comp_label}",
+        f"  DNI/RUC:               {taxpayer_id or '—'}",
+        f"  Razón social:          {taxpayer_name or '—'}",
         "",
         "¿Qué sigue?",
         "  1. Nuestro equipo verificará tu pago en las próximas horas hábiles.",
