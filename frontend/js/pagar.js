@@ -78,6 +78,12 @@
       // Update buy button label
       btnPayText.textContent = `Pagar ${formatPrice(course.price)}`;
 
+      // Point success link to specific Moodle course if known
+      if (course.moodle_course_id) {
+        const moodleBtn = document.getElementById('btn-go-moodle');
+        if (moodleBtn) moodleBtn.href = `https://cursos.katarzyna.pe/course/view.php?id=${course.moodle_course_id}`;
+      }
+
       summaryLoading.classList.add('hidden');
       summaryContent.classList.remove('hidden');
     } catch {

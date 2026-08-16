@@ -1583,12 +1583,18 @@ def api_admin_get_course(course_id):
 @require_admin()
 def api_admin_update_course(course_id):
     ensure_db()
-    data = request.get_json(silent=True) or {}
+    incoming = request.get_json(silent=True) or {}
     existing = fetch_course_by_id(course_id)
     if not existing:
         return jsonify(error="Curso no encontrado"), 404
+    # Merge: existing values are the base, incoming fields override
+    merged = {**existing, **incoming}
+    # Remove modules from merged dict (save_course handles them from incoming only)
+    merged.pop("modules", None)
+    if "modules" in incoming:
+        merged["modules"] = incoming["modules"]
     try:
-        save_course(data, course_id=course_id)
+        save_course(merged, course_id=course_id)
         return jsonify(message="Curso actualizado"), 200
     except Exception as exc:
         return jsonify(error=str(exc)), 400
