@@ -1696,10 +1696,8 @@ def _provision_moodle_and_notify(order_id):
         admin_update_order(order_id, updates)
         app.logger.info("provision_moodle: orden %s matriculada user_id=%s", order_id, result["moodle_user_id"])
 
+        moodle_url = f"https://cursos.katarzyna.pe/course/view.php?id={moodle_course_id}"
         if result["was_created"] and result["password"]:
-            moodle_url = (
-                f"https://cursos.katarzyna.pe/course/view.php?id={moodle_course_id}"
-            )
             _send_moodle_credentials(
                 student_email=email,
                 student_name=order.get("student_name", ""),
@@ -1709,8 +1707,64 @@ def _provision_moodle_and_notify(order_id):
                 moodle_url=moodle_url,
                 order_ref=f"ORD-{order_id:04d}",
             )
+        else:
+            _send_moodle_enrollment_notification(
+                student_email=email,
+                student_name=order.get("student_name", ""),
+                course_title=order.get("course_title", ""),
+                moodle_url=moodle_url,
+                order_ref=f"ORD-{order_id:04d}",
+            )
     except Exception as exc:
         app.logger.error("provision_moodle error order %s: %s", order_id, exc)
+
+
+def _send_moodle_enrollment_notification(student_email, student_name, course_title,
+                                         moodle_url, order_ref):
+    """Notifica al alumno que ha sido matriculado en un nuevo curso (cuenta ya existía)."""
+    cfg = _mail_config()
+    if not cfg["enabled"]:
+        return
+    msg = EmailMessage()
+    msg["Subject"] = f"Nuevo curso disponible — {course_title}"
+    msg["From"] = cfg["from"]
+    msg["To"] = student_email
+    msg.set_content("\n".join([
+        f"Hola {student_name},",
+        "",
+        "¡Tu inscripción ha sido confirmada! Hemos matriculado tu cuenta",
+        "en el siguiente curso:",
+        "",
+        f"  Curso: {course_title}",
+        f"  Orden: {order_ref}",
+        "",
+        "Puedes acceder directamente desde tu cuenta en:",
+        f"  {moodle_url}",
+        "",
+        "Usa tus credenciales habituales para ingresar. Si no recuerdas",
+        "tu contraseña, usa la opción \"¿Olvidó su contraseña?\" con",
+        "tu dirección de correo electrónico.",
+        "",
+        "Cualquier consulta: contacto@katarzyna.pe",
+        "",
+        "Equipo Katarzyna Legal & Tributario",
+        "https://katarzyna.pe",
+    ]))
+    try:
+        if cfg["use_ssl"]:
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15) as server:
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
+                if cfg["use_tls"]:
+                    server.starttls(context=ssl.create_default_context())
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+    except Exception as exc:
+        app.logger.error("enrollment notification email error: %s", exc)
 
 
 def _send_checkout_emails(order_id, student_name, student_email, course_title, amount,
