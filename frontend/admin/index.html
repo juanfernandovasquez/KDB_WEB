@@ -1549,7 +1549,16 @@
             </div>
             <div>
               <label>Nivel</label>
-              <input type="text" id="ac-level" placeholder="Ej. Todos los niveles" />
+              <select id="ac-level" class="form-select">
+                <option value="Todos los niveles">Todos los niveles</option>
+                <option value="Básico">Básico</option>
+                <option value="Intermedio">Intermedio</option>
+                <option value="Avanzado">Avanzado</option>
+              </select>
+            </div>
+            <div>
+              <label>ID del curso en Moodle <small class="muted">— visible en la URL del curso en cursos.katarzyna.pe</small></label>
+              <input type="number" id="ac-moodle-course-id" min="1" step="1" placeholder="Ej. 3" />
             </div>
             <div>
               <label>Publicado</label>
