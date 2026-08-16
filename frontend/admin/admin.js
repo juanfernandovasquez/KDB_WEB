@@ -1047,6 +1047,7 @@
     "servicios",
     "productos",
     "publicaciones",
+    "academia",
     "kdbweb",
     "subs",
     "contacto",
@@ -2075,6 +2076,276 @@ let currentAdminUserId = null;
     await loadKdbwebEntries();
   }
 
+  // ── Academia ──────────────────────────────────────────────────────────────
+
+  let acEditId = null;
+  let acCourses = [];
+  let acEventsBound = false;
+
+  function acSlugify(str) {
+    return str.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function acModuleHtml(mod, mi) {
+    const lessons = (mod.lessons || []).map((l, li) => `
+      <div class="ac-lesson-row" data-li="${li}">
+        <input type="text" class="ac-lesson-title" placeholder="Lección ${li+1}" value="${escHtml(l.title||'')}">
+        <input type="text" class="ac-lesson-dur" placeholder="12:30" style="width:80px" value="${escHtml(l.duration||'')}">
+        <select class="ac-lesson-type form-select" style="width:90px">
+          <option value="video"${l.type==='video'?' selected':''}>Video</option>
+          <option value="pdf"${l.type==='pdf'?' selected':''}>PDF</option>
+          <option value="quiz"${l.type==='quiz'?' selected':''}>Quiz</option>
+        </select>
+        <button type="button" class="secondary small-btn danger ac-del-lesson">✕</button>
+      </div>`).join('');
+
+    return `
+      <div class="ac-module-block" data-mi="${mi}" style="border:1px solid #e4e9f4;margin-bottom:.75rem;padding:1rem;">
+        <div class="row" style="gap:.5rem;margin-bottom:.5rem;align-items:center;">
+          <strong style="min-width:24px;color:var(--brand-blue,#06186d);">${mi+1}</strong>
+          <input type="text" class="ac-mod-title" placeholder="Título del módulo" value="${escHtml(mod.title||'')}" style="flex:1">
+          <input type="text" class="ac-mod-dur" placeholder="38 min" style="width:80px" value="${escHtml(mod.duration||'')}">
+          <button type="button" class="secondary small-btn danger ac-del-module">Quitar</button>
+        </div>
+        <div class="ac-lessons-list">${lessons}</div>
+        <button type="button" class="secondary small-btn ac-add-lesson" style="margin-top:.5rem;">+ Lección</button>
+      </div>`;
+  }
+
+  function acGetModules() {
+    return [...q('ac-modules-list').querySelectorAll('.ac-module-block')].map(block => ({
+      title: block.querySelector('.ac-mod-title')?.value?.trim() || '',
+      duration: block.querySelector('.ac-mod-dur')?.value?.trim() || '',
+      lessons_count: block.querySelectorAll('.ac-lesson-row').length,
+      lessons: [...block.querySelectorAll('.ac-lesson-row')].map(row => ({
+        title: row.querySelector('.ac-lesson-title')?.value?.trim() || '',
+        duration: row.querySelector('.ac-lesson-dur')?.value?.trim() || '',
+        type: row.querySelector('.ac-lesson-type')?.value || 'video',
+      })),
+    }));
+  }
+
+  function acRenderModules(modules) {
+    const list = q('ac-modules-list');
+    list.innerHTML = (modules || []).map((m, i) => acModuleHtml(m, i)).join('');
+  }
+
+  function acRenumberModules() {
+    q('ac-modules-list').querySelectorAll('.ac-module-block strong').forEach((el, i) => {
+      el.textContent = String(i + 1);
+    });
+  }
+
+  function acOpenForm(course) {
+    acEditId = course?.id || null;
+    q('ac-id').value = acEditId || '';
+    q('ac-form-title').textContent = acEditId ? 'Editar curso' : 'Nuevo curso';
+    q('ac-title').value = course?.title || '';
+    q('ac-slug').value = course?.slug || '';
+    q('ac-subtitle').value = course?.subtitle || '';
+    q('ac-description').value = course?.description || '';
+    q('ac-category').value = course?.category || 'tributario';
+    q('ac-price').value = course?.price || '';
+    q('ac-original-price').value = course?.original_price || '';
+    q('ac-duration').value = course?.duration || '';
+    q('ac-level').value = course?.level || 'Todos los niveles';
+    q('ac-published').value = course?.is_published ? '1' : '0';
+    // image picker
+    setImgPicker('ac-image-url', course?.image_url || '');
+    // modules
+    acRenderModules(course?.modules || []);
+    q('ac-form-card').classList.remove('hidden');
+    q('ac-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    q('ac-save-status').textContent = '';
+  }
+
+  function acCloseForm() {
+    acEditId = null;
+    q('ac-form-card').classList.add('hidden');
+  }
+
+  async function acSaveCourse() {
+    const status = q('ac-save-status');
+    const title = q('ac-title').value.trim();
+    const slug = q('ac-slug').value.trim();
+    if (!title || !slug) {
+      status.textContent = 'Título y slug son requeridos.';
+      return;
+    }
+    const modules = acGetModules();
+    const payload = {
+      title,
+      slug,
+      subtitle: q('ac-subtitle').value.trim(),
+      description: q('ac-description').value.trim(),
+      category: q('ac-category').value,
+      price: parseFloat(q('ac-price').value) || 0,
+      original_price: parseFloat(q('ac-original-price').value) || null,
+      image_url: q('ac-image-url').value.trim() || null,
+      duration: q('ac-duration').value.trim(),
+      level: q('ac-level').value.trim(),
+      is_published: q('ac-published').value === '1',
+      modules_count: modules.length,
+      lessons_count: modules.reduce((s, m) => s + m.lessons.length, 0),
+      modules,
+    };
+    status.textContent = 'Guardando…';
+    try {
+      if (acEditId) {
+        await apiFetch(`/api/admin/courses/${acEditId}`, { method: 'PUT', body: JSON.stringify(payload) });
+      } else {
+        await apiFetch('/api/admin/courses', { method: 'POST', body: JSON.stringify(payload) });
+      }
+      status.textContent = '✓ Guardado';
+      setTimeout(() => { acCloseForm(); loadAcademiaAdmin(); }, 800);
+    } catch (err) {
+      status.textContent = `Error: ${err.message || 'No se pudo guardar'}`;
+    }
+  }
+
+  async function acDeleteCourse(id, title) {
+    if (!confirm(`¿Eliminar el curso "${title}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      await apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+      loadAcademiaAdmin();
+    } catch (err) {
+      alert(`Error al eliminar: ${err.message}`);
+    }
+  }
+
+  async function loadAcademiaAdmin() {
+    // Load courses
+    const tbody = q('ac-table-body');
+    const countEl = q('ac-count');
+    tbody.innerHTML = '<tr><td colspan="5" class="muted small">Cargando…</td></tr>';
+    try {
+      acCourses = await apiFetch('/api/admin/courses');
+      const courses = acCourses;
+      countEl.textContent = courses.length;
+      if (!courses.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="muted small">Sin cursos. Haz clic en "+ Nuevo curso" para crear el primero.</td></tr>';
+      } else {
+        tbody.innerHTML = courses.map(c => `
+          <tr>
+            <td><strong>${escHtml(c.title)}</strong><br><small class="muted">${escHtml(c.slug)}</small></td>
+            <td>${escHtml(c.category || '—')}</td>
+            <td>S/ ${Number(c.price).toFixed(0)}${c.original_price ? ` <small class="muted" style="text-decoration:line-through">S/ ${Number(c.original_price).toFixed(0)}</small>` : ''}</td>
+            <td><span class="${c.is_published ? 'badge-active' : 'badge-inactive'}">${c.is_published ? 'Publicado' : 'Borrador'}</span></td>
+            <td class="row" style="gap:.35rem;flex-wrap:wrap;">
+              <a class="secondary small-btn" href="/curso.html?slug=${encodeURIComponent(c.slug)}" target="_blank">Ver</a>
+              <button type="button" class="secondary small-btn ac-edit-btn" data-id="${c.id}">Editar</button>
+              <button type="button" class="secondary small-btn danger ac-del-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Eliminar</button>
+            </td>
+          </tr>`).join('');
+        // bind edit/delete
+        tbody.querySelectorAll('.ac-edit-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            try {
+              const course = await apiFetch(`/api/admin/courses/${btn.dataset.id}`);
+              acOpenForm(course);
+            } catch {
+              alert('No se pudo cargar el curso.');
+            }
+          });
+        });
+        tbody.querySelectorAll('.ac-del-btn').forEach(btn => {
+          btn.addEventListener('click', () => acDeleteCourse(btn.dataset.id, btn.dataset.title));
+        });
+      }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5" class="muted small">Error: ${escHtml(err.message)}</td></tr>`;
+    }
+
+    // Load orders
+    const ordTbody = q('ac-orders-body');
+    const ordCount = q('ac-orders-count');
+    try {
+      const orders = await apiFetch('/api/admin/orders');
+      ordCount.textContent = orders.length;
+      if (!orders.length) {
+        ordTbody.innerHTML = '<tr><td colspan="6" class="muted small">Sin órdenes aún.</td></tr>';
+      } else {
+        ordTbody.innerHTML = orders.map(o => {
+          const d = new Date(o.created_at).toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+          return `<tr>
+            <td class="small">${d}</td>
+            <td>${escHtml(o.student_name)}</td>
+            <td><a href="mailto:${escHtml(o.student_email)}">${escHtml(o.student_email)}</a></td>
+            <td class="small">${escHtml(o.course_title || o.course_slug || '—')}</td>
+            <td>S/ ${Number(o.amount).toFixed(0)}</td>
+            <td><span class="${o.status === 'paid' ? 'badge-active' : (o.status === 'pending' ? 'badge-inactive' : '')}">${escHtml(o.status)}</span></td>
+          </tr>`;
+        }).join('');
+      }
+    } catch {
+      ordTbody.innerHTML = '<tr><td colspan="6" class="muted small">Error al cargar órdenes.</td></tr>';
+    }
+
+    // expand both cards
+    ['ac-table-wrap', 'ac-orders-wrap'].forEach(id => {
+      const el = q(id);
+      if (el?.classList.contains('collapsed')) el.classList.remove('collapsed');
+    });
+  }
+
+  function bindAcademiaEvents() {
+    if (acEventsBound) return;
+    acEventsBound = true;
+
+    bindOnce('ac-new-btn', () => acOpenForm(null));
+    bindOnce('ac-form-cancel', acCloseForm);
+    bindOnce('ac-form-cancel2', acCloseForm);
+    bindOnce('ac-save-btn', acSaveCourse);
+    bindOnce('ac-add-module', () => {
+      const list = q('ac-modules-list');
+      const mi = list.querySelectorAll('.ac-module-block').length;
+      const tmp = document.createElement('div');
+      tmp.innerHTML = acModuleHtml({ title: '', duration: '', lessons: [] }, mi);
+      list.appendChild(tmp.firstElementChild);
+    });
+
+    // auto-slug from title
+    const titleInput = q('ac-title');
+    if (titleInput) {
+      titleInput.addEventListener('input', () => {
+        if (!acEditId) q('ac-slug').value = acSlugify(titleInput.value);
+      });
+    }
+
+    // Module list event delegation (set up once, works for all dynamic content)
+    const modList = q('ac-modules-list');
+    if (modList) {
+      modList.addEventListener('click', (ev) => {
+        if (ev.target.closest('.ac-del-module')) {
+          ev.target.closest('.ac-module-block').remove();
+          acRenumberModules();
+        } else if (ev.target.closest('.ac-del-lesson')) {
+          ev.target.closest('.ac-lesson-row').remove();
+        } else if (ev.target.closest('.ac-add-lesson')) {
+          const block = ev.target.closest('.ac-module-block');
+          const container = block.querySelector('.ac-lessons-list');
+          const li = container.querySelectorAll('.ac-lesson-row').length;
+          const tmp = document.createElement('div');
+          tmp.innerHTML = `<div class="ac-lesson-row"><input type="text" class="ac-lesson-title" placeholder="Lección ${li+1}"><input type="text" class="ac-lesson-dur" placeholder="12:30" style="width:80px"><select class="ac-lesson-type form-select" style="width:90px"><option value="video">Video</option><option value="pdf">PDF</option><option value="quiz">Quiz</option></select><button type="button" class="secondary small-btn danger ac-del-lesson">✕</button></div>`;
+          container.appendChild(tmp.firstElementChild);
+        }
+      });
+    }
+  }
+
+  function bindOnce(id, fn) {
+    const el = q(id);
+    if (el && !el.dataset.bound) { el.dataset.bound = '1'; el.addEventListener('click', fn); }
+  }
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // endregion Academia
+
   async function loadPublicationsAdmin() {
     const status = q("status-publications");
     if (status) status.textContent = "Cargando publicaciones...";
@@ -2813,6 +3084,7 @@ let currentAdminUserId = null;
     q("subs-section")?.classList.add("hidden");
     q("contact-section")?.classList.add("hidden");
     q("publications-section")?.classList.add("hidden");
+    q("academia-section")?.classList.add("hidden");
     q("kdbweb-section")?.classList.add("hidden");
     q("users-section")?.classList.add("hidden");
     q("legales-section")?.classList.add("hidden");
@@ -2872,6 +3144,16 @@ let currentAdminUserId = null;
     await loadPublicationsAdmin();
   }
 
+  async function switchToAcademia() {
+    currentPage = null;
+    currentSection = "academia";
+    setActive("academia");
+    hideAllSections();
+    q("academia-section").classList.remove("hidden");
+    bindAcademiaEvents();
+    await loadAcademiaAdmin();
+  }
+
   async function switchToKdbweb() {
     currentPage = null;
     currentSection = "kdbweb";
@@ -2898,6 +3180,7 @@ let currentAdminUserId = null;
     if (normalized === "subs") return switchToSubs();
     if (normalized === "contacto") return switchToContact();
     if (normalized === "publicaciones" || normalized === "publications") return switchToPublications();
+    if (normalized === "academia") return switchToAcademia();
     if (normalized === "kdbweb") return switchToKdbweb();
     if (normalized === "legales") return switchToLegales();
     if (normalized === "usuarios") return switchToUsers();

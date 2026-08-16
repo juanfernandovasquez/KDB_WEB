@@ -1569,6 +1569,16 @@ def api_admin_create_course():
         return jsonify(error=str(exc)), 400
 
 
+@app.route("/api/admin/courses/<int:course_id>", methods=["GET"])
+@require_admin()
+def api_admin_get_course(course_id):
+    ensure_db()
+    course = fetch_course_by_id(course_id)
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+    return jsonify(course)
+
+
 @app.route("/api/admin/courses/<int:course_id>", methods=["PUT"])
 @require_admin()
 def api_admin_update_course(course_id):
