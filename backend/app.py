@@ -1681,6 +1681,32 @@ def api_voucher_presign():
         return jsonify(error=str(exc)), 500
 
 
+@app.route("/api/admin/orders/<int:order_id>/voucher-presign", methods=["POST"])
+@require_admin()
+def api_admin_voucher_presign(order_id):
+    """Genera presigned POST para que el admin suba un comprobante de pago a S3."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    data = request.get_json(silent=True) or {}
+    filename = (data.get("filename") or "voucher.jpg").strip()
+    content_type = data.get("content_type") or "image/jpeg"
+    if content_type not in ("image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"):
+        return jsonify(error="Tipo de archivo no permitido"), 400
+    try:
+        result = create_presigned_post(
+            filename,
+            content_type=content_type,
+            max_bytes=10 * 1024 * 1024,
+            prefix_override="vouchers/",
+        )
+        return jsonify(result)
+    except Exception as exc:
+        app.logger.exception("Error generating admin voucher presign")
+        return jsonify(error=str(exc)), 500
+
+
 # ─── Academia: Checkout (simulación) ─────────────────────────────────────────
 
 def _send_moodle_credentials(student_email, student_name, course_title,
@@ -2108,8 +2134,7 @@ def api_admin_request_voucher(order_id):
     order = fetch_order_by_id(order_id)
     if not order:
         return jsonify(error="Orden no encontrada"), 404
-    if order.get("voucher_url"):
-        return jsonify(error="Esta orden ya tiene un comprobante adjunto"), 400
+    # Allow re-sending even if voucher exists (admin may need a better copy)
 
     cfg = _mail_config()
     if not cfg["enabled"]:

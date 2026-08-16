@@ -2313,25 +2313,28 @@ let currentAdminUserId = null;
           const moodleBadge = o.moodle_enrolled
             ? `<span class="badge-active">Inscrito</span>`
             : `<span class="badge-inactive">Pendiente</span>`;
-          const voucherLink = o.voucher_url
-            ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="small" style="color:var(--brand-blue);">📎 Ver constancia</a>`
-            : '';
-          const pmLabel = o.payment_method ? `<br><small class="muted">${escHtml(o.payment_method)}</small>` : '';
-          const opNumLabel = o.operation_number ? `<br><small class="muted">Op: ${escHtml(o.operation_number)}</small>` : '';
+          const voucherCell = o.voucher_url
+            ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="small voucher-link">📎 Ver constancia</a>`
+            : `<span class="small muted">Sin constancia</span>`;
+          const pmLabel = o.payment_method ? `<small class="muted">${escHtml(o.payment_method)}</small>` : '';
+          const opNumLabel = o.operation_number ? `<small class="muted">Op: ${escHtml(o.operation_number)}</small>` : '';
+          const notesSnippet = o.notes ? `<div class="order-notes-preview small muted" title="${escHtml(o.notes)}">📝 ${escHtml(o.notes.substring(0,40))}${o.notes.length>40?'…':''}</div>` : '';
           return `<tr data-order-id="${o.id}">
-            <td class="small">${escHtml(ordRef)}</td>
-            <td class="small">${d}</td>
-            <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small">${escHtml(o.student_email)}</a></td>
+            <td class="small"><strong>${escHtml(ordRef)}</strong><br>${d}</td>
+            <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small">${escHtml(o.student_email)}</a>${notesSnippet}</td>
             <td class="small">${escHtml(o.course_title || o.course_slug || '—')}</td>
-            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong>${pmLabel}${opNumLabel}${voucherLink ? '<br>' + voucherLink : ''}</td>
+            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong><br>${pmLabel}${opNumLabel ? '<br>' + opNumLabel : ''}</td>
+            <td>${voucherCell}</td>
             <td>${compLabel}${taxpayerInfo}<br>${compNumBadge}</td>
             <td>${paidBadge}</td>
             <td>${moodleBadge}</td>
             <td>
               <div style="display:flex;flex-direction:column;gap:.3rem;">
                 ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-paid" data-id="${o.id}">✓ Confirmar pago</button>` : ''}
-                ${!o.comprobante_number ? `<button class="secondary small-btn ac-ord-comp" data-id="${o.id}">📄 Registrar comprobante</button>` : ''}
-                ${!o.voucher_url && o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-req-voucher" data-id="${o.id}" data-email="${escHtml(o.student_email)}">📩 Solicitar comprobante</button>` : ''}
+                <button class="secondary small-btn ac-ord-comp" data-id="${o.id}" data-current="${escHtml(o.comprobante_number||'')}">${o.comprobante_number ? '✏️ Editar comprobante' : '📄 Registrar comprobante'}</button>
+                <button class="secondary small-btn ac-ord-attach-voucher" data-id="${o.id}">📎 Adjuntar constancia</button>
+                ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-req-voucher" data-id="${o.id}" data-email="${escHtml(o.student_email)}">📩 Solicitar constancia</button>` : ''}
+                <button class="secondary small-btn ac-ord-notes" data-id="${o.id}" data-notes="${escHtml(o.notes||'')}">📝 Notas</button>
                 ${o.status === 'paid' && !o.moodle_enrolled ? `<button class="btn-provision small-btn ac-ord-provision" data-id="${o.id}" data-email="${escHtml(o.student_email)}" data-name="${escHtml(o.student_name)}">📧 Enviar credenciales</button>` : ''}
                 ${o.moodle_enrolled ? `<button class="secondary small-btn ac-ord-unenroll" data-id="${o.id}" data-name="${escHtml(o.student_name)}">🚫 Desmatricular</button>` : ''}
               </div>
@@ -2349,19 +2352,48 @@ let currentAdminUserId = null;
           });
         });
 
+        ordTbody.querySelectorAll('.ac-ord-comp').forEach(btn => {
+          btn.addEventListener('click', () => {
+            q('ac-comp-order-id').value = btn.dataset.id;
+            q('ac-comp-number').value = btn.dataset.current || '';
+            q('ac-comp-status').textContent = '';
+            q('ac-comp-modal').classList.remove('hidden');
+          });
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-attach-voucher').forEach(btn => {
+          btn.addEventListener('click', () => {
+            q('ac-voucher-order-id').value = btn.dataset.id;
+            q('ac-voucher-file').value = '';
+            q('ac-voucher-status').textContent = '';
+            q('ac-voucher-dropzone').classList.remove('dragover');
+            q('ac-voucher-modal').classList.remove('hidden');
+          });
+        });
+
         ordTbody.querySelectorAll('.ac-ord-req-voucher').forEach(btn => {
           btn.addEventListener('click', async () => {
             const { id, email } = btn.dataset;
-            if (!confirm(`¿Enviar correo a ${email} solicitando el comprobante de pago?`)) return;
+            if (!confirm(`¿Enviar correo a ${email} solicitando la constancia de pago?`)) return;
             btn.disabled = true; btn.textContent = 'Enviando…';
             const res = await apiFetch(`/api/admin/orders/${id}/request_voucher`, { method: 'POST' });
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
               btn.textContent = '✓ Enviado';
+              setTimeout(() => { btn.disabled = false; btn.textContent = '📩 Solicitar constancia'; }, 3000);
             } else {
               alert(data.error || 'Error al enviar correo.');
-              btn.disabled = false; btn.textContent = '📩 Solicitar comprobante';
+              btn.disabled = false; btn.textContent = '📩 Solicitar constancia';
             }
+          });
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-notes').forEach(btn => {
+          btn.addEventListener('click', () => {
+            q('ac-notes-order-id').value = btn.dataset.id;
+            q('ac-notes-text').value = btn.dataset.notes || '';
+            q('ac-notes-status').textContent = '';
+            q('ac-notes-modal').classList.remove('hidden');
           });
         });
 
@@ -2378,15 +2410,6 @@ let currentAdminUserId = null;
               alert(data.error || 'Error al desmatricular.');
               btn.disabled = false; btn.textContent = '🚫 Desmatricular';
             }
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-comp').forEach(btn => {
-          btn.addEventListener('click', () => {
-            q('ac-comp-order-id').value = btn.dataset.id;
-            q('ac-comp-number').value = '';
-            q('ac-comp-status').textContent = '';
-            q('ac-comp-modal').classList.remove('hidden');
           });
         });
 
@@ -2538,6 +2561,73 @@ let currentAdminUserId = null;
         q('ac-comp-status').textContent = 'Error al guardar.';
       }
     });
+
+    // Notas modal
+    bindOnce('ac-notes-cancel', () => q('ac-notes-modal').classList.add('hidden'));
+    bindOnce('ac-notes-save', async () => {
+      const id    = q('ac-notes-order-id').value;
+      const notes = (q('ac-notes-text').value || '').trim();
+      q('ac-notes-status').textContent = 'Guardando…';
+      const res = await apiFetch(`/api/admin/orders/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      });
+      if (res.ok) {
+        q('ac-notes-modal').classList.add('hidden');
+        loadAcademiaAdmin();
+      } else {
+        q('ac-notes-status').textContent = 'Error al guardar.';
+      }
+    });
+
+    // Admin voucher upload modal
+    bindOnce('ac-voucher-cancel', () => q('ac-voucher-modal').classList.add('hidden'));
+    {
+      const dropzone = q('ac-voucher-dropzone');
+      const fileInput = q('ac-voucher-file');
+      if (dropzone && fileInput) {
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', e => {
+          e.preventDefault(); dropzone.classList.remove('dragover');
+          const f = e.dataTransfer.files[0]; if (f) uploadAdminVoucher(f);
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadAdminVoucher(fileInput.files[0]); });
+      }
+    }
+    async function uploadAdminVoucher(file) {
+      const id = q('ac-voucher-order-id').value;
+      const statusEl = q('ac-voucher-status');
+      if (file.size > 10 * 1024 * 1024) { statusEl.textContent = 'Archivo demasiado grande (máx 10 MB).'; return; }
+      statusEl.textContent = 'Subiendo archivo…';
+      try {
+        const presignRes = await apiFetch(`/api/admin/orders/${id}/voucher-presign`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, content_type: file.type }),
+        });
+        if (!presignRes.ok) { statusEl.textContent = 'Error al preparar subida.'; return; }
+        const { url, fields, public_url } = await presignRes.json();
+        const fd = new FormData();
+        Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+        fd.append('file', file);
+        const upRes = await fetch(url, { method: 'POST', body: fd });
+        if (!upRes.ok) { statusEl.textContent = 'Error al subir archivo.'; return; }
+        // Save voucher_url to order
+        const saveRes = await apiFetch(`/api/admin/orders/${id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voucher_url: public_url }),
+        });
+        if (saveRes.ok) {
+          statusEl.textContent = '✓ Constancia guardada.';
+          setTimeout(() => { q('ac-voucher-modal').classList.add('hidden'); loadAcademiaAdmin(); }, 1000);
+        } else {
+          statusEl.textContent = 'Archivo subido pero error al guardar URL.';
+        }
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+      }
+    }
     bindOnce('ac-add-module', () => {
       const list = q('ac-modules-list');
       const mi = list.querySelectorAll('.ac-module-block').length;

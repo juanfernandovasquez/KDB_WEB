@@ -1467,6 +1467,13 @@ button.secondary.small-btn {
 .btn-provision:hover { background: #071331; border-color: #071331; color: #fff; }
 .btn-provision:disabled { background: #b0b8cc; border-color: #b0b8cc; cursor: not-allowed; }
 
+/* ── Orders table extras ─────────────────────────────────────────── */
+.voucher-link { color: var(--brand-blue); text-decoration: none; font-weight: 600; }
+.voucher-link:hover { text-decoration: underline; }
+.order-notes-preview { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
+.admin-dropzone { transition: background .15s, border-color .15s; }
+.admin-dropzone:hover, .admin-dropzone.dragover { background: #f0f3ff; border-color: var(--brand-blue); }
+
 /* ── Barra de herramientas enriquecida (publicaciones) ───────────── */
 .editor-toolbar--publication {
   gap: 0.55rem;
