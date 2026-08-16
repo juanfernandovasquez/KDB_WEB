@@ -1714,36 +1714,41 @@ def _provision_moodle_and_notify(order_id):
                 course_title=order.get("course_title", ""),
                 moodle_url=moodle_url,
                 order_ref=f"ORD-{order_id:04d}",
+                moodle_username=result.get("username", ""),
             )
     except Exception as exc:
         app.logger.error("provision_moodle error order %s: %s", order_id, exc)
 
 
 def _send_moodle_enrollment_notification(student_email, student_name, course_title,
-                                         moodle_url, order_ref):
+                                         moodle_url, order_ref, moodle_username=""):
     """Notifica al alumno que ha sido matriculado en un nuevo curso (cuenta ya existía)."""
     cfg = _mail_config()
     if not cfg["enabled"]:
         return
     msg = EmailMessage()
-    msg["Subject"] = f"Nuevo curso disponible — {course_title}"
+    msg["Subject"] = f"Ya tienes acceso a tu nuevo curso — {course_title}"
     msg["From"] = cfg["from"]
     msg["To"] = student_email
+    username_line = (
+        [f"  Usuario:  {moodle_username}", ""]
+        if moodle_username else []
+    )
     msg.set_content("\n".join([
         f"Hola {student_name},",
         "",
-        "¡Tu inscripción ha sido confirmada! Hemos matriculado tu cuenta",
-        "en el siguiente curso:",
+        "¡Tu pago ha sido confirmado y ya hemos matriculado tu cuenta",
+        f"en el curso \"{course_title}\"!",
         "",
-        f"  Curso: {course_title}",
-        f"  Orden: {order_ref}",
-        "",
-        "Puedes acceder directamente desde tu cuenta en:",
+        f"  Orden:    {order_ref}",
+        f"  Curso:    {course_title}",
+        *username_line,
+        "Accede directamente aquí:",
         f"  {moodle_url}",
         "",
-        "Usa tus credenciales habituales para ingresar. Si no recuerdas",
-        "tu contraseña, usa la opción \"¿Olvidó su contraseña?\" con",
-        "tu dirección de correo electrónico.",
+        "Ingresa con tus credenciales habituales. Si no recuerdas tu",
+        "contraseña, recupérala en:",
+        "  https://cursos.katarzyna.pe/login/forgot_password.php",
         "",
         "Cualquier consulta: contacto@katarzyna.pe",
         "",
