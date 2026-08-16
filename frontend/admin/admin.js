@@ -3235,6 +3235,103 @@ let currentAdminUserId = null;
     await loadPublicationsAdmin();
   }
 
+  async function loadAcademiaPageContent() {
+    const status = q("ac-page-status");
+    if (status) status.textContent = "Cargando...";
+    try {
+      const res = await apiFetch("/config/page/academia");
+      if (!res.ok) {
+        if (status) status.textContent = "Error al cargar";
+        return;
+      }
+      const data = await res.json();
+      const about = data.about || {};
+      const story = data.story || {};
+      const services = data.services || [];
+      const servicesMeta = data.services_meta || {};
+
+      // Hero
+      setVal("ac-page-kicker", about.primary_label || "");
+      setVal("ac-page-title", about.title || "");
+      setVal("ac-page-desc", about.content || "");
+
+      // Stats (stored as JSON in story.content_html)
+      let stats = [];
+      try { stats = JSON.parse(story.content_html || "[]"); } catch (_) {}
+      for (let i = 0; i < 4; i++) {
+        setVal("ac-stat-" + i + "-num",   stats[i] ? stats[i].num   : "");
+        setVal("ac-stat-" + i + "-label", stats[i] ? stats[i].label : "");
+      }
+
+      // Benefits
+      setVal("ac-benefits-title", servicesMeta.title || "");
+      for (let i = 0; i < 6; i++) {
+        setVal("ac-benefit-" + i + "-title", services[i] ? services[i].title       : "");
+        setVal("ac-benefit-" + i + "-desc",  services[i] ? services[i].description : "");
+      }
+
+      // CTA
+      setVal("ac-cta-title",     story.title      || "");
+      setVal("ac-cta-desc",      story.paragraphs || "");
+      setVal("ac-cta-btn-label", about.secondary_label || "");
+      setVal("ac-cta-btn-href",  about.secondary_href  || "");
+
+      if (status) status.textContent = "";
+    } catch (err) {
+      console.error("Error cargando contenido academia", err);
+      if (status) status.textContent = "Error al cargar";
+    }
+  }
+
+  async function saveAcademiaPageContent() {
+    const status = q("ac-page-status");
+    if (status) status.textContent = "Guardando...";
+
+    const stats = [0, 1, 2, 3].map((i) => ({
+      num:   (q("ac-stat-" + i + "-num")   || {}).value || "",
+      label: (q("ac-stat-" + i + "-label") || {}).value || "",
+    }));
+
+    const benefits = [0, 1, 2, 3, 4, 5].map((i) => ({
+      title:       (q("ac-benefit-" + i + "-title") || {}).value || "",
+      description: (q("ac-benefit-" + i + "-desc")  || {}).value || "",
+    }));
+
+    const payload = {
+      about: {
+        primary_label:   (q("ac-page-kicker")    || {}).value || "",
+        title:           (q("ac-page-title")      || {}).value || "",
+        content:         (q("ac-page-desc")       || {}).value || "",
+        secondary_label: (q("ac-cta-btn-label")   || {}).value || "",
+        secondary_href:  (q("ac-cta-btn-href")    || {}).value || "",
+      },
+      story: {
+        title:        (q("ac-cta-title") || {}).value || "",
+        paragraphs:   (q("ac-cta-desc")  || {}).value || "",
+        content_html: JSON.stringify(stats),
+      },
+      services_meta: { title: (q("ac-benefits-title") || {}).value || "" },
+      services:      benefits,
+      hero:          [],
+      team:          [],
+      team_meta:     {},
+    };
+
+    try {
+      const res = await apiFetch("/config/page/academia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("save");
+      if (status) status.textContent = "Contenido guardado";
+      setTimeout(() => { if (status) status.textContent = ""; }, 3000);
+    } catch (err) {
+      console.error("Error guardando contenido academia", err);
+      if (status) status.textContent = "Error al guardar";
+    }
+  }
+
   async function switchToAcademia() {
     currentPage = null;
     currentSection = "academia";
@@ -3243,6 +3340,12 @@ let currentAdminUserId = null;
     q("academia-section").classList.remove("hidden");
     bindAcademiaEvents();
     await loadAcademiaAdmin();
+    await loadAcademiaPageContent();
+    const saveBtn = q("ac-page-save");
+    if (saveBtn && !saveBtn._acPageBound) {
+      saveBtn._acPageBound = true;
+      saveBtn.addEventListener("click", saveAcademiaPageContent);
+    }
   }
 
   async function switchToKdbweb() {

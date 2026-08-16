@@ -1508,6 +1508,91 @@
           </div>
         </div>
 
+        <!-- ── Contenido de la página ── -->
+        <div class="card" id="ac-page-content-card">
+          <div class="card-head between">
+            <h3>Contenido de la página</h3>
+            <button type="button" class="collapse-btn" data-collapse-target="ac-page-content-wrap">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="ac-page-content-wrap">
+
+            <!-- Hero -->
+            <div class="card-head between" style="margin-top:1rem;">
+              <h4 style="margin:0;">Hero de la página</h4>
+            </div>
+            <div class="grid-2" style="margin-top:.75rem;">
+              <div class="full">
+                <label>Kicker</label>
+                <input type="text" id="ac-page-kicker" placeholder="FORMACIÓN ESPECIALIZADA" />
+              </div>
+              <div class="full">
+                <label>Título (h1)</label>
+                <input type="text" id="ac-page-title" placeholder="Academia Katarzyna" />
+              </div>
+              <div class="full">
+                <label>Descripción</label>
+                <textarea id="ac-page-desc" rows="3" placeholder="Cursos prácticos en derecho tributario..."></textarea>
+              </div>
+            </div>
+            <p class="small muted" style="margin:.75rem 0 .5rem;">Stats (4 estadísticas del hero)</p>
+            <div class="grid-2">
+              <div><label>Stat 1 — Número</label><input type="text" id="ac-stat-0-num" placeholder="6+" /></div>
+              <div><label>Stat 1 — Etiqueta</label><input type="text" id="ac-stat-0-label" placeholder="Cursos" /></div>
+              <div><label>Stat 2 — Número</label><input type="text" id="ac-stat-1-num" placeholder="150+" /></div>
+              <div><label>Stat 2 — Etiqueta</label><input type="text" id="ac-stat-1-label" placeholder="Estudiantes" /></div>
+              <div><label>Stat 3 — Número</label><input type="text" id="ac-stat-2-num" placeholder="12+" /></div>
+              <div><label>Stat 3 — Etiqueta</label><input type="text" id="ac-stat-2-label" placeholder="Años de exp." /></div>
+              <div><label>Stat 4 — Número</label><input type="text" id="ac-stat-3-num" placeholder="100%" /></div>
+              <div><label>Stat 4 — Etiqueta</label><input type="text" id="ac-stat-3-label" placeholder="Online" /></div>
+            </div>
+
+            <!-- Beneficios -->
+            <div class="card-head between" style="margin-top:1.5rem;">
+              <h4 style="margin:0;">Beneficios</h4>
+            </div>
+            <div class="grid-2" style="margin-top:.75rem;">
+              <div class="full">
+                <label>Título de la sección</label>
+                <input type="text" id="ac-benefits-title" placeholder="¿Por qué elegir Academia Katarzyna?" />
+              </div>
+              <div><label>Beneficio 1 — Título</label><input type="text" id="ac-benefit-0-title" placeholder="Docentes en ejercicio" /></div>
+              <div><label>Beneficio 1 — Descripción</label><input type="text" id="ac-benefit-0-desc" placeholder="Abogados que actualmente litigan..." /></div>
+              <div><label>Beneficio 2 — Título</label><input type="text" id="ac-benefit-1-title" placeholder="Acceso de por vida" /></div>
+              <div><label>Beneficio 2 — Descripción</label><input type="text" id="ac-benefit-1-desc" placeholder="Una vez inscrito, el contenido es tuyo..." /></div>
+              <div><label>Beneficio 3 — Título</label><input type="text" id="ac-benefit-2-title" placeholder="Certificado incluido" /></div>
+              <div><label>Beneficio 3 — Descripción</label><input type="text" id="ac-benefit-2-desc" placeholder="Al completar el curso obtienes..." /></div>
+              <div><label>Beneficio 4 — Título</label><input type="text" id="ac-benefit-3-title" placeholder="Aprende a tu ritmo" /></div>
+              <div><label>Beneficio 4 — Descripción</label><input type="text" id="ac-benefit-3-desc" placeholder="Videos bajo demanda..." /></div>
+              <div><label>Beneficio 5 — Título</label><input type="text" id="ac-benefit-4-title" placeholder="Material descargable" /></div>
+              <div><label>Beneficio 5 — Descripción</label><input type="text" id="ac-benefit-4-desc" placeholder="Plantillas, checklists y guías..." /></div>
+              <div><label>Beneficio 6 — Título</label><input type="text" id="ac-benefit-5-title" placeholder="Soporte de consultas" /></div>
+              <div><label>Beneficio 6 — Descripción</label><input type="text" id="ac-benefit-5-desc" placeholder="Resuelve tus dudas con el equipo..." /></div>
+            </div>
+
+            <!-- CTA -->
+            <div class="card-head between" style="margin-top:1.5rem;">
+              <h4 style="margin:0;">CTA (llamada a la acción)</h4>
+            </div>
+            <div class="grid-2" style="margin-top:.75rem;">
+              <div class="full">
+                <label>Título</label>
+                <input type="text" id="ac-cta-title" placeholder="¿Formación para tu equipo completo?" />
+              </div>
+              <div class="full">
+                <label>Descripción</label>
+                <textarea id="ac-cta-desc" rows="2" placeholder="Ofrecemos planes corporativos..."></textarea>
+              </div>
+              <div><label>Texto del botón</label><input type="text" id="ac-cta-btn-label" placeholder="Solicitar plan corporativo" /></div>
+              <div><label>URL del botón</label><input type="text" id="ac-cta-btn-href" placeholder="contacto.html" /></div>
+            </div>
+
+            <div class="row row-space-top">
+              <button type="button" class="cta" id="ac-page-save">Guardar contenido de página</button>
+              <span class="status" id="ac-page-status"></span>
+            </div>
+          </div>
+        </div>
+
         <!-- Course form (hidden by default, shown on new/edit) -->
         <div class="card hidden" id="ac-form-card">
           <div class="section-head spaced">

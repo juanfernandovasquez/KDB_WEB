@@ -101,6 +101,7 @@ ALLOWED_PAGES = {
     "cookies",
     "terminos",
     "privacidad",
+    "academia",
 }
 PAGE_VISIBILITY_KEYS = {
     "home",

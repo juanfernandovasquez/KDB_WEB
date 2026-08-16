@@ -223,6 +223,7 @@ def init_db():
             "cookies",
             "terminos",
             "privacidad",
+            "academia",
         ]
         now = datetime.utcnow().isoformat()
         for page in page_defaults:

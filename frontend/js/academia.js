@@ -1,4 +1,4 @@
-/* Academia page — course catalog */
+/* Academia page — course catalog + dynamic page content */
 (function () {
   const grid = document.getElementById('courses-grid');
   const loading = document.getElementById('courses-loading');
@@ -6,6 +6,77 @@
   const filterBtns = document.querySelectorAll('#academia-filters .filter-btn');
 
   let allCourses = [];
+
+  async function loadPageContent() {
+    let data = {};
+    try {
+      const res = await fetch(`${window.API_BASE}/api/page/academia`);
+      if (res.ok) data = await res.json();
+    } catch (_) {}
+
+    const about = data.about || {};
+    const story = data.story || {};
+    const services = data.services || [];
+    const servicesMeta = data.services_meta || {};
+
+    // Hero kicker
+    const kicEl = document.querySelector('.academia-hero-kicker');
+    if (kicEl && about.primary_label) kicEl.textContent = about.primary_label;
+
+    // Hero h1
+    const h1El = document.querySelector('.academia-hero h1');
+    if (h1El && about.title) h1El.textContent = about.title;
+
+    // Hero description
+    const descEl = document.querySelector('.academia-hero-desc');
+    if (descEl && about.content) descEl.textContent = about.content;
+
+    // Stats
+    let stats = [];
+    try { stats = JSON.parse(story.content_html || '[]'); } catch (_) {}
+    if (stats.length === 4) {
+      document.querySelectorAll('.academia-stat').forEach(function (el, i) {
+        const numEl = el.querySelector('.stat-num');
+        const lblEl = el.querySelector('.stat-label');
+        if (numEl && stats[i].num)   numEl.textContent = stats[i].num;
+        if (lblEl && stats[i].label) lblEl.textContent = stats[i].label;
+      });
+    }
+
+    // Benefits section title
+    const benefTitleEl = document.querySelector('.academia-benefits h2');
+    if (benefTitleEl && servicesMeta.title) benefTitleEl.textContent = servicesMeta.title;
+
+    // Benefit cards
+    if (services.length) {
+      document.querySelectorAll('.benefit-card').forEach(function (card, i) {
+        if (!services[i]) return;
+        const h3 = card.querySelector('h3');
+        const p  = card.querySelector('p');
+        if (h3 && services[i].title)       h3.textContent = services[i].title;
+        if (p  && services[i].description) p.textContent  = services[i].description;
+      });
+    }
+
+    // CTA title
+    const ctaTitleEl = document.querySelector('.academia-cta h2');
+    if (ctaTitleEl && story.title) ctaTitleEl.textContent = story.title;
+
+    // CTA description
+    const ctaDescEl = document.querySelector('.academia-cta p');
+    if (ctaDescEl && story.paragraphs) ctaDescEl.textContent = story.paragraphs;
+
+    // CTA button
+    if (about.secondary_label) {
+      const btn = document.querySelector('.btn-cta-gold');
+      if (btn) {
+        btn.textContent = about.secondary_label;
+        if (about.secondary_href) btn.href = about.secondary_href;
+      }
+    }
+  }
+
+  loadPageContent();
 
   function categoryLabel(cat) {
     const map = {
