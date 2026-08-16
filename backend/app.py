@@ -77,6 +77,8 @@ from models import (
     admin_update_order,
     fetch_orders,
     fetch_order_by_id,
+    fetch_students,
+    fetch_student_orders,
 )
 from s3_service import (
     create_media_folder,
@@ -1613,6 +1615,45 @@ def api_admin_delete_course(course_id):
         return jsonify(error="Curso no encontrado"), 404
     delete_course(course_id)
     return jsonify(message="Curso eliminado"), 200
+
+
+# ─── Academia: Moodle course visibility toggle ────────────────────────────────
+
+@app.route("/api/admin/courses/<int:course_id>/moodle_visibility", methods=["POST"])
+@require_admin()
+def api_admin_toggle_moodle_visibility(course_id):
+    ensure_db()
+    from moodle_service import set_course_visibility
+    course = fetch_course_by_id(course_id)
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+    moodle_id = course.get("moodle_course_id")
+    if not moodle_id:
+        return jsonify(error="Este curso no tiene moodle_course_id configurado"), 400
+    data = request.get_json(silent=True) or {}
+    visible = bool(data.get("visible", True))
+    try:
+        set_course_visibility(moodle_id, visible)
+        return jsonify(message=f"Curso {'visible' if visible else 'oculto'} en Moodle"), 200
+    except Exception as exc:
+        app.logger.error("moodle visibility error: %s", exc)
+        return jsonify(error=str(exc)), 500
+
+
+# ─── Academia: Students ───────────────────────────────────────────────────────
+
+@app.route("/api/admin/students", methods=["GET"])
+@require_admin()
+def api_admin_students():
+    ensure_db()
+    return jsonify(fetch_students())
+
+
+@app.route("/api/admin/students/<path:email>/orders", methods=["GET"])
+@require_admin()
+def api_admin_student_orders(email):
+    ensure_db()
+    return jsonify(fetch_student_orders(email))
 
 
 # ─── Academia: Checkout (simulación) ─────────────────────────────────────────

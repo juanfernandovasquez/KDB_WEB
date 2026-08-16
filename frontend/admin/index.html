@@ -1752,6 +1752,58 @@
           </div>
         </div>
 
+        <!-- Students table -->
+        <div class="card" id="ac-students-card">
+          <div class="card-head between">
+            <h3>Alumnos (<span id="ac-students-count">0</span>)</h3>
+            <button type="button" class="collapse-btn" data-collapse-target="ac-students-wrap">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="ac-students-wrap">
+            <div class="table-responsive">
+              <table class="subs-table" style="min-width:760px;">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th style="text-align:center;">Órdenes</th>
+                    <th style="text-align:center;">Pagadas</th>
+                    <th>Total pagado</th>
+                    <th style="text-align:center;">Matriculado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="ac-students-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student detail modal -->
+        <div class="modal-overlay hidden" id="ac-student-modal" role="dialog" aria-modal="true">
+          <div class="modal-box" style="max-width:860px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+              <h3 id="ac-student-modal-name" style="margin:0;">Alumno</h3>
+              <button type="button" class="secondary small-btn" id="ac-student-modal-close">Cerrar</button>
+            </div>
+            <div class="table-responsive">
+              <table class="subs-table" style="min-width:640px;">
+                <thead>
+                  <tr>
+                    <th>Orden</th>
+                    <th>Fecha</th>
+                    <th>Curso</th>
+                    <th>Monto</th>
+                    <th>Comprobante</th>
+                    <th>Pago</th>
+                    <th>Moodle</th>
+                  </tr>
+                </thead>
+                <tbody id="ac-student-orders-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- Comprobante modal -->
         <div class="modal-overlay hidden" id="ac-comp-modal" role="dialog" aria-modal="true">
           <div class="modal-box" style="max-width:420px;">

@@ -1268,6 +1268,41 @@ def fetch_orders(status=None):
     return [dict(r) for r in rows]
 
 
+def fetch_students():
+    """Retorna alumnos únicos (por email) con resumen de sus órdenes."""
+    conn = get_conn()
+    rows = conn.execute("""
+        SELECT
+            o.student_email,
+            o.student_name,
+            o.moodle_user_email,
+            COUNT(o.id)                                          AS total_orders,
+            SUM(CASE WHEN o.status='paid' THEN 1 ELSE 0 END)    AS paid_orders,
+            SUM(CASE WHEN o.status='paid' THEN o.amount ELSE 0 END) AS total_paid,
+            SUM(CASE WHEN o.moodle_enrolled=1 THEN 1 ELSE 0 END) AS enrolled_count,
+            MAX(o.created_at)                                    AS last_order_at
+        FROM orders o
+        GROUP BY o.student_email
+        ORDER BY last_order_at DESC
+    """).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def fetch_student_orders(student_email):
+    """Retorna todas las órdenes de un alumno específico."""
+    conn = get_conn()
+    rows = conn.execute("""
+        SELECT o.*, c.slug AS course_slug, c.moodle_course_id
+        FROM orders o
+        LEFT JOIN courses c ON o.course_id = c.id
+        WHERE o.student_email = ?
+        ORDER BY o.created_at DESC
+    """, (student_email,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 # --- Admin auth helpers ---
 
 def fetch_admin_by_username(username):

@@ -1,9 +1,12 @@
 import os
+import time
 import secrets
 import string
 import logging
 
 import requests
+
+ENROLLMENT_DAYS = int(os.environ.get("MOODLE_ENROLLMENT_DAYS", "90"))
 
 logger = logging.getLogger(__name__)
 
@@ -88,18 +91,35 @@ def get_or_create_moodle_user(email, firstname, lastname):
 
 
 def enroll_user_in_course(moodle_user_id, moodle_course_id):
-    """Matricula al usuario (rol Student=5) en el curso de Moodle."""
+    """Matricula al usuario (rol Student=5) con duración de ENROLLMENT_DAYS días."""
+    timestart = int(time.time())
+    timeend = timestart + ENROLLMENT_DAYS * 24 * 3600
     _call(
         "enrol_manual_enrol_users",
         **{
             "enrolments[0][roleid]": 5,
             "enrolments[0][userid]": moodle_user_id,
             "enrolments[0][courseid]": moodle_course_id,
+            "enrolments[0][timestart]": timestart,
+            "enrolments[0][timeend]": timeend,
         },
     )
     logger.info(
-        "Moodle: usuario %s matriculado en curso %s", moodle_user_id, moodle_course_id
+        "Moodle: usuario %s matriculado en curso %s por %s días",
+        moodle_user_id, moodle_course_id, ENROLLMENT_DAYS,
     )
+
+
+def set_course_visibility(moodle_course_id, visible: bool):
+    """Hace visible (True) o invisible (False) un curso en Moodle."""
+    _call(
+        "core_course_update_courses",
+        **{
+            "courses[0][id]": moodle_course_id,
+            "courses[0][visible]": 1 if visible else 0,
+        },
+    )
+    logger.info("Moodle: curso %s visible=%s", moodle_course_id, visible)
 
 
 def provision_student(email, firstname, lastname, moodle_course_id):

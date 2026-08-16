@@ -2244,17 +2244,19 @@ let currentAdminUserId = null;
       } else {
         tbody.innerHTML = courses.map(c => `
           <tr>
-            <td><strong>${escHtml(c.title)}</strong><br><small class="muted">${escHtml(c.slug)}</small></td>
+            <td><strong>${escHtml(c.title)}</strong><br><small class="muted">${escHtml(c.slug)}</small>${c.moodle_course_id ? `<br><small class="muted">Moodle ID: ${c.moodle_course_id}</small>` : ''}</td>
             <td>${escHtml(c.category || '—')}</td>
             <td>S/ ${Number(c.price).toFixed(0)}${c.original_price ? ` <small class="muted" style="text-decoration:line-through">S/ ${Number(c.original_price).toFixed(0)}</small>` : ''}</td>
             <td><span class="${c.is_published ? 'badge-active' : 'badge-inactive'}">${c.is_published ? 'Publicado' : 'Borrador'}</span></td>
             <td class="row" style="gap:.35rem;flex-wrap:wrap;">
               <a class="secondary small-btn" href="/curso.html?slug=${encodeURIComponent(c.slug)}" target="_blank">Ver</a>
               <button type="button" class="secondary small-btn ac-edit-btn" data-id="${c.id}">Editar</button>
+              ${c.moodle_course_id ? `<button type="button" class="secondary small-btn ac-moodle-hide-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Ocultar Moodle</button>
+              <button type="button" class="cta small-btn ac-moodle-show-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Activar Moodle</button>` : ''}
               <button type="button" class="secondary small-btn danger ac-del-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Eliminar</button>
             </td>
           </tr>`).join('');
-        // bind edit/delete
+        // bind edit/delete/moodle visibility
         tbody.querySelectorAll('.ac-edit-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
             try {
@@ -2268,6 +2270,19 @@ let currentAdminUserId = null;
         });
         tbody.querySelectorAll('.ac-del-btn').forEach(btn => {
           btn.addEventListener('click', () => acDeleteCourse(btn.dataset.id, btn.dataset.title));
+        });
+        const toggleMoodleVisibility = async (id, visible) => {
+          const r = await apiFetch(`/api/admin/courses/${id}/moodle_visibility`, {
+            method: 'POST', body: JSON.stringify({ visible })
+          });
+          const data = await r.json();
+          alert(data.message || data.error);
+        };
+        tbody.querySelectorAll('.ac-moodle-hide-btn').forEach(btn => {
+          btn.addEventListener('click', () => toggleMoodleVisibility(btn.dataset.id, false));
+        });
+        tbody.querySelectorAll('.ac-moodle-show-btn').forEach(btn => {
+          btn.addEventListener('click', () => toggleMoodleVisibility(btn.dataset.id, true));
         });
       }
     } catch (err) {
@@ -2355,11 +2370,79 @@ let currentAdminUserId = null;
       ordTbody.innerHTML = '<tr><td colspan="9" class="muted small">Error al cargar órdenes.</td></tr>';
     }
 
-    // expand both cards
-    ['ac-table-wrap', 'ac-orders-wrap'].forEach(id => {
+    // Load students
+    await loadStudentsAdmin();
+
+    // expand cards
+    ['ac-table-wrap', 'ac-orders-wrap', 'ac-students-wrap'].forEach(id => {
       const el = q(id);
       if (el?.classList.contains('collapsed')) el.classList.remove('collapsed');
     });
+  }
+
+  async function loadStudentsAdmin() {
+    const tbody = q('ac-students-body');
+    const countEl = q('ac-students-count');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" class="muted small">Cargando…</td></tr>';
+    try {
+      const res = await apiFetch('/api/admin/students');
+      const students = await res.json().catch(() => []);
+      countEl.textContent = Array.isArray(students) ? students.length : 0;
+      if (!Array.isArray(students) || !students.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="muted small">Sin alumnos registrados aún.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = students.map(s => `
+        <tr>
+          <td><strong>${escHtml(s.student_name || '—')}</strong></td>
+          <td>${escHtml(s.student_email)}</td>
+          <td style="text-align:center;">${s.total_orders}</td>
+          <td style="text-align:center;">${s.paid_orders}</td>
+          <td>S/ ${Number(s.total_paid || 0).toFixed(2)}</td>
+          <td style="text-align:center;">${s.enrolled_count > 0 ? '<span class="badge-active">Sí</span>' : '<span class="badge-inactive">No</span>'}</td>
+          <td>
+            <button type="button" class="secondary small-btn ac-student-detail-btn" data-email="${escHtml(s.student_email)}" data-name="${escHtml(s.student_name || '')}">Ver órdenes</button>
+          </td>
+        </tr>`).join('');
+      tbody.querySelectorAll('.ac-student-detail-btn').forEach(btn => {
+        btn.addEventListener('click', () => showStudentDetail(btn.dataset.email, btn.dataset.name));
+      });
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="7" class="muted small">Error al cargar alumnos.</td></tr>';
+    }
+  }
+
+  async function showStudentDetail(email, name) {
+    const modal = q('ac-student-modal');
+    const title = q('ac-student-modal-name');
+    const tbody = q('ac-student-orders-body');
+    if (!modal) return;
+    title.textContent = name || email;
+    tbody.innerHTML = '<tr><td colspan="7" class="muted small">Cargando…</td></tr>';
+    modal.classList.remove('hidden');
+    try {
+      const res = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/orders`);
+      const orders = await res.json().catch(() => []);
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="muted small">Sin órdenes.</td></tr>';
+        return;
+      }
+      const compLabel = t => t === 'factura' ? 'Factura' : 'Boleta';
+      const statusBadge = s => s === 'paid' ? '<span class="badge-active">Pagado</span>' : s === 'pending' ? '<span class="badge-inactive">Pendiente</span>' : `<span class="badge-inactive">${escHtml(s)}</span>`;
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td>ORD-${String(o.id).padStart(4,'0')}</td>
+          <td>${escHtml((o.created_at||'').slice(0,10))}</td>
+          <td>${escHtml(o.course_title||'—')}</td>
+          <td>S/ ${Number(o.amount||0).toFixed(2)}</td>
+          <td>${compLabel(o.comprobante_type)}<br><small class="muted">${escHtml(o.taxpayer_id||'')}</small>${o.taxpayer_name ? `<br><small class="muted">${escHtml(o.taxpayer_name)}</small>` : ''}</td>
+          <td>${statusBadge(o.status)}</td>
+          <td>${o.moodle_enrolled ? '<span class="badge-active">Matriculado</span>' : '<span class="badge-inactive">No</span>'}</td>
+        </tr>`).join('');
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="7" class="muted small">Error al cargar.</td></tr>';
+    }
   }
 
   function bindAcademiaEvents() {
@@ -4359,6 +4442,7 @@ let currentAdminUserId = null;
     bind("contact-next", () => changeContactPage(1));
     bind("contact-modal-close", closeContactModal);
     bind("contact-modal-backdrop", closeContactModal);
+    bind("ac-student-modal-close", () => q("ac-student-modal")?.classList.add("hidden"));
     bind("media-modal-close", closeMediaModal);
     bind("media-modal-backdrop", closeMediaModal);
     bind("media-refresh", () => loadMediaLibrary());
