@@ -1870,14 +1870,102 @@ button.secondary.small-btn {
   .service-description-editor .editor-surface { min-height: 160px; }
 }
 
-/* ── Modal overlay (Academia: comprobante) ───────────────────────────────── */
+/* ── Modal overlay ───────────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 9000;
   background: rgba(0,0,0,.5);
   display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
 }
 .modal-overlay.hidden { display: none !important; }
 .modal-box {
   background: #fff; padding: 2rem; width: 100%; max-width: 440px;
   box-shadow: 0 8px 32px rgba(0,0,0,.2);
+}
+
+/* ── Gestionar orden modal ───────────────────────────────────────────────── */
+.manage-order-modal {
+  max-width: 780px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 0;
+  border-radius: 10px;
+}
+.mgmt-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid #e8e8e8;
+  position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.mgmt-header h3 { margin: 0; font-size: 1.05rem; }
+.modal-close-x {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.3rem; color: #666; padding: .2rem .5rem; line-height: 1;
+}
+.modal-close-x:hover { color: #111; }
+.mgmt-summary {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .25rem .5rem;
+  padding: .9rem 1.4rem;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: .85rem;
+}
+.mgmt-sum-row { display: flex; gap: .4rem; align-items: baseline; }
+.mgmt-sum-lbl { color: #777; flex-shrink: 0; min-width: 7rem; }
+.mgmt-sections {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #e8e8e8;
+}
+.mgmt-section {
+  background: #fff;
+  padding: 1rem 1.25rem;
+}
+.mgmt-section-full {
+  grid-column: 1 / -1;
+  background: #fff;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e8e8e8;
+}
+.mgmt-section-title {
+  font-size: .78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: #666; margin: 0 0 .7rem;
+}
+.mgmt-label { display: block; font-size: .82rem; color: #555; margin-bottom: .3rem; }
+.mgmt-input {
+  width: 100%; padding: .45rem .6rem; font-size: .88rem;
+  border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;
+}
+.mgmt-input:focus { outline: none; border-color: #7a5c9e; }
+.mgmt-textarea {
+  width: 100%; padding: .45rem .6rem; font-size: .88rem;
+  border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;
+  resize: vertical; min-height: 80px;
+}
+.mgmt-textarea:focus { outline: none; border-color: #7a5c9e; }
+.mgmt-btn-full {
+  width: 100%; margin-top: .6rem; text-align: center;
+}
+.mgmt-status { margin: .35rem 0 0; min-height: 1.2em; color: #555; }
+.mgmt-dropzone {
+  border: 2px dashed #ccc; border-radius: 6px; padding: .8rem;
+  text-align: center; cursor: pointer; margin-top: .5rem;
+  transition: border-color .15s, background .15s;
+}
+.mgmt-dropzone:hover, .mgmt-dropzone.dragover {
+  border-color: #7a5c9e; background: #f4eeff;
+}
+.mgmt-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .4rem; }
+.link-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: #7a5c9e; text-decoration: underline; font-size: inherit;
+}
+.link-btn:hover { color: #5a3c7e; }
+
+@media (max-width: 640px) {
+  .manage-order-modal { max-height: 98vh; border-radius: 8px 8px 0 0; margin-top: auto; }
+  .mgmt-sections { grid-template-columns: 1fr; }
+  .mgmt-section-full { grid-column: 1; }
+  .mgmt-summary { grid-template-columns: 1fr; }
 }

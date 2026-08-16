@@ -2295,15 +2295,14 @@ let currentAdminUserId = null;
     try {
       const oRes = await apiFetch('/api/admin/orders');
       const orders = await oRes.json().catch(() => []);
-      ordCount.textContent = Array.isArray(orders) ? orders.length : 0;
-      if (!Array.isArray(orders) || !orders.length) {
-        ordTbody.innerHTML = '<tr><td colspan="9" class="muted small">Sin órdenes aún.</td></tr>';
+      _ordersCache = Array.isArray(orders) ? orders : [];
+      ordCount.textContent = _ordersCache.length;
+      if (!_ordersCache.length) {
+        ordTbody.innerHTML = '<tr><td colspan="7" class="muted small">Sin órdenes aún.</td></tr>';
       } else {
-        ordTbody.innerHTML = orders.map(o => {
-          const d = new Date(o.created_at + 'Z').toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+        ordTbody.innerHTML = _ordersCache.map(o => {
+          const d = new Date(o.created_at + 'Z').toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'2-digit' });
           const ordRef = `ORD-${String(o.id).padStart(4,'0')}`;
-          const compLabel = o.comprobante_type === 'factura' ? 'Factura' : 'Boleta';
-          const taxpayerInfo = o.taxpayer_id ? `<br><small class="muted">${escHtml(o.taxpayer_id)}${o.taxpayer_name ? ' · ' + escHtml(o.taxpayer_name) : ''}</small>` : '';
           const compNumBadge = o.comprobante_number
             ? `<span class="badge-active small">${escHtml(o.comprobante_number)}</span>`
             : `<span class="badge-inactive small">Pendiente</span>`;
@@ -2311,132 +2310,31 @@ let currentAdminUserId = null;
             ? `<span class="badge-active">Pagado</span>`
             : `<span class="badge-inactive">Pendiente</span>`;
           const moodleBadge = o.moodle_enrolled
-            ? `<span class="badge-active">Inscrito</span>`
-            : `<span class="badge-inactive">Pendiente</span>`;
+            ? `<span class="badge-active small">Inscrito</span>`
+            : `<span class="badge-inactive small">No</span>`;
           const voucherCell = o.voucher_url
-            ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="small voucher-link">📎 Ver constancia</a>`
-            : `<span class="small muted">Sin constancia</span>`;
-          const pmLabel = o.payment_method ? `<small class="muted">${escHtml(o.payment_method)}</small>` : '';
-          const opNumLabel = o.operation_number ? `<small class="muted">Op: ${escHtml(o.operation_number)}</small>` : '';
-          const notesSnippet = o.notes ? `<div class="order-notes-preview small muted" title="${escHtml(o.notes)}">📝 ${escHtml(o.notes.substring(0,40))}${o.notes.length>40?'…':''}</div>` : '';
+            ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="small voucher-link">📎 Ver</a>`
+            : `<span class="small muted">—</span>`;
+          const notesSnippet = o.notes
+            ? `<div class="order-notes-preview small muted" title="${escHtml(o.notes)}">📝 ${escHtml(o.notes.substring(0,30))}${o.notes.length>30?'…':''}</div>`
+            : '';
           return `<tr data-order-id="${o.id}">
-            <td class="small"><strong>${escHtml(ordRef)}</strong><br>${d}</td>
-            <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small">${escHtml(o.student_email)}</a>${notesSnippet}</td>
+            <td class="small"><strong>${escHtml(ordRef)}</strong><br><span class="muted">${d}</span></td>
+            <td>${escHtml(o.student_name)}<br><a href="mailto:${escHtml(o.student_email)}" class="small muted">${escHtml(o.student_email)}</a>${notesSnippet}</td>
             <td class="small">${escHtml(o.course_title || o.course_slug || '—')}</td>
-            <td><strong>S/ ${Number(o.amount).toFixed(0)}</strong><br>${pmLabel}${opNumLabel ? '<br>' + opNumLabel : ''}</td>
             <td>${voucherCell}</td>
-            <td>${compLabel}${taxpayerInfo}<br>${compNumBadge}</td>
-            <td>${paidBadge}</td>
-            <td>${moodleBadge}</td>
-            <td>
-              <div style="display:flex;flex-direction:column;gap:.3rem;">
-                ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-paid" data-id="${o.id}">✓ Confirmar pago</button>` : ''}
-                <button class="secondary small-btn ac-ord-comp" data-id="${o.id}" data-current="${escHtml(o.comprobante_number||'')}">${o.comprobante_number ? '✏️ Editar comprobante' : '📄 Registrar comprobante'}</button>
-                <button class="secondary small-btn ac-ord-attach-voucher" data-id="${o.id}">📎 Adjuntar constancia</button>
-                ${o.status !== 'paid' ? `<button class="secondary small-btn ac-ord-req-voucher" data-id="${o.id}" data-email="${escHtml(o.student_email)}">📩 Solicitar constancia</button>` : ''}
-                <button class="secondary small-btn ac-ord-notes" data-id="${o.id}" data-notes="${escHtml(o.notes||'')}">📝 Notas</button>
-                ${o.status === 'paid' && !o.moodle_enrolled ? `<button class="btn-provision small-btn ac-ord-provision" data-id="${o.id}" data-email="${escHtml(o.student_email)}" data-name="${escHtml(o.student_name)}">📧 Enviar credenciales</button>` : ''}
-                ${o.moodle_enrolled ? `<button class="secondary small-btn ac-ord-unenroll" data-id="${o.id}" data-name="${escHtml(o.student_name)}">🚫 Desmatricular</button>` : ''}
-              </div>
-            </td>
+            <td>${(o.comprobante_type === 'factura' ? 'Factura' : 'Boleta')}<br>${compNumBadge}</td>
+            <td>${paidBadge}<br>${moodleBadge}</td>
+            <td><button class="secondary small-btn ac-ord-manage" data-id="${o.id}">⚙ Gestionar</button></td>
           </tr>`;
         }).join('');
 
-        // Bind order action buttons
-        ordTbody.querySelectorAll('.ac-ord-paid').forEach(btn => {
-          btn.addEventListener('click', () => {
-            q('ac-pay-order-id').value = btn.dataset.id;
-            q('ac-pay-opnum').value = '';
-            q('ac-pay-status').textContent = '';
-            q('ac-pay-modal').classList.remove('hidden');
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-comp').forEach(btn => {
-          btn.addEventListener('click', () => {
-            q('ac-comp-order-id').value = btn.dataset.id;
-            q('ac-comp-number').value = btn.dataset.current || '';
-            q('ac-comp-status').textContent = '';
-            q('ac-comp-modal').classList.remove('hidden');
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-attach-voucher').forEach(btn => {
-          btn.addEventListener('click', () => {
-            q('ac-voucher-order-id').value = btn.dataset.id;
-            q('ac-voucher-file').value = '';
-            q('ac-voucher-status').textContent = '';
-            q('ac-voucher-dropzone').classList.remove('dragover');
-            q('ac-voucher-modal').classList.remove('hidden');
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-req-voucher').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const { id, email } = btn.dataset;
-            if (!confirm(`¿Enviar correo a ${email} solicitando la constancia de pago?`)) return;
-            btn.disabled = true; btn.textContent = 'Enviando…';
-            const res = await apiFetch(`/api/admin/orders/${id}/request_voucher`, { method: 'POST' });
-            const data = await res.json().catch(() => ({}));
-            if (res.ok) {
-              btn.textContent = '✓ Enviado';
-              setTimeout(() => { btn.disabled = false; btn.textContent = '📩 Solicitar constancia'; }, 3000);
-            } else {
-              alert(data.error || 'Error al enviar correo.');
-              btn.disabled = false; btn.textContent = '📩 Solicitar constancia';
-            }
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-notes').forEach(btn => {
-          btn.addEventListener('click', () => {
-            q('ac-notes-order-id').value = btn.dataset.id;
-            q('ac-notes-text').value = btn.dataset.notes || '';
-            q('ac-notes-status').textContent = '';
-            q('ac-notes-modal').classList.remove('hidden');
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-unenroll').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const { id, name } = btn.dataset;
-            if (!confirm(`¿Desmatricular a ${name} del curso en Moodle?\n\nEsto revocará su acceso al curso.`)) return;
-            btn.disabled = true; btn.textContent = 'Desmatriculando…';
-            const res = await apiFetch(`/api/admin/orders/${id}/unenroll`, { method: 'POST' });
-            const data = await res.json().catch(() => ({}));
-            if (res.ok) {
-              loadAcademiaAdmin();
-            } else {
-              alert(data.error || 'Error al desmatricular.');
-              btn.disabled = false; btn.textContent = '🚫 Desmatricular';
-            }
-          });
-        });
-
-        ordTbody.querySelectorAll('.ac-ord-provision').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const { id, name, email } = btn.dataset;
-            if (!confirm(`¿Enviar credenciales y matricular en Moodle a:\n${name} (${email})?\n\nEsto enviará el correo de bienvenida con acceso al curso.`)) return;
-            btn.disabled = true; btn.textContent = 'Enviando…';
-            try {
-              const res = await apiFetch(`/api/admin/orders/${id}/provision`, { method: 'POST' });
-              const data = await res.json().catch(() => ({}));
-              if (res.ok) {
-                btn.textContent = '✓ Enviado';
-                setTimeout(() => loadAcademiaAdmin(), 1500);
-              } else {
-                alert(data.error || 'Error al enviar credenciales.');
-                btn.disabled = false; btn.textContent = '📧 Enviar credenciales';
-              }
-            } catch {
-              alert('Error de conexión.');
-              btn.disabled = false; btn.textContent = '📧 Enviar credenciales';
-            }
-          });
+        ordTbody.querySelectorAll('.ac-ord-manage').forEach(btn => {
+          btn.addEventListener('click', () => openManageModal(Number(btn.dataset.id)));
         });
       }
     } catch {
-      ordTbody.innerHTML = '<tr><td colspan="9" class="muted small">Error al cargar órdenes.</td></tr>';
+      ordTbody.innerHTML = '<tr><td colspan="7" class="muted small">Error al cargar órdenes.</td></tr>';
     }
 
     // Load students
@@ -2514,6 +2412,121 @@ let currentAdminUserId = null;
     }
   }
 
+  // ── Gestionar orden modal ────────────────────────────────────────────────────
+
+  let _ordersCache = [];
+  let _managedOrderId = null;
+
+  function openManageModal(orderId) {
+    const o = _ordersCache.find(x => x.id === orderId);
+    if (!o) return;
+    _managedOrderId = orderId;
+
+    const ordRef = `ORD-${String(o.id).padStart(4,'0')}`;
+    const d = new Date(o.created_at + 'Z').toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+
+    // Summary
+    q('mgmt-ref').textContent = ordRef;
+    q('mgmt-student').textContent = o.student_name || '—';
+    const emailEl = q('mgmt-email'); emailEl.textContent = o.student_email || '—'; emailEl.href = `mailto:${o.student_email}`;
+    q('mgmt-course').textContent = o.course_title || o.course_slug || '—';
+    q('mgmt-amount').textContent = `S/ ${Number(o.amount || 0).toFixed(2)}`;
+    q('mgmt-method').textContent = o.payment_method || '—';
+    const opnumRow = q('mgmt-opnum-row');
+    if (o.operation_number) { q('mgmt-opnum').textContent = o.operation_number; opnumRow.style.display = ''; }
+    else { opnumRow.style.display = 'none'; }
+    q('mgmt-date').textContent = d;
+    q('mgmt-comp-type-info').textContent = `${o.comprobante_type === 'factura' ? 'Factura' : 'Boleta'}${o.taxpayer_id ? ' · ' + o.taxpayer_id : ''}`;
+
+    // Pago section
+    q('mgmt-pay-badge').innerHTML = o.status === 'paid'
+      ? '<span class="badge-active">Pagado</span>'
+      : '<span class="badge-inactive">Pendiente</span>';
+    q('mgmt-pay-form').style.display = o.status === 'paid' ? 'none' : '';
+    q('mgmt-pay-opnum').value = o.operation_number || '';
+    q('mgmt-pay-status').textContent = '';
+
+    // Constancia section
+    const voucherCur = q('mgmt-voucher-current');
+    voucherCur.innerHTML = o.voucher_url
+      ? `<a href="${escHtml(o.voucher_url)}" target="_blank" class="voucher-link small">📎 Ver constancia adjunta</a>`
+      : '<span class="small muted">Sin constancia</span>';
+    q('mgmt-voucher-file').value = '';
+    q('mgmt-voucher-status').textContent = '';
+    q('mgmt-voucher-dropzone').classList.remove('dragover');
+    q('mgmt-req-voucher').textContent = '📩 Solicitar al alumno';
+    q('mgmt-req-voucher').disabled = false;
+    q('mgmt-req-voucher').style.display = o.status === 'paid' ? 'none' : '';
+
+    // Comprobante section
+    q('mgmt-comp-type').textContent = o.comprobante_type === 'factura' ? 'Factura' : 'Boleta';
+    const taxpayerEl = q('mgmt-taxpayer-info');
+    taxpayerEl.textContent = [o.taxpayer_id, o.taxpayer_name].filter(Boolean).join(' · ') || '';
+    q('mgmt-comp-number').value = o.comprobante_number || '';
+    q('mgmt-comp-status').textContent = '';
+
+    // Moodle section
+    q('mgmt-moodle-badge').innerHTML = o.moodle_enrolled
+      ? '<span class="badge-active">Inscrito</span>'
+      : '<span class="badge-inactive">No inscrito</span>';
+    q('mgmt-provision-btn-wrap').style.display = (o.status === 'paid' && !o.moodle_enrolled) ? '' : 'none';
+    const provBtn = q('mgmt-provision'); provBtn.disabled = false; provBtn.textContent = '📧 Enviar credenciales';
+    q('mgmt-unenroll-btn-wrap').style.display = o.moodle_enrolled ? '' : 'none';
+    const unenBtn = q('mgmt-unenroll'); unenBtn.disabled = false; unenBtn.textContent = '🚫 Desmatricular';
+    q('mgmt-moodle-status').textContent = '';
+
+    // Notas
+    q('mgmt-notes').value = o.notes || '';
+    q('mgmt-notes-status').textContent = '';
+
+    q('ac-manage-modal').classList.remove('hidden');
+  }
+
+  async function mgmtApiCall(path, body) {
+    return apiFetch(path, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
+
+  async function mgmtRefresh() {
+    const id = _managedOrderId;
+    await loadAcademiaAdmin();
+    if (id) openManageModal(id);
+  }
+
+  async function uploadMgmtVoucher(file) {
+    const id = _managedOrderId;
+    const statusEl = q('mgmt-voucher-status');
+    if (file.size > 10 * 1024 * 1024) { statusEl.textContent = 'Archivo demasiado grande (máx 10 MB).'; return; }
+    statusEl.textContent = 'Subiendo archivo…';
+    try {
+      const presignRes = await apiFetch(`/api/admin/orders/${id}/voucher-presign`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, content_type: file.type }),
+      });
+      if (!presignRes.ok) { statusEl.textContent = 'Error al preparar subida.'; return; }
+      const { url, fields, public_url } = await presignRes.json();
+      const fd = new FormData();
+      Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+      fd.append('file', file);
+      const upRes = await fetch(url, { method: 'POST', body: fd });
+      if (!upRes.ok) { statusEl.textContent = 'Error al subir archivo.'; return; }
+      const saveRes = await apiFetch(`/api/admin/orders/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voucher_url: public_url }),
+      });
+      if (saveRes.ok) {
+        statusEl.textContent = '✓ Constancia guardada.';
+        setTimeout(() => mgmtRefresh(), 1000);
+      } else {
+        statusEl.textContent = 'Archivo subido pero error al guardar URL.';
+      }
+    } catch (err) {
+      statusEl.textContent = `Error: ${err.message}`;
+    }
+  }
+
   function bindAcademiaEvents() {
     if (acEventsBound) return;
     acEventsBound = true;
@@ -2523,111 +2536,112 @@ let currentAdminUserId = null;
     bindOnce('ac-form-cancel2', acCloseForm);
     bindOnce('ac-save-btn', acSaveCourse);
 
-    // Confirmar pago modal
-    bindOnce('ac-pay-cancel', () => q('ac-pay-modal').classList.add('hidden'));
-    bindOnce('ac-pay-save', async () => {
-      const id  = q('ac-pay-order-id').value;
-      const opnum = (q('ac-pay-opnum').value || '').trim();
-      q('ac-pay-status').textContent = 'Guardando…';
+    // ── Gestionar orden modal ───────────────────────────────────────────────
+    bindOnce('ac-manage-close', () => q('ac-manage-modal').classList.add('hidden'));
+
+    // Confirm pay
+    bindOnce('mgmt-confirm-pay', async () => {
+      const id = _managedOrderId;
+      const opnum = (q('mgmt-pay-opnum').value || '').trim();
+      const statusEl = q('mgmt-pay-status');
+      statusEl.textContent = 'Guardando…';
       const body = { status: 'paid', payment_method: 'manual' };
       if (opnum) body.operation_number = opnum;
-      const res = await apiFetch(`/api/admin/orders/${id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        q('ac-pay-modal').classList.add('hidden');
-        loadAcademiaAdmin();
-      } else {
-        q('ac-pay-status').textContent = 'Error al confirmar pago.';
-      }
+      const res = await mgmtApiCall(`/api/admin/orders/${id}`, body);
+      if (res.ok) { statusEl.textContent = '✓ Pago confirmado.'; await mgmtRefresh(); }
+      else statusEl.textContent = 'Error al confirmar pago.';
     });
 
-    // Comprobante modal
-    bindOnce('ac-comp-cancel', () => q('ac-comp-modal').classList.add('hidden'));
-    bindOnce('ac-comp-save', async () => {
-      const id  = q('ac-comp-order-id').value;
-      const num = (q('ac-comp-number').value || '').trim();
-      if (!num) { q('ac-comp-status').textContent = 'Ingresa el N° de comprobante.'; return; }
-      q('ac-comp-status').textContent = 'Guardando…';
-      const res = await apiFetch(`/api/admin/orders/${id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comprobante_number: num }),
-      });
-      if (res.ok) {
-        q('ac-comp-modal').classList.add('hidden');
-        loadAcademiaAdmin();
-      } else {
-        q('ac-comp-status').textContent = 'Error al guardar.';
-      }
-    });
-
-    // Notas modal
-    bindOnce('ac-notes-cancel', () => q('ac-notes-modal').classList.add('hidden'));
-    bindOnce('ac-notes-save', async () => {
-      const id    = q('ac-notes-order-id').value;
-      const notes = (q('ac-notes-text').value || '').trim();
-      q('ac-notes-status').textContent = 'Guardando…';
-      const res = await apiFetch(`/api/admin/orders/${id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes }),
-      });
-      if (res.ok) {
-        q('ac-notes-modal').classList.add('hidden');
-        loadAcademiaAdmin();
-      } else {
-        q('ac-notes-status').textContent = 'Error al guardar.';
-      }
-    });
-
-    // Admin voucher upload modal
-    bindOnce('ac-voucher-cancel', () => q('ac-voucher-modal').classList.add('hidden'));
+    // Voucher upload in modal
     {
-      const dropzone = q('ac-voucher-dropzone');
-      const fileInput = q('ac-voucher-file');
+      const dropzone = q('mgmt-voucher-dropzone');
+      const fileInput = q('mgmt-voucher-file');
+      const browse = q('mgmt-voucher-browse');
       if (dropzone && fileInput) {
+        browse?.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
         dropzone.addEventListener('click', () => fileInput.click());
         dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
         dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
         dropzone.addEventListener('drop', e => {
           e.preventDefault(); dropzone.classList.remove('dragover');
-          const f = e.dataTransfer.files[0]; if (f) uploadAdminVoucher(f);
+          const f = e.dataTransfer.files[0]; if (f) uploadMgmtVoucher(f);
         });
-        fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadAdminVoucher(fileInput.files[0]); });
+        fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadMgmtVoucher(fileInput.files[0]); });
       }
     }
-    async function uploadAdminVoucher(file) {
-      const id = q('ac-voucher-order-id').value;
-      const statusEl = q('ac-voucher-status');
-      if (file.size > 10 * 1024 * 1024) { statusEl.textContent = 'Archivo demasiado grande (máx 10 MB).'; return; }
-      statusEl.textContent = 'Subiendo archivo…';
-      try {
-        const presignRes = await apiFetch(`/api/admin/orders/${id}/voucher-presign`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filename: file.name, content_type: file.type }),
-        });
-        if (!presignRes.ok) { statusEl.textContent = 'Error al preparar subida.'; return; }
-        const { url, fields, public_url } = await presignRes.json();
-        const fd = new FormData();
-        Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
-        fd.append('file', file);
-        const upRes = await fetch(url, { method: 'POST', body: fd });
-        if (!upRes.ok) { statusEl.textContent = 'Error al subir archivo.'; return; }
-        // Save voucher_url to order
-        const saveRes = await apiFetch(`/api/admin/orders/${id}`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ voucher_url: public_url }),
-        });
-        if (saveRes.ok) {
-          statusEl.textContent = '✓ Constancia guardada.';
-          setTimeout(() => { q('ac-voucher-modal').classList.add('hidden'); loadAcademiaAdmin(); }, 1000);
-        } else {
-          statusEl.textContent = 'Archivo subido pero error al guardar URL.';
-        }
-      } catch (err) {
-        statusEl.textContent = `Error: ${err.message}`;
+
+    // Request voucher email
+    bindOnce('mgmt-req-voucher', async () => {
+      const id = _managedOrderId;
+      const o = _ordersCache.find(x => x.id === id);
+      if (!confirm(`¿Enviar correo a ${o?.student_email} solicitando la constancia de pago?`)) return;
+      const btn = q('mgmt-req-voucher');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      const res = await apiFetch(`/api/admin/orders/${id}/request_voucher`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) { btn.textContent = '✓ Correo enviado'; }
+      else { alert(data.error || 'Error al enviar correo.'); btn.disabled = false; btn.textContent = '📩 Solicitar al alumno'; }
+    });
+
+    // Save comprobante number
+    bindOnce('mgmt-save-comp', async () => {
+      const id = _managedOrderId;
+      const num = (q('mgmt-comp-number').value || '').trim();
+      const statusEl = q('mgmt-comp-status');
+      if (!num) { statusEl.textContent = 'Ingresa el N° de comprobante.'; return; }
+      statusEl.textContent = 'Guardando…';
+      const res = await mgmtApiCall(`/api/admin/orders/${id}`, { comprobante_number: num });
+      if (res.ok) { statusEl.textContent = '✓ Guardado.'; await mgmtRefresh(); }
+      else statusEl.textContent = 'Error al guardar.';
+    });
+
+    // Send Moodle credentials
+    bindOnce('mgmt-provision', async () => {
+      const id = _managedOrderId;
+      const o = _ordersCache.find(x => x.id === id);
+      if (!confirm(`¿Enviar credenciales Moodle a ${o?.student_name} (${o?.student_email})?\n\nEsto enviará el correo de bienvenida.`)) return;
+      const btn = q('mgmt-provision');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      const res = await apiFetch(`/api/admin/orders/${id}/provision`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        q('mgmt-moodle-status').textContent = '✓ Procesando matrícula…';
+        btn.textContent = '✓ Enviado';
+        setTimeout(() => mgmtRefresh(), 2000);
+      } else {
+        alert(data.error || 'Error al enviar credenciales.');
+        btn.disabled = false; btn.textContent = '📧 Enviar credenciales';
       }
-    }
+    });
+
+    // Unenroll from Moodle
+    bindOnce('mgmt-unenroll', async () => {
+      const id = _managedOrderId;
+      const o = _ordersCache.find(x => x.id === id);
+      if (!confirm(`¿Desmatricular a ${o?.student_name} del curso en Moodle?\n\nEsto revocará su acceso al curso.`)) return;
+      const btn = q('mgmt-unenroll');
+      btn.disabled = true; btn.textContent = 'Desmatriculando…';
+      const res = await apiFetch(`/api/admin/orders/${id}/unenroll`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) { q('mgmt-moodle-status').textContent = '✓ Desmatriculado.'; await mgmtRefresh(); }
+      else { alert(data.error || 'Error al desmatricular.'); btn.disabled = false; btn.textContent = '🚫 Desmatricular'; }
+    });
+
+    // Save notes
+    bindOnce('mgmt-save-notes', async () => {
+      const id = _managedOrderId;
+      const notes = (q('mgmt-notes').value || '').trim();
+      const statusEl = q('mgmt-notes-status');
+      statusEl.textContent = 'Guardando…';
+      const res = await mgmtApiCall(`/api/admin/orders/${id}`, { notes });
+      if (res.ok) { statusEl.textContent = '✓ Guardado.'; await mgmtRefresh(); }
+      else statusEl.textContent = 'Error al guardar.';
+    });
+
+    // Close modal on overlay click
+    q('ac-manage-modal')?.addEventListener('click', e => {
+      if (e.target === q('ac-manage-modal')) q('ac-manage-modal').classList.add('hidden');
+    });
     bindOnce('ac-add-module', () => {
       const list = q('ac-modules-list');
       const mi = list.querySelectorAll('.ac-module-block').length;
