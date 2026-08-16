@@ -153,27 +153,19 @@
     voucherUploading?.classList.remove('hidden');
 
     try {
-      const presignRes = await fetch(`${window.API_BASE}/api/checkout/voucher-presign`, {
+      const fd = new FormData();
+      fd.append('file', file);
+      const uploadRes = await fetch(`${window.API_BASE}/api/checkout/voucher-upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, content_type: file.type }),
+        body: fd,
       });
 
-      if (!presignRes.ok) {
-        const err = await presignRes.json().catch(() => ({}));
-        throw new Error(err.error || 'Error al obtener URL de subida.');
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json().catch(() => ({}));
+        throw new Error(err.error || 'Error al subir el archivo.');
       }
 
-      const presignData = await presignRes.json();
-      const presignPost = presignData.post || {};
-      const public_url = presignData.url;
-      const fd = new FormData();
-      Object.entries(presignPost.fields || {}).forEach(([k, v]) => fd.append(k, v));
-      fd.append('file', file);
-
-      const uploadRes = await fetch(presignPost.url, { method: 'POST', body: fd });
-
-      if (!uploadRes.ok) throw new Error('Error al subir el archivo.');
+      const { public_url } = await uploadRes.json();
 
       voucherUrl = public_url;
       voucherUrlInput.value = public_url;
@@ -241,7 +233,10 @@
 
       if (course.moodle_course_id) {
         const moodleBtn = document.getElementById('btn-go-moodle');
-        if (moodleBtn) moodleBtn.href = `https://cursos.katarzyna.pe/course/view.php?id=${course.moodle_course_id}`;
+        if (moodleBtn) {
+          const courseUrl = `/course/view.php?id=${course.moodle_course_id}`;
+          moodleBtn.href = `https://cursos.katarzyna.pe/login/index.php?wantsurl=${encodeURIComponent(courseUrl)}`;
+        }
       }
 
       summaryLoad.classList.add('hidden');
@@ -368,7 +363,10 @@
 
         if (data.moodle_course_id) {
           const btn = document.getElementById('btn-go-moodle');
-          if (btn) btn.href = `https://cursos.katarzyna.pe/course/view.php?id=${data.moodle_course_id}`;
+          if (btn) {
+            const courseUrl = `/course/view.php?id=${data.moodle_course_id}`;
+            btn.href = `https://cursos.katarzyna.pe/login/index.php?wantsurl=${encodeURIComponent(courseUrl)}`;
+          }
         }
 
         form.classList.add('hidden');

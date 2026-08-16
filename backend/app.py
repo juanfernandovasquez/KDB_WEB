@@ -90,6 +90,7 @@ from s3_service import (
     move_media_object,
     optimize_media_object,
     rename_media_object,
+    upload_file_object,
 )
 
 EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -1704,6 +1705,61 @@ def api_admin_voucher_presign(order_id):
         return jsonify(result)
     except Exception as exc:
         app.logger.exception("Error generating admin voucher presign")
+        return jsonify(error=str(exc)), 500
+
+
+_ALLOWED_VOUCHER_TYPES = {"image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"}
+
+
+@app.route("/api/checkout/voucher-upload", methods=["POST"])
+def api_checkout_voucher_upload():
+    """Alumno sube constancia de pago directamente al servidor (sin presign/CORS)."""
+    if _is_rate_limited("contact"):
+        return jsonify(error="Demasiadas solicitudes"), 429
+    f = request.files.get("file")
+    if not f:
+        return jsonify(error="No se recibió archivo"), 400
+    ct = f.content_type or ""
+    if ct not in _ALLOWED_VOUCHER_TYPES:
+        return jsonify(error="Tipo de archivo no permitido"), 400
+    f.stream.seek(0, 2)
+    size = f.stream.tell()
+    f.stream.seek(0)
+    if size > 5 * 1024 * 1024:
+        return jsonify(error="Archivo demasiado grande (máx 5 MB)"), 400
+    try:
+        result = upload_file_object(f.stream, f.filename or "voucher", content_type=ct, prefix_override="vouchers/")
+        return jsonify(public_url=result["url"])
+    except Exception as exc:
+        app.logger.exception("Error uploading checkout voucher")
+        return jsonify(error=str(exc)), 500
+
+
+@app.route("/api/admin/orders/<int:order_id>/voucher-upload", methods=["POST"])
+@require_admin()
+def api_admin_voucher_upload(order_id):
+    """Admin sube constancia de pago directamente al servidor (sin presign/CORS)."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    f = request.files.get("file")
+    if not f:
+        return jsonify(error="No se recibió archivo"), 400
+    ct = f.content_type or ""
+    if ct not in _ALLOWED_VOUCHER_TYPES:
+        return jsonify(error="Tipo de archivo no permitido"), 400
+    f.stream.seek(0, 2)
+    size = f.stream.tell()
+    f.stream.seek(0)
+    if size > 10 * 1024 * 1024:
+        return jsonify(error="Archivo demasiado grande (máx 10 MB)"), 400
+    try:
+        result = upload_file_object(f.stream, f.filename or "voucher", content_type=ct, prefix_override="vouchers/")
+        admin_update_order(order_id, {"voucher_url": result["url"]})
+        return jsonify(voucher_url=result["url"])
+    except Exception as exc:
+        app.logger.exception("Error uploading admin voucher")
         return jsonify(error=str(exc)), 500
 
 

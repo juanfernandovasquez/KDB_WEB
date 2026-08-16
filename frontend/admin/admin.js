@@ -2528,33 +2528,19 @@ let currentAdminUserId = null;
     if (file.size > 10 * 1024 * 1024) { statusEl.textContent = 'Archivo demasiado grande (máx 10 MB).'; return; }
     statusEl.textContent = 'Subiendo archivo…';
     try {
-      const presignRes = await apiFetch(`/api/admin/orders/${id}/voucher-presign`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, content_type: file.type }),
-      });
-      if (!presignRes.ok) {
-        const err = await presignRes.json().catch(() => ({}));
-        statusEl.textContent = `Error al preparar subida: ${err.error || presignRes.status}`;
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await apiFetch(`/api/admin/orders/${id}/voucher-upload`, { method: 'POST', body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        statusEl.textContent = `Error: ${err.error || res.status}`;
         return;
       }
-      const data = await presignRes.json();
-      const post = data.post || {};
-      const publicUrl = data.url;
-      const fd = new FormData();
-      Object.entries(post.fields || {}).forEach(([k, v]) => fd.append(k, v));
-      fd.append('file', file);
-      const upRes = await fetch(post.url, { method: 'POST', body: fd });
-      if (!upRes.ok) { statusEl.textContent = 'Error al subir archivo.'; return; }
-      const saveRes = await apiFetch(`/api/admin/orders/${id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ voucher_url: publicUrl }),
-      });
-      if (saveRes.ok) {
-        statusEl.textContent = '✓ Constancia guardada.';
-        setTimeout(() => mgmtRefresh(), 1000);
-      } else {
-        statusEl.textContent = 'Archivo subido pero error al guardar URL.';
-      }
+      const { voucher_url } = await res.json();
+      const o = _ordersCache.find(x => x.id === id);
+      if (o) o.voucher_url = voucher_url;
+      statusEl.textContent = '✓ Constancia guardada.';
+      setTimeout(() => mgmtRefresh(), 1000);
     } catch (err) {
       statusEl.textContent = `Error: ${err.message}`;
     }

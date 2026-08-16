@@ -75,6 +75,26 @@ def _sanitize_folder_name(name):
     return safe or f"folder-{uuid.uuid4().hex}"
 
 
+def upload_file_object(file_obj, filename, content_type=None, prefix_override=None):
+    """Upload a file-like object directly to S3 (server-side, no CORS needed)."""
+    bucket, region, prefix, public_base = _get_bucket_config()
+    allowed_prefixes = _get_allowed_prefixes(prefix)
+    if prefix_override is not None:
+        prefix = _normalize_prefix(prefix_override)
+        if not _prefix_allowed(prefix, allowed_prefixes):
+            raise ValueError("Prefijo fuera del permitido")
+    safe_name = _sanitize_filename(filename)
+    key = f"{prefix}{uuid.uuid4().hex}_{safe_name}" if prefix else f"{uuid.uuid4().hex}_{safe_name}"
+    if not content_type:
+        content_type = mimetypes.guess_type(safe_name)[0] or "application/octet-stream"
+    client = boto3.client("s3", region_name=region or None)
+    try:
+        client.upload_fileobj(file_obj, bucket, key, ExtraArgs={"ContentType": content_type})
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError("No se pudo subir el archivo a S3") from exc
+    return {"key": key, "url": _build_public_url(bucket, region, key, public_base)}
+
+
 def create_presigned_post(filename, content_type=None, max_bytes=None, prefix_override=None):
     bucket, region, prefix, public_base = _get_bucket_config()
     allowed_prefixes = _get_allowed_prefixes(prefix)
