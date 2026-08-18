@@ -168,36 +168,51 @@
 
               <!-- Yape instructions -->
               <div class="pay-instructions" id="instr-yape">
-                <div class="pay-instr-box">
-                  <p><strong>Yapea al número:</strong></p>
-                  <p class="pay-account-num">📱 <span id="yape-number">999 999 999</span></p>
-                  <p class="pay-account-name">A nombre de: <strong>Katarzyna Legal & Tributario</strong></p>
-                  <p class="pay-instr-note">Indica tu nombre y el nombre del curso en el concepto.</p>
+                <div class="pay-instr-box pay-wallet-box">
+                  <div class="pay-wallet-qr" id="yape-qr-wrap">
+                    <img id="yape-qr-img" src="" alt="QR Yape" class="pay-qr-img" />
+                    <span class="pay-qr-placeholder hidden" id="yape-qr-placeholder">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h1v1h-1z M16 14h1v1h-1z M18 14h1v1h-1z M14 16h1v1h-1z M16 16h1v1h-1z M18 16h1v1h-1z M14 18h1v1h-1z M16 18h1v1h-1z M18 18h1v1h-1z"/></svg>
+                      <span>QR pendiente</span>
+                    </span>
+                  </div>
+                  <div class="pay-wallet-info">
+                    <p class="pay-wallet-label"><strong>Yapea al número:</strong></p>
+                    <p class="pay-account-num">📱 <span id="yape-number">—</span></p>
+                    <p class="pay-account-name">A nombre de: <strong>Katarzyna Legal &amp; Tributario</strong></p>
+                    <p class="pay-instr-note">Indica tu nombre y el nombre del curso en el concepto.</p>
+                  </div>
                 </div>
               </div>
 
               <!-- Plin instructions -->
               <div class="pay-instructions hidden" id="instr-plin">
-                <div class="pay-instr-box">
-                  <p><strong>Plínea al número:</strong></p>
-                  <p class="pay-account-num">📲 <span id="plin-number">999 999 999</span></p>
-                  <p class="pay-account-name">A nombre de: <strong>Katarzyna Legal & Tributario</strong></p>
-                  <p class="pay-instr-note">Indica tu nombre y el nombre del curso en el concepto.</p>
+                <div class="pay-instr-box pay-wallet-box">
+                  <div class="pay-wallet-qr" id="plin-qr-wrap">
+                    <img id="plin-qr-img" src="" alt="QR Plin" class="pay-qr-img" />
+                    <span class="pay-qr-placeholder hidden" id="plin-qr-placeholder">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h1v1h-1z M16 14h1v1h-1z M18 14h1v1h-1z M14 16h1v1h-1z M16 16h1v1h-1z M18 16h1v1h-1z M14 18h1v1h-1z M16 18h1v1h-1z M18 18h1v1h-1z"/></svg>
+                      <span>QR pendiente</span>
+                    </span>
+                  </div>
+                  <div class="pay-wallet-info">
+                    <p class="pay-wallet-label"><strong>Plínea al número:</strong></p>
+                    <p class="pay-account-num">📲 <span id="plin-number">—</span></p>
+                    <p class="pay-account-name">A nombre de: <strong>Katarzyna Legal &amp; Tributario</strong></p>
+                    <p class="pay-instr-note">Indica tu nombre y el nombre del curso en el concepto.</p>
+                  </div>
                 </div>
               </div>
 
               <!-- Transferencia instructions -->
               <div class="pay-instructions hidden" id="instr-bank">
-                <div class="pay-instr-box">
-                  <p><strong>Datos de cuenta bancaria:</strong></p>
-                  <table class="bank-table">
-                    <tr><td>Banco</td><td id="bank-name">—</td></tr>
-                    <tr><td>Titular</td><td id="bank-holder">Katarzyna Legal & Tributario SAC</td></tr>
-                    <tr><td>N° de cuenta</td><td id="bank-account">—</td></tr>
-                    <tr><td>CCI</td><td id="bank-cci">—</td></tr>
-                  </table>
-                  <p class="pay-instr-note">Indica tu nombre y el nombre del curso en la descripción de la transferencia.</p>
+                <div id="bank-accounts-list">
+                  <!-- rendered by JS -->
+                  <div class="pay-instr-box">
+                    <p class="muted small">Cargando datos bancarios…</p>
+                  </div>
                 </div>
+                <p class="pay-instr-note" style="margin-top:.75rem;">Indica tu nombre y el nombre del curso en la descripción de la transferencia.</p>
               </div>
 
               <!-- N° de operación (opcional) -->

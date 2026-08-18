@@ -79,6 +79,9 @@ from models import (
     fetch_order_by_id,
     fetch_students,
     fetch_student_orders,
+    # payment config
+    get_payment_config,
+    save_payment_config,
 )
 from s3_service import (
     create_media_folder,
@@ -1550,6 +1553,23 @@ def api_course_by_slug(slug):
     if not course:
         return jsonify(error="Curso no encontrado"), 404
     return jsonify(course)
+
+
+# ─── Payment config ──────────────────────────────────────────────────────────
+
+@app.route("/api/payment-config", methods=["GET"])
+def api_payment_config():
+    ensure_db()
+    return jsonify(get_payment_config())
+
+
+@app.route("/config/payment", methods=["POST"])
+@require_admin()
+def api_save_payment_config():
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    save_payment_config(data)
+    return jsonify(message="Configuración de pagos guardada"), 200
 
 
 # ─── Academia: Courses (admin CRUD) ──────────────────────────────────────────

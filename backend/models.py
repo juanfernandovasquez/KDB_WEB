@@ -1002,6 +1002,15 @@ def is_page_enabled(page):
 
 def _course_row_to_dict(row):
     d = dict(row)
+    for key in ("what_you_learn", "includes_list", "audience"):
+        raw = d.get(key)
+        if raw:
+            try:
+                d[key] = json.loads(raw)
+            except Exception:
+                d[key] = []
+        else:
+            d[key] = []
     return d
 
 
@@ -1070,6 +1079,15 @@ def fetch_course_by_id(course_id):
 
 def save_course(payload, course_id=None):
     now = datetime.utcnow().isoformat()
+
+    def _json_list(key):
+        val = payload.get(key)
+        if isinstance(val, list):
+            return json.dumps(val)
+        if isinstance(val, str):
+            return val  # already serialized
+        return json.dumps([])
+
     conn = get_conn()
     with conn:
         if course_id:
@@ -1079,7 +1097,9 @@ def save_course(payload, course_id=None):
                   slug=?, title=?, subtitle=?, description=?, category=?,
                   price=?, original_price=?, image_url=?, duration=?,
                   modules_count=?, lessons_count=?, level=?, is_published=?,
-                  position=?, moodle_course_id=?, updated_at=?
+                  position=?, moodle_course_id=?,
+                  what_you_learn=?, includes_list=?, audience=?,
+                  updated_at=?
                 WHERE id=?
                 """,
                 (
@@ -1098,6 +1118,9 @@ def save_course(payload, course_id=None):
                     1 if payload.get("is_published") else 0,
                     payload.get("position", 0),
                     payload.get("moodle_course_id"),
+                    _json_list("what_you_learn"),
+                    _json_list("includes_list"),
+                    _json_list("audience"),
                     now,
                     course_id,
                 ),
@@ -1109,8 +1132,10 @@ def save_course(payload, course_id=None):
                 INSERT INTO courses (slug, title, subtitle, description, category,
                   price, original_price, image_url, duration,
                   modules_count, lessons_count, level, is_published,
-                  position, moodle_course_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  position, moodle_course_id,
+                  what_you_learn, includes_list, audience,
+                  created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload.get("slug"),
@@ -1128,6 +1153,9 @@ def save_course(payload, course_id=None):
                     1 if payload.get("is_published") else 0,
                     payload.get("position", 0),
                     payload.get("moodle_course_id"),
+                    _json_list("what_you_learn"),
+                    _json_list("includes_list"),
+                    _json_list("audience"),
                     now,
                     now,
                 ),
@@ -1461,4 +1489,46 @@ def revoke_admin_session(token):
     conn = get_conn()
     with conn:
         conn.execute("DELETE FROM admin_sessions WHERE token = ?", (token,))
+
+
+# ─── Payment config ───────────────────────────────────────────────────────────
+
+def get_payment_config():
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM payment_config WHERE id = 1").fetchone()
+    conn.close()
+    if not row:
+        return {"yape_number": "", "yape_qr_url": "", "plin_number": "", "plin_qr_url": "", "bank_accounts": []}
+    d = dict(row)
+    try:
+        d["bank_accounts"] = json.loads(d.get("bank_accounts") or "[]")
+    except Exception:
+        d["bank_accounts"] = []
+    return d
+
+
+def save_payment_config(payload):
+    bank_accounts = json.dumps(payload.get("bank_accounts") or [])
+    conn = get_conn()
+    with conn:
+        conn.execute(
+            """
+            INSERT INTO payment_config (id, yape_number, yape_qr_url, plin_number, plin_qr_url, bank_accounts)
+            VALUES (1, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              yape_number = excluded.yape_number,
+              yape_qr_url = excluded.yape_qr_url,
+              plin_number = excluded.plin_number,
+              plin_qr_url = excluded.plin_qr_url,
+              bank_accounts = excluded.bank_accounts
+            """,
+            (
+                payload.get("yape_number", ""),
+                payload.get("yape_qr_url", ""),
+                payload.get("plin_number", ""),
+                payload.get("plin_qr_url", ""),
+                bank_accounts,
+            ),
+        )
+    conn.close()
     conn.close()

@@ -30,6 +30,7 @@
         <li><button type="button" data-page="servicios">Servicios</button></li>
         <li><button type="button" data-page="publicaciones">Publicaciones</button></li>
         <li><button type="button" data-page="academia">Academia</button></li>
+        <li><button type="button" data-page="pagos">Pagos</button></li>
         <li><button type="button" data-page="kdbweb">KDBWEB</button></li>
         <li><button type="button" data-page="subs">Suscriptores</button></li>
         <li><button type="button" data-page="contacto">Contactos</button></li>
@@ -560,6 +561,86 @@
           </div>
         </div>
       </div>
+
+      <!-- ═══════════════════════════ PAGOS ═══════════════════════════ -->
+      <section id="pagos-section" class="hidden">
+        <div class="page-header">
+          <div class="title">
+            <h2>Configuración de pagos</h2>
+            <p class="small">Configura los métodos de pago que verán los alumnos en la página de inscripción.</p>
+          </div>
+        </div>
+
+        <!-- Yape -->
+        <div class="card">
+          <div class="card-head between">
+            <h3>Yape</h3>
+          </div>
+          <div class="grid-2" style="margin-top:.75rem;">
+            <div>
+              <label>Número de Yape</label>
+              <input type="text" id="pay-yape-number" placeholder="999 999 999" />
+            </div>
+            <div class="full">
+              <label>Imagen QR de Yape</label>
+              <div class="image-picker-field">
+                <input type="hidden" id="pay-yape-qr-url" />
+                <div class="img-picker-preview">
+                  <img class="img-picker-thumb" alt="QR Yape" style="display:none" />
+                  <span class="img-picker-empty">Sin imagen</span>
+                </div>
+                <div class="img-picker-actions">
+                  <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                  <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plin -->
+        <div class="card">
+          <div class="card-head between">
+            <h3>Plin</h3>
+          </div>
+          <div class="grid-2" style="margin-top:.75rem;">
+            <div>
+              <label>Número de Plin</label>
+              <input type="text" id="pay-plin-number" placeholder="999 999 999" />
+            </div>
+            <div class="full">
+              <label>Imagen QR de Plin</label>
+              <div class="image-picker-field">
+                <input type="hidden" id="pay-plin-qr-url" />
+                <div class="img-picker-preview">
+                  <img class="img-picker-thumb" alt="QR Plin" style="display:none" />
+                  <span class="img-picker-empty">Sin imagen</span>
+                </div>
+                <div class="img-picker-actions">
+                  <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                  <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cuentas bancarias -->
+        <div class="card">
+          <div class="card-head between">
+            <h3>Cuentas bancarias</h3>
+            <button type="button" class="secondary small-btn" id="pay-add-bank">+ Agregar banco</button>
+          </div>
+          <p class="small muted" style="margin:.25rem 0 1rem;">Agrega las cuentas bancarias que se mostrarán en la opción "Transferencia". Ejemplo: BCP, BBVA.</p>
+          <div id="pay-banks-list"></div>
+        </div>
+
+        <div class="row row-space-top">
+          <button type="button" class="cta" id="pay-save-btn">Guardar configuración de pagos</button>
+          <span class="status" id="pay-save-status"></span>
+        </div>
+      </section>
+      <!-- ═══════════════════════════ /PAGOS ══════════════════════════ -->
 
       <section id="kdbweb-section" class="hidden">
         <div class="page-header">
@@ -1684,6 +1765,36 @@
             </div>
             <p class="small muted" style="margin-bottom:.75rem;">Agrega los módulos del curso. Cada módulo puede tener varias lecciones.</p>
             <div id="ac-modules-list"></div>
+          </div>
+
+          <!-- What you'll learn -->
+          <div style="margin-top:1.5rem;">
+            <div class="section-head spaced" style="margin-bottom:.5rem;">
+              <h4 style="margin:0;">¿Qué aprenderás? <small class="muted" style="font-weight:400;">(opcional)</small></h4>
+              <button type="button" class="secondary small-btn" id="ac-add-learn">+ Agregar</button>
+            </div>
+            <p class="small muted" style="margin-bottom:.75rem;">Lista de resultados de aprendizaje. Se muestra en la pestaña "Descripción".</p>
+            <div id="ac-learn-list"></div>
+          </div>
+
+          <!-- Course includes -->
+          <div style="margin-top:1.5rem;">
+            <div class="section-head spaced" style="margin-bottom:.5rem;">
+              <h4 style="margin:0;">Este curso incluye <small class="muted" style="font-weight:400;">(opcional)</small></h4>
+              <button type="button" class="secondary small-btn" id="ac-add-include">+ Agregar</button>
+            </div>
+            <p class="small muted" style="margin-bottom:.75rem;">Características del curso (acceso ilimitado, certificado, etc.). Si no se configura se usan valores por defecto.</p>
+            <div id="ac-includes-list"></div>
+          </div>
+
+          <!-- Audience -->
+          <div style="margin-top:1.5rem;">
+            <div class="section-head spaced" style="margin-bottom:.5rem;">
+              <h4 style="margin:0;">¿Para quién es este curso? <small class="muted" style="font-weight:400;">(opcional)</small></h4>
+              <button type="button" class="secondary small-btn" id="ac-add-audience">+ Agregar</button>
+            </div>
+            <p class="small muted" style="margin-bottom:.75rem;">Perfil del estudiante ideal. Se muestra en la pestaña "Descripción".</p>
+            <div id="ac-audience-list"></div>
           </div>
 
           <div class="row row-space-top">

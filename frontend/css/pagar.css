@@ -300,10 +300,40 @@
   font-size: .75rem !important; color: #5b6474 !important;
   margin-top: .5rem !important;
 }
-.bank-table { width: 100%; border-collapse: collapse; margin: .5rem 0 .75rem; font-size: .85rem; }
+.bank-table { width: 100%; border-collapse: collapse; margin: .5rem 0 .25rem; font-size: .85rem; }
 .bank-table td { padding: .3rem .5rem; }
 .bank-table td:first-child { color: #5b6474; width: 110px; }
 .bank-table td:last-child { font-weight: 600; color: #2b2b2b; }
+
+/* Wallet (Yape / Plin) layout: QR + info side by side */
+.pay-wallet-box { display: flex; gap: 1.25rem; align-items: flex-start; }
+.pay-wallet-qr {
+  flex-shrink: 0; width: 130px; height: 130px;
+  border: 1px solid #dce3f0; background: #fff;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.pay-qr-img { width: 100%; height: 100%; object-fit: contain; }
+.pay-qr-img.hidden { display: none; }
+.pay-qr-placeholder {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .4rem; color: #b0b8cc; font-size: .7rem; text-align: center; padding: .5rem;
+}
+.pay-wallet-info { flex: 1; }
+.pay-wallet-label { margin-bottom: .2rem !important; }
+
+/* Multiple bank cards */
+.bank-card { margin-bottom: .75rem; }
+.bank-card:last-child { margin-bottom: 0; }
+.bank-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: .5rem;
+}
+.bank-card-name { font-size: .9rem; font-weight: 700; color: var(--brand-blue,#06186d); }
+.bank-card-currency {
+  font-size: .7rem; font-weight: 700; letter-spacing: .06em;
+  background: #e8edfa; color: var(--brand-blue,#06186d);
+  padding: .1rem .45rem;
+}
 
 /* N° de operación */
 .operation-number-section { margin-top: 1.25rem; }
@@ -393,4 +423,7 @@
   .pay-method-opt { padding: .55rem .75rem; font-size: .8rem; }
   .pay-instr-box { padding: .9rem 1rem; }
   .pay-account-num { font-size: 1rem !important; }
+  .pay-wallet-box { flex-direction: column; align-items: center; text-align: center; }
+  .pay-wallet-qr { width: 110px; height: 110px; }
+  .pay-qr-placeholder { font-size: .65rem; }
 }

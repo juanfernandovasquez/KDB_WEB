@@ -5,6 +5,7 @@
 
   let course = null;
   let voucherUrl = null;
+  let paymentConfig = null;
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
   const form         = document.getElementById('pagar-form');
@@ -194,6 +195,69 @@
       voucherEmpty?.classList.remove('hidden');
       if (errEl) errEl.textContent = err.message || 'Error al subir el archivo. Intenta de nuevo.';
     }
+  }
+
+  // ── Load & render payment config ─────────────────────────────────────────────
+  async function loadPaymentConfig() {
+    try {
+      const resp = await fetch(`${window.API_BASE}/api/payment-config`);
+      if (!resp.ok) return;
+      paymentConfig = await resp.json();
+
+      // Yape
+      const yapeNum = paymentConfig.yape_number || '';
+      document.getElementById('yape-number').textContent = yapeNum || '—';
+      const yapeQrImg = document.getElementById('yape-qr-img');
+      const yapeQrPlaceholder = document.getElementById('yape-qr-placeholder');
+      if (paymentConfig.yape_qr_url) {
+        yapeQrImg.src = paymentConfig.yape_qr_url;
+        yapeQrImg.classList.remove('hidden');
+        yapeQrPlaceholder?.classList.add('hidden');
+      } else {
+        yapeQrImg.classList.add('hidden');
+        yapeQrPlaceholder?.classList.remove('hidden');
+      }
+
+      // Plin
+      const plinNum = paymentConfig.plin_number || '';
+      document.getElementById('plin-number').textContent = plinNum || '—';
+      const plinQrImg = document.getElementById('plin-qr-img');
+      const plinQrPlaceholder = document.getElementById('plin-qr-placeholder');
+      if (paymentConfig.plin_qr_url) {
+        plinQrImg.src = paymentConfig.plin_qr_url;
+        plinQrImg.classList.remove('hidden');
+        plinQrPlaceholder?.classList.add('hidden');
+      } else {
+        plinQrImg.classList.add('hidden');
+        plinQrPlaceholder?.classList.remove('hidden');
+      }
+
+      // Bank accounts
+      const bankList = document.getElementById('bank-accounts-list');
+      const accounts = paymentConfig.bank_accounts || [];
+      if (accounts.length) {
+        bankList.innerHTML = accounts.map(acc => `
+          <div class="pay-instr-box bank-card">
+            <div class="bank-card-header">
+              <span class="bank-card-name">🏦 ${escStr(acc.bank_name || '')}</span>
+              ${acc.currency ? `<span class="bank-card-currency">${escStr(acc.currency)}</span>` : ''}
+            </div>
+            <table class="bank-table">
+              <tr><td>Titular</td><td>${escStr(acc.holder || '')}</td></tr>
+              <tr><td>N° de cuenta</td><td>${escStr(acc.account || '')}</td></tr>
+              <tr><td>CCI</td><td>${escStr(acc.cci || '')}</td></tr>
+            </table>
+          </div>`).join('');
+      } else {
+        bankList.innerHTML = '<div class="pay-instr-box"><p class="muted small">Datos bancarios no configurados aún.</p></div>';
+      }
+    } catch (_) {
+      // silent fail — page still works without payment config
+    }
+  }
+
+  function escStr(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   // ── Load course ─────────────────────────────────────────────────────────────
@@ -387,4 +451,5 @@
   }
 
   loadCourse();
+  loadPaymentConfig();
 })();

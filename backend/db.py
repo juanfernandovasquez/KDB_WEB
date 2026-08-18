@@ -1038,6 +1038,31 @@ def init_db():
             except Exception:
                 pass  # column already exists
 
+        # ── Payment config ────────────────────────────────────────────────────
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS payment_config (
+              id INTEGER PRIMARY KEY CHECK (id = 1),
+              yape_number TEXT,
+              yape_qr_url TEXT,
+              plin_number TEXT,
+              plin_qr_url TEXT,
+              bank_accounts TEXT DEFAULT '[]'
+            )
+            """
+        )
+
+        # ── Extra course content fields ───────────────────────────────────────
+        for col_def in [
+            ("what_you_learn", "TEXT"),
+            ("includes_list",  "TEXT"),
+            ("audience",       "TEXT"),
+        ]:
+            try:
+                conn.execute(f"ALTER TABLE courses ADD COLUMN {col_def[0]} {col_def[1]}")
+            except Exception:
+                pass  # column already exists
+
         # Bootstrap admin user if none exist and env vars are provided
         admin_count = conn.execute("SELECT COUNT(*) AS c FROM admin_users").fetchone()["c"]
         admin_user = (os.environ.get("ADMIN_USER") or "").strip()

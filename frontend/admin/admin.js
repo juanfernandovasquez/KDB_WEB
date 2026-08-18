@@ -1048,6 +1048,7 @@
     "productos",
     "publicaciones",
     "academia",
+    "pagos",
     "kdbweb",
     "subs",
     "contacto",
@@ -2138,6 +2139,47 @@ let currentAdminUserId = null;
     });
   }
 
+  // ── Dynamic text-item list editors for courses ──────────────────────────────
+  function acDynListHtml(containerId, items) {
+    const container = q(containerId);
+    if (!container) return;
+    if (!items || !items.length) {
+      container.innerHTML = '<p class="small muted ac-dynlist-empty">Sin ítems. Haz clic en "+ Agregar".</p>';
+      return;
+    }
+    container.innerHTML = items.map((text, i) => `
+      <div class="ac-dynlist-row" data-di="${i}" style="display:flex;gap:.5rem;margin-bottom:.4rem;align-items:center;">
+        <input type="text" class="ac-dynlist-item" style="flex:1;" value="${escHtml(String(text||''))}">
+        <button type="button" class="secondary small-btn danger ac-dynlist-del">✕</button>
+      </div>`).join('');
+    container.querySelectorAll('.ac-dynlist-del').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.ac-dynlist-row').remove());
+    });
+  }
+
+  function acDynListAdd(containerId) {
+    const container = q(containerId);
+    if (!container) return;
+    const empty = container.querySelector('.ac-dynlist-empty');
+    if (empty) empty.remove();
+    const row = document.createElement('div');
+    row.className = 'ac-dynlist-row';
+    row.style.cssText = 'display:flex;gap:.5rem;margin-bottom:.4rem;align-items:center;';
+    row.innerHTML = `<input type="text" class="ac-dynlist-item" style="flex:1;" placeholder="Nuevo ítem…">
+      <button type="button" class="secondary small-btn danger ac-dynlist-del">✕</button>`;
+    row.querySelector('.ac-dynlist-del').addEventListener('click', () => row.remove());
+    container.appendChild(row);
+    row.querySelector('input').focus();
+  }
+
+  function acDynListGet(containerId) {
+    const container = q(containerId);
+    if (!container) return [];
+    return [...container.querySelectorAll('.ac-dynlist-item')]
+      .map(inp => inp.value.trim())
+      .filter(Boolean);
+  }
+
   function acOpenForm(course) {
     acEditId = course?.id || null;
     q('ac-id').value = acEditId || '';
@@ -2157,6 +2199,10 @@ let currentAdminUserId = null;
     setImgPicker('ac-image-url', course?.image_url || '');
     // modules
     acRenderModules(course?.modules || []);
+    // dynamic lists
+    acDynListHtml('ac-learn-list',    course?.what_you_learn || []);
+    acDynListHtml('ac-includes-list', course?.includes_list  || []);
+    acDynListHtml('ac-audience-list', course?.audience       || []);
     q('ac-form-card').classList.remove('hidden');
     q('ac-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     q('ac-save-status').textContent = '';
@@ -2192,6 +2238,9 @@ let currentAdminUserId = null;
       modules_count: modules.length,
       lessons_count: modules.reduce((s, m) => s + m.lessons.length, 0),
       modules,
+      what_you_learn: acDynListGet('ac-learn-list'),
+      includes_list:  acDynListGet('ac-includes-list'),
+      audience:       acDynListGet('ac-audience-list'),
     };
     status.textContent = 'Guardando…';
     try {
@@ -2554,6 +2603,11 @@ let currentAdminUserId = null;
     bindOnce('ac-form-cancel', acCloseForm);
     bindOnce('ac-form-cancel2', acCloseForm);
     bindOnce('ac-save-btn', acSaveCourse);
+
+    // Dynamic list "+" buttons for course fields
+    bindOnce('ac-add-learn',    () => acDynListAdd('ac-learn-list'));
+    bindOnce('ac-add-include',  () => acDynListAdd('ac-includes-list'));
+    bindOnce('ac-add-audience', () => acDynListAdd('ac-audience-list'));
 
     // ── Gestionar orden modal ───────────────────────────────────────────────
     bindOnce('ac-manage-close', () => q('ac-manage-modal').classList.add('hidden'));
@@ -3463,6 +3517,7 @@ let currentAdminUserId = null;
     q("contact-section")?.classList.add("hidden");
     q("publications-section")?.classList.add("hidden");
     q("academia-section")?.classList.add("hidden");
+    q("pagos-section")?.classList.add("hidden");
     q("kdbweb-section")?.classList.add("hidden");
     q("users-section")?.classList.add("hidden");
     q("legales-section")?.classList.add("hidden");
@@ -3635,6 +3690,114 @@ let currentAdminUserId = null;
     }
   }
 
+  // ── Pagos ──────────────────────────────────────────────────────────────────
+
+  let payBankData = [];
+
+  function payBankRowHtml(bank, idx) {
+    return `
+      <div class="pay-bank-row" data-bi="${idx}" style="border:1px solid #e4e9f4;padding:1rem;margin-bottom:.6rem;">
+        <div class="grid-2" style="gap:.5rem;">
+          <div><label style="font-size:.78rem;">Nombre del banco</label><input type="text" class="pb-name" placeholder="BCP" value="${escHtml(bank.bank_name||'')}" /></div>
+          <div><label style="font-size:.78rem;">Moneda</label><input type="text" class="pb-currency" placeholder="PEN" style="max-width:80px;" value="${escHtml(bank.currency||'PEN')}" /></div>
+          <div class="full"><label style="font-size:.78rem;">Titular</label><input type="text" class="pb-holder" placeholder="Katarzyna Legal &amp; Tributario SAC" value="${escHtml(bank.holder||'')}" /></div>
+          <div><label style="font-size:.78rem;">N° de cuenta</label><input type="text" class="pb-account" placeholder="191-12345678-0-12" value="${escHtml(bank.account||'')}" /></div>
+          <div><label style="font-size:.78rem;">CCI</label><input type="text" class="pb-cci" placeholder="00219101234567801234" value="${escHtml(bank.cci||'')}" /></div>
+          <div style="display:flex;align-items:flex-end;">
+            <button type="button" class="secondary small-btn danger pb-del-btn" style="margin-top:auto;">Quitar</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function payRenderBanks() {
+    const container = q('pay-banks-list');
+    if (!container) return;
+    if (!payBankData.length) {
+      container.innerHTML = '<p class="small muted">Sin cuentas bancarias. Haz clic en "+ Agregar banco".</p>';
+      return;
+    }
+    container.innerHTML = payBankData.map((b, i) => payBankRowHtml(b, i)).join('');
+    container.querySelectorAll('.pb-del-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('.pay-bank-row');
+        const idx = parseInt(row.dataset.bi, 10);
+        payBankData.splice(idx, 1);
+        payRenderBanks();
+      });
+    });
+  }
+
+  function payGetBanks() {
+    const container = q('pay-banks-list');
+    if (!container) return [];
+    return [...container.querySelectorAll('.pay-bank-row')].map(row => ({
+      bank_name: row.querySelector('.pb-name')?.value?.trim() || '',
+      currency:  row.querySelector('.pb-currency')?.value?.trim() || 'PEN',
+      holder:    row.querySelector('.pb-holder')?.value?.trim() || '',
+      account:   row.querySelector('.pb-account')?.value?.trim() || '',
+      cci:       row.querySelector('.pb-cci')?.value?.trim() || '',
+    }));
+  }
+
+  async function loadPagosAdmin() {
+    try {
+      const res = await apiFetch('/api/payment-config');
+      if (!res.ok) return;
+      const data = await res.json();
+      setVal('pay-yape-number', data.yape_number || '');
+      setImgPicker('pay-yape-qr-url', data.yape_qr_url || '');
+      setVal('pay-plin-number', data.plin_number || '');
+      setImgPicker('pay-plin-qr-url', data.plin_qr_url || '');
+      payBankData = Array.isArray(data.bank_accounts) ? data.bank_accounts : [];
+      payRenderBanks();
+    } catch (err) {
+      console.error('Error cargando config de pagos', err);
+    }
+  }
+
+  async function savePagosAdmin() {
+    const status = q('pay-save-status');
+    if (status) status.textContent = 'Guardando…';
+    const payload = {
+      yape_number: (q('pay-yape-number')?.value || '').trim(),
+      yape_qr_url: (q('pay-yape-qr-url')?.value || '').trim(),
+      plin_number: (q('pay-plin-number')?.value || '').trim(),
+      plin_qr_url: (q('pay-plin-qr-url')?.value || '').trim(),
+      bank_accounts: payGetBanks(),
+    };
+    try {
+      const res = await apiFetch('/config/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('save');
+      if (status) status.textContent = '✓ Guardado';
+      setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+    } catch (err) {
+      if (status) status.textContent = 'Error al guardar';
+    }
+  }
+
+  let pagosBound = false;
+  async function switchToPagos() {
+    currentPage = null;
+    currentSection = "pagos";
+    setActive("pagos");
+    hideAllSections();
+    q("pagos-section").classList.remove("hidden");
+    await loadPagosAdmin();
+    if (!pagosBound) {
+      pagosBound = true;
+      q('pay-add-bank')?.addEventListener('click', () => {
+        payBankData.push({ bank_name: '', currency: 'PEN', holder: '', account: '', cci: '' });
+        payRenderBanks();
+      });
+      q('pay-save-btn')?.addEventListener('click', savePagosAdmin);
+    }
+  }
+
   async function switchToKdbweb() {
     currentPage = null;
     currentSection = "kdbweb";
@@ -3662,6 +3825,7 @@ let currentAdminUserId = null;
     if (normalized === "contacto") return switchToContact();
     if (normalized === "publicaciones" || normalized === "publications") return switchToPublications();
     if (normalized === "academia") return switchToAcademia();
+    if (normalized === "pagos") return switchToPagos();
     if (normalized === "kdbweb") return switchToKdbweb();
     if (normalized === "legales") return switchToLegales();
     if (normalized === "usuarios") return switchToUsers();
