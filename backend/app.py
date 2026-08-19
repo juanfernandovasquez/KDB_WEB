@@ -274,14 +274,18 @@ def _env_bool(name, default=False):
 
 
 def _mail_config():
+    base_from = (os.environ.get("MAIL_FROM") or os.environ.get("SMTP_USER") or "").strip()
+    academia_from = (os.environ.get("ACADEMIA_MAIL_FROM") or base_from).strip()
     return {
         "enabled": _env_bool("MAIL_ENABLED", False),
         "host": (os.environ.get("SMTP_HOST") or "").strip(),
         "port": int((os.environ.get("SMTP_PORT") or "587").strip()),
         "user": (os.environ.get("SMTP_USER") or "").strip(),
         "password": (os.environ.get("SMTP_PASS") or "").strip(),
-        "from": (os.environ.get("MAIL_FROM") or os.environ.get("SMTP_USER") or "").strip(),
+        "from": base_from,
+        "academia_from": academia_from,
         "to": (os.environ.get("CONTACT_TO") or "formulario.pagina@katarzyna.pe").strip(),
+        "academia_to": (os.environ.get("ACADEMIA_CONTACT_TO") or os.environ.get("CONTACT_TO") or "akatdemy@katarzyna.pe").strip(),
         "use_tls": _env_bool("SMTP_USE_TLS", True),
         "use_ssl": _env_bool("SMTP_USE_SSL", False),
         "required": _env_bool("MAIL_REQUIRED", False),
@@ -1793,7 +1797,7 @@ def _send_moodle_credentials(student_email, student_name, course_title,
         return
     msg = EmailMessage()
     msg["Subject"] = f"Tus credenciales de acceso — {course_title}"
-    msg["From"] = cfg["from"]
+    msg["From"] = cfg["academia_from"]
     msg["To"] = student_email
     msg.set_content("\n".join([
         f"Hola {student_name},",
@@ -1812,9 +1816,9 @@ def _send_moodle_credentials(student_email, student_name, course_title,
         "Puedes recuperar tu acceso en cualquier momento usando",
         "la opción \"¿Olvidó su contraseña?\" con tu dirección de correo.",
         "",
-        "Cualquier consulta: contacto@katarzyna.pe",
+        "Cualquier consulta: akatdemy@katarzyna.pe",
         "",
-        "Equipo Katarzyna Legal & Tributario",
+        "Equipo Katarzyna Academia",
         "https://katarzyna.pe",
     ]))
     try:
@@ -1898,7 +1902,7 @@ def _send_moodle_enrollment_notification(student_email, student_name, course_tit
         return
     msg = EmailMessage()
     msg["Subject"] = f"Ya tienes acceso a tu nuevo curso — {course_title}"
-    msg["From"] = cfg["from"]
+    msg["From"] = cfg["academia_from"]
     msg["To"] = student_email
     username_line = (
         [f"  Usuario:  {moodle_username}", ""]
@@ -1920,9 +1924,9 @@ def _send_moodle_enrollment_notification(student_email, student_name, course_tit
         "contraseña, recupérala en:",
         "  https://cursos.katarzyna.pe/login/forgot_password.php",
         "",
-        "Cualquier consulta: contacto@katarzyna.pe",
+        "Cualquier consulta: akatdemy@katarzyna.pe",
         "",
-        "Equipo Katarzyna Legal & Tributario",
+        "Equipo Katarzyna Academia",
         "https://katarzyna.pe",
     ]))
     try:
@@ -1959,8 +1963,8 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
     # Email to admin
     admin_msg = EmailMessage()
     admin_msg["Subject"] = f"[Academia] Nueva inscripción #{order_ref} — {course_title}"
-    admin_msg["From"] = cfg["from"]
-    admin_msg["To"] = cfg["to"]
+    admin_msg["From"] = cfg["academia_from"]
+    admin_msg["To"] = cfg["academia_to"]
     admin_msg.set_content("\n".join([
         f"Nueva inscripción registrada — {order_ref}",
         "=" * 50,
@@ -1983,7 +1987,7 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
     # Confirmation email to student
     student_msg = EmailMessage()
     student_msg["Subject"] = f"Inscripción recibida — {course_title} [{order_ref}]"
-    student_msg["From"] = cfg["from"]
+    student_msg["From"] = cfg["academia_from"]
     student_msg["To"] = student_email
     student_msg.set_content("\n".join([
         f"Hola {student_name},",
@@ -2002,7 +2006,7 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
         "  3. Recibirás un correo con tus credenciales de acceso a:",
         f"     {moodle_url}",
         "",
-        "Si tienes alguna consulta, escríbenos a contacto@katarzyna.pe",
+        "Si tienes alguna consulta, escríbenos a akatdemy@katarzyna.pe",
         "indicando tu número de orden: " + order_ref,
         "",
         "Gracias,",
@@ -2223,7 +2227,7 @@ def api_admin_request_voucher(order_id):
 
     msg = EmailMessage()
     msg["Subject"] = f"Necesitamos tu comprobante de pago — {order_ref}"
-    msg["From"] = cfg["from"]
+    msg["From"] = cfg["academia_from"]
     msg["To"] = student_email
     msg.set_content("\n".join([
         f"Hola {student_name},",
@@ -2239,7 +2243,7 @@ def api_admin_request_voucher(order_id):
         "",
         "Una vez verificado, recibirás tus credenciales de acceso al curso.",
         "",
-        "Si ya realizaste el pago y tienes dudas, escríbenos a contacto@katarzyna.pe",
+        "Si ya realizaste el pago y tienes dudas, escríbenos a akatdemy@katarzyna.pe",
         f"indicando tu número de orden: {order_ref}",
         "",
         "Gracias,",
