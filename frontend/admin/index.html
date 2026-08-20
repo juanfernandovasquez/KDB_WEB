@@ -1629,40 +1629,25 @@
                 </div>
               </div>
             </div>
-            <p class="small muted" style="margin:.75rem 0 .5rem;">Stats (4 estadísticas del hero)</p>
-            <div class="grid-2">
-              <div><label>Stat 1 — Número</label><input type="text" id="ac-stat-0-num" placeholder="6+" /></div>
-              <div><label>Stat 1 — Etiqueta</label><input type="text" id="ac-stat-0-label" placeholder="Cursos" /></div>
-              <div><label>Stat 2 — Número</label><input type="text" id="ac-stat-1-num" placeholder="150+" /></div>
-              <div><label>Stat 2 — Etiqueta</label><input type="text" id="ac-stat-1-label" placeholder="Estudiantes" /></div>
-              <div><label>Stat 3 — Número</label><input type="text" id="ac-stat-2-num" placeholder="12+" /></div>
-              <div><label>Stat 3 — Etiqueta</label><input type="text" id="ac-stat-2-label" placeholder="Años de exp." /></div>
-              <div><label>Stat 4 — Número</label><input type="text" id="ac-stat-3-num" placeholder="100%" /></div>
-              <div><label>Stat 4 — Etiqueta</label><input type="text" id="ac-stat-3-label" placeholder="Online" /></div>
+            <div class="row between" style="margin:.75rem 0 .4rem;align-items:center;">
+              <p class="small muted" style="margin:0;">Estadísticas del hero</p>
+              <button type="button" class="secondary small-btn" id="ac-stat-add">+ Agregar</button>
             </div>
+            <div id="ac-stats-rows"></div>
 
             <!-- Beneficios -->
             <div class="card-head between" style="margin-top:1.5rem;">
               <h4 style="margin:0;">Beneficios</h4>
             </div>
-            <div class="grid-2" style="margin-top:.75rem;">
-              <div class="full">
-                <label>Título de la sección</label>
-                <input type="text" id="ac-benefits-title" placeholder="¿Por qué elegir Academia Katarzyna?" />
-              </div>
-              <div><label>Beneficio 1 — Título</label><input type="text" id="ac-benefit-0-title" placeholder="Docentes en ejercicio" /></div>
-              <div><label>Beneficio 1 — Descripción</label><input type="text" id="ac-benefit-0-desc" placeholder="Abogados que actualmente litigan..." /></div>
-              <div><label>Beneficio 2 — Título</label><input type="text" id="ac-benefit-1-title" placeholder="Acceso de por vida" /></div>
-              <div><label>Beneficio 2 — Descripción</label><input type="text" id="ac-benefit-1-desc" placeholder="Una vez inscrito, el contenido es tuyo..." /></div>
-              <div><label>Beneficio 3 — Título</label><input type="text" id="ac-benefit-2-title" placeholder="Certificado incluido" /></div>
-              <div><label>Beneficio 3 — Descripción</label><input type="text" id="ac-benefit-2-desc" placeholder="Al completar el curso obtienes..." /></div>
-              <div><label>Beneficio 4 — Título</label><input type="text" id="ac-benefit-3-title" placeholder="Aprende a tu ritmo" /></div>
-              <div><label>Beneficio 4 — Descripción</label><input type="text" id="ac-benefit-3-desc" placeholder="Videos bajo demanda..." /></div>
-              <div><label>Beneficio 5 — Título</label><input type="text" id="ac-benefit-4-title" placeholder="Material descargable" /></div>
-              <div><label>Beneficio 5 — Descripción</label><input type="text" id="ac-benefit-4-desc" placeholder="Plantillas, checklists y guías..." /></div>
-              <div><label>Beneficio 6 — Título</label><input type="text" id="ac-benefit-5-title" placeholder="Soporte de consultas" /></div>
-              <div><label>Beneficio 6 — Descripción</label><input type="text" id="ac-benefit-5-desc" placeholder="Resuelve tus dudas con el equipo..." /></div>
+            <div style="margin-top:.75rem;">
+              <label>Título de la sección</label>
+              <input type="text" id="ac-benefits-title" placeholder="¿Por qué elegir Academia Katarzyna?" />
             </div>
+            <div class="row between" style="margin:.75rem 0 .4rem;align-items:center;">
+              <p class="small muted" style="margin:0;">Tarjetas de beneficios</p>
+              <button type="button" class="secondary small-btn" id="ac-benefit-add">+ Agregar</button>
+            </div>
+            <div id="ac-benefits-rows"></div>
 
             <!-- CTA -->
             <div class="card-head between" style="margin-top:1.5rem;">

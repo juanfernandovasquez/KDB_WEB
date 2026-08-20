@@ -2609,6 +2609,14 @@ let currentAdminUserId = null;
     bindOnce('ac-add-include',  () => acDynListAdd('ac-includes-list'));
     bindOnce('ac-add-audience', () => acDynListAdd('ac-audience-list'));
 
+    // Page content — dynamic stat/benefit rows
+    bindOnce('ac-stat-add', function () {
+      renderAcStatRows([...getAcStats(), { num: "", label: "" }]);
+    });
+    bindOnce('ac-benefit-add', function () {
+      renderAcBenefitRows([...getAcBenefits(), { icon: "estrella", title: "", description: "" }]);
+    });
+
     // ── Gestionar orden modal ───────────────────────────────────────────────
     bindOnce('ac-manage-close', () => q('ac-manage-modal').classList.add('hidden'));
 
@@ -3577,6 +3585,82 @@ let currentAdminUserId = null;
     await loadPublicationsAdmin();
   }
 
+  // ── Academia page content — dynamic rows ───────────────────────────────────
+
+  var BENEFIT_ICON_OPTS = [
+    ["docentes", "Graduación / Docentes"],
+    ["reloj",    "Reloj / Tiempo"],
+    ["escudo",   "Escudo / Seguridad"],
+    ["monitor",  "Monitor / Online"],
+    ["archivo",  "Archivo / Material"],
+    ["chat",     "Chat / Soporte"],
+    ["estrella", "Estrella / Calidad"],
+    ["personas", "Personas / Equipo"],
+    ["check",    "Check / Completado"],
+    ["rayo",     "Rayo / Dinamismo"],
+  ];
+
+  function renderAcStatRows(stats) {
+    const container = q("ac-stats-rows");
+    if (!container) return;
+    container.innerHTML = "";
+    (stats || []).forEach(function (s) {
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;";
+      row.innerHTML =
+        '<input type="text" class="ac-stat-num" placeholder="6+" value="' + safe(s.num || "") + '" style="width:90px;flex-shrink:0" />' +
+        '<input type="text" class="ac-stat-label" placeholder="Cursos" value="' + safe(s.label || "") + '" style="flex:1" />' +
+        '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>';
+      row.querySelector("button").addEventListener("click", function () { row.remove(); });
+      container.appendChild(row);
+    });
+  }
+
+  function renderAcBenefitRows(benefits) {
+    const container = q("ac-benefits-rows");
+    if (!container) return;
+    container.innerHTML = "";
+    (benefits || []).forEach(function (b) {
+      const row = document.createElement("div");
+      row.style.cssText = "border:1px solid #e4e9f4;padding:.65rem .75rem;border-radius:6px;margin-bottom:.5rem;";
+      const iconOpts = BENEFIT_ICON_OPTS.map(function (opt) {
+        return '<option value="' + opt[0] + '"' + (b.icon === opt[0] ? " selected" : "") + ">" + opt[1] + "</option>";
+      }).join("");
+      row.innerHTML =
+        '<div style="display:flex;gap:.5rem;margin-bottom:.4rem;align-items:center;">' +
+          '<select class="ac-benefit-icon" style="flex-shrink:0;font-size:.8rem;">' + iconOpts + "</select>" +
+          '<input type="text" class="ac-benefit-title" placeholder="Título" value="' + safe(b.title || "") + '" style="flex:1" />' +
+          '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>' +
+        "</div>" +
+        '<input type="text" class="ac-benefit-desc" placeholder="Descripción" value="' + safe(b.description || "") + '" style="width:100%;box-sizing:border-box" />';
+      row.querySelector("button").addEventListener("click", function () { row.remove(); });
+      container.appendChild(row);
+    });
+  }
+
+  function getAcStats() {
+    const container = q("ac-stats-rows");
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(":scope > div")).map(function (row) {
+      return {
+        num:   (row.querySelector(".ac-stat-num")   || {}).value || "",
+        label: (row.querySelector(".ac-stat-label") || {}).value || "",
+      };
+    }).filter(function (s) { return s.num || s.label; });
+  }
+
+  function getAcBenefits() {
+    const container = q("ac-benefits-rows");
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(":scope > div")).map(function (row) {
+      return {
+        icon:        (row.querySelector(".ac-benefit-icon")  || {}).value || "estrella",
+        title:       (row.querySelector(".ac-benefit-title") || {}).value || "",
+        description: (row.querySelector(".ac-benefit-desc")  || {}).value || "",
+      };
+    }).filter(function (b) { return b.title || b.description; });
+  }
+
   async function loadAcademiaPageContent() {
     const status = q("ac-page-status");
     if (status) status.textContent = "Cargando...";
@@ -3601,17 +3685,11 @@ let currentAdminUserId = null;
       // Stats (stored as JSON in story.html)
       let stats = [];
       try { stats = JSON.parse(story.html || "[]"); } catch (_) {}
-      for (let i = 0; i < 4; i++) {
-        setVal("ac-stat-" + i + "-num",   stats[i] ? stats[i].num   : "");
-        setVal("ac-stat-" + i + "-label", stats[i] ? stats[i].label : "");
-      }
+      renderAcStatRows(stats);
 
       // Benefits
       setVal("ac-benefits-title", servicesMeta.title || "");
-      for (let i = 0; i < 6; i++) {
-        setVal("ac-benefit-" + i + "-title", services[i] ? services[i].title       : "");
-        setVal("ac-benefit-" + i + "-desc",  services[i] ? services[i].description : "");
-      }
+      renderAcBenefitRows(services);
 
       // CTA
       setVal("ac-cta-title",     story.title      || "");
@@ -3630,15 +3708,8 @@ let currentAdminUserId = null;
     const status = q("ac-page-status");
     if (status) status.textContent = "Guardando...";
 
-    const stats = [0, 1, 2, 3].map((i) => ({
-      num:   (q("ac-stat-" + i + "-num")   || {}).value || "",
-      label: (q("ac-stat-" + i + "-label") || {}).value || "",
-    }));
-
-    const benefits = [0, 1, 2, 3, 4, 5].map((i) => ({
-      title:       (q("ac-benefit-" + i + "-title") || {}).value || "",
-      description: (q("ac-benefit-" + i + "-desc")  || {}).value || "",
-    }));
+    const stats = getAcStats();
+    const benefits = getAcBenefits();
 
     const payload = {
       about: {
