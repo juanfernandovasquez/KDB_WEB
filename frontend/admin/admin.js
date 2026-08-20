@@ -2609,12 +2609,14 @@ let currentAdminUserId = null;
     bindOnce('ac-add-include',  () => acDynListAdd('ac-includes-list'));
     bindOnce('ac-add-audience', () => acDynListAdd('ac-audience-list'));
 
-    // Page content — dynamic stat/benefit rows
+    // Page content — dynamic stat/benefit rows (append only, no re-render)
     bindOnce('ac-stat-add', function () {
-      renderAcStatRows([...getAcStats(), { num: "", label: "" }]);
+      const c = q("ac-stats-rows");
+      if (c) c.appendChild(makeAcStatRow({ num: "", label: "" }));
     });
     bindOnce('ac-benefit-add', function () {
-      renderAcBenefitRows([...getAcBenefits(), { icon: "estrella", title: "", description: "" }]);
+      const c = q("ac-benefits-rows");
+      if (c) c.appendChild(makeAcBenefitRow({ icon: "estrella", title: "", description: "" }));
     });
 
     // ── Gestionar orden modal ───────────────────────────────────────────────
@@ -3600,42 +3602,46 @@ let currentAdminUserId = null;
     ["rayo",     "Rayo / Dinamismo"],
   ];
 
+  function makeAcStatRow(s) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;";
+    row.innerHTML =
+      '<input type="text" class="ac-stat-num" placeholder="6+" value="' + safe(s.num || "") + '" style="width:90px;flex-shrink:0" />' +
+      '<input type="text" class="ac-stat-label" placeholder="Cursos" value="' + safe(s.label || "") + '" style="flex:1" />' +
+      '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>';
+    row.querySelector("button").addEventListener("click", function () { row.remove(); });
+    return row;
+  }
+
   function renderAcStatRows(stats) {
     const container = q("ac-stats-rows");
     if (!container) return;
     container.innerHTML = "";
-    (stats || []).forEach(function (s) {
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;";
-      row.innerHTML =
-        '<input type="text" class="ac-stat-num" placeholder="6+" value="' + safe(s.num || "") + '" style="width:90px;flex-shrink:0" />' +
-        '<input type="text" class="ac-stat-label" placeholder="Cursos" value="' + safe(s.label || "") + '" style="flex:1" />' +
-        '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>';
-      row.querySelector("button").addEventListener("click", function () { row.remove(); });
-      container.appendChild(row);
-    });
+    (stats || []).forEach(function (s) { container.appendChild(makeAcStatRow(s)); });
+  }
+
+  function makeAcBenefitRow(b) {
+    const row = document.createElement("div");
+    row.style.cssText = "border:1px solid #e4e9f4;padding:.65rem .75rem;border-radius:6px;margin-bottom:.5rem;";
+    const iconOpts = BENEFIT_ICON_OPTS.map(function (opt) {
+      return '<option value="' + opt[0] + '"' + (b.icon === opt[0] ? " selected" : "") + ">" + opt[1] + "</option>";
+    }).join("");
+    row.innerHTML =
+      '<div style="display:flex;gap:.5rem;margin-bottom:.4rem;align-items:center;">' +
+        '<select class="ac-benefit-icon" style="flex-shrink:0;font-size:.8rem;">' + iconOpts + "</select>" +
+        '<input type="text" class="ac-benefit-title" placeholder="Título" value="' + safe(b.title || "") + '" style="flex:1" />' +
+        '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>' +
+      "</div>" +
+      '<input type="text" class="ac-benefit-desc" placeholder="Descripción" value="' + safe(b.description || "") + '" style="width:100%;box-sizing:border-box" />';
+    row.querySelector("button").addEventListener("click", function () { row.remove(); });
+    return row;
   }
 
   function renderAcBenefitRows(benefits) {
     const container = q("ac-benefits-rows");
     if (!container) return;
     container.innerHTML = "";
-    (benefits || []).forEach(function (b) {
-      const row = document.createElement("div");
-      row.style.cssText = "border:1px solid #e4e9f4;padding:.65rem .75rem;border-radius:6px;margin-bottom:.5rem;";
-      const iconOpts = BENEFIT_ICON_OPTS.map(function (opt) {
-        return '<option value="' + opt[0] + '"' + (b.icon === opt[0] ? " selected" : "") + ">" + opt[1] + "</option>";
-      }).join("");
-      row.innerHTML =
-        '<div style="display:flex;gap:.5rem;margin-bottom:.4rem;align-items:center;">' +
-          '<select class="ac-benefit-icon" style="flex-shrink:0;font-size:.8rem;">' + iconOpts + "</select>" +
-          '<input type="text" class="ac-benefit-title" placeholder="Título" value="' + safe(b.title || "") + '" style="flex:1" />' +
-          '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>' +
-        "</div>" +
-        '<input type="text" class="ac-benefit-desc" placeholder="Descripción" value="' + safe(b.description || "") + '" style="width:100%;box-sizing:border-box" />';
-      row.querySelector("button").addEventListener("click", function () { row.remove(); });
-      container.appendChild(row);
-    });
+    (benefits || []).forEach(function (b) { container.appendChild(makeAcBenefitRow(b)); });
   }
 
   function getAcStats() {
