@@ -998,7 +998,7 @@ def api_media_presign():
     filename = (payload.get("filename") or "").strip()
     content_type = (payload.get("content_type") or "").strip()
     size = payload.get("size")
-    prefix = payload.get("prefix")
+    prefix = payload.get("prefix") or None
     if not filename:
         return jsonify(error="filename es obligatorio"), 400
     if content_type and not content_type.lower().startswith("image/"):

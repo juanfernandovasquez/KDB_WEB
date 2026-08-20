@@ -3596,10 +3596,11 @@ let currentAdminUserId = null;
       setVal("ac-page-kicker", about.primary_label || "");
       setVal("ac-page-title", about.title || "");
       setVal("ac-page-desc", about.content || "");
+      setImgPicker("ac-page-hero-image", about.image_url || "");
 
-      // Stats (stored as JSON in story.content_html)
+      // Stats (stored as JSON in story.html)
       let stats = [];
-      try { stats = JSON.parse(story.content_html || "[]"); } catch (_) {}
+      try { stats = JSON.parse(story.html || "[]"); } catch (_) {}
       for (let i = 0; i < 4; i++) {
         setVal("ac-stat-" + i + "-num",   stats[i] ? stats[i].num   : "");
         setVal("ac-stat-" + i + "-label", stats[i] ? stats[i].label : "");
@@ -3641,11 +3642,12 @@ let currentAdminUserId = null;
 
     const payload = {
       about: {
-        primary_label:   (q("ac-page-kicker")    || {}).value || "",
-        title:           (q("ac-page-title")      || {}).value || "",
-        content:         (q("ac-page-desc")       || {}).value || "",
-        secondary_label: (q("ac-cta-btn-label")   || {}).value || "",
-        secondary_href:  (q("ac-cta-btn-href")    || {}).value || "",
+        primary_label:   (q("ac-page-kicker")       || {}).value || "",
+        title:           (q("ac-page-title")         || {}).value || "",
+        content:         (q("ac-page-desc")          || {}).value || "",
+        image_url:       (q("ac-page-hero-image")    || {}).value || "",
+        secondary_label: (q("ac-cta-btn-label")      || {}).value || "",
+        secondary_href:  (q("ac-cta-btn-href")       || {}).value || "",
       },
       story: {
         title:        (q("ac-cta-title") || {}).value || "",
