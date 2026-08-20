@@ -3682,10 +3682,10 @@ let currentAdminUserId = null;
       setVal("ac-page-desc", about.content || "");
       setImgPicker("ac-page-hero-image", about.image_url || "");
 
-      // Stats (stored as JSON in story.html)
+      // Stats (stored as JSON in story.html) — filter out blank entries from old format
       let stats = [];
       try { stats = JSON.parse(story.html || "[]"); } catch (_) {}
-      renderAcStatRows(stats);
+      renderAcStatRows(stats.filter(function (s) { return s.num || s.label; }));
 
       // Benefits
       setVal("ac-benefits-title", servicesMeta.title || "");
