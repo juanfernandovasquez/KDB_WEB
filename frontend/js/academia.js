@@ -26,6 +26,13 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">' + path + '</svg>';
   }
 
+  function statNumHtml(num) {
+    var s = String(num || '');
+    var m = s.match(/^(\d[\d,\.]*)([+%].*)$/);
+    if (m) return m[1] + '<span class="stat-suffix">' + m[2] + '</span>';
+    return s;
+  }
+
   async function loadPageContent() {
     var data = {};
     try {
@@ -62,7 +69,7 @@
       var stats = [];
       try { stats = JSON.parse(story.html || '[]'); } catch (_) {}
       statsContainer.innerHTML = stats.map(function (s, i) {
-        var div = '<div class="academia-stat"><span class="stat-num">' + escHtml(s.num) + '</span><span class="stat-label">' + escHtml(s.label) + '</span></div>';
+        var div = '<div class="academia-stat"><span class="stat-num">' + statNumHtml(s.num) + '</span><span class="stat-label">' + escHtml(s.label) + '</span></div>';
         return (i > 0 ? '<div class="academia-stat-div"></div>' : '') + div;
       }).join('');
     }
@@ -76,7 +83,7 @@
     if (benefitsGrid && services.length) {
       benefitsGrid.innerHTML = services.map(function (s) {
         return '<div class="benefit-card">' +
-          '<div class="benefit-icon">' + benefitSvg(s.icon) + '</div>' +
+          '<div class="ac-benefit-icon">' + benefitSvg(s.icon) + '</div>' +
           '<h3>' + escHtml(s.title) + '</h3>' +
           '<p>' + escHtml(s.description) + '</p>' +
           '</div>';

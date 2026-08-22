@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
   <link rel="stylesheet" href="./css/footer.css" />
-  <link rel="stylesheet" href="./css/academia.css?v=20260822a" />
+  <link rel="stylesheet" href="./css/academia.css?v=20260901a" />
 </head>
 <body data-page="academia">
   <div id="site-header"></div>
@@ -18,26 +18,61 @@
       <div class="academia-hero-bg"></div>
       <div class="academia-hero-overlay"></div>
       <div class="academia-hero-inner">
-        <p class="academia-hero-kicker">FORMACIÓN ESPECIALIZADA</p>
-        <h1>Academia Katarzyna</h1>
-        <p class="academia-hero-desc">Cursos prácticos en derecho tributario, laboral y corporativo impartidos por abogados especializados con más de 12 años de experiencia.</p>
-        <div class="academia-stats" id="academia-stats"></div>
+        <span class="ac-section-label academia-hero-kicker">KATARZYNA ACADEMY</span>
+        <h1>Formación legal y tributaria para tomar mejores decisiones</h1>
+        <p class="academia-hero-desc">Cursos diseñados por abogados en ejercicio, con casos reales, lenguaje claro y aplicación práctica para empresas y emprendedores.</p>
+        <div class="ac-hero-btns">
+          <a class="ac-btn-primary" href="#cursos">Ver cursos disponibles</a>
+          <a class="ac-btn-secondary-hero" href="servicios.html">Nuestros servicios</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats bar -->
+    <div class="ac-stats-bar">
+      <div id="academia-stats"></div>
+    </div>
+
+    <!-- Intro section -->
+    <section class="ac-intro">
+      <div class="ac-intro-inner">
+        <div class="ac-intro-grid">
+          <div class="ac-intro-image">
+            <img src="https://kdbweb-media-2026.s3.us-east-1.amazonaws.com/publicaciones/4f5e5c5e549e4ac99e1100e96b4fa9ad__MG_1297.JPG" alt="Equipo Katarzyna Academy" loading="lazy" />
+          </div>
+          <div class="ac-intro-text">
+            <span class="ac-section-label">¿Por qué Katarzyna Academy?</span>
+            <h2>Conocimiento legal al servicio de tu negocio</h2>
+            <p>Nuestros cursos son creados y dictados por abogados con ejercicio activo. No teoría abstracta, sino herramientas reales para tomar mejores decisiones empresariales y evitar contingencias legales y tributarias.</p>
+            <ul class="ac-intro-bullets">
+              <li>Docentes que ejercen activamente en el sector tributario y laboral</li>
+              <li>Casos prácticos basados en la realidad peruana</li>
+              <li>Certificado de participación al completar el curso</li>
+              <li>Acceso inmediato y sin fecha de vencimiento</li>
+              <li>Material descargable: plantillas, checklists y guías</li>
+            </ul>
+            <a class="ac-btn-primary" href="#cursos">Explorar cursos</a>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Cursos -->
-    <section class="academia-courses-section">
+    <section class="academia-courses-section" id="cursos">
       <div class="academia-courses-inner">
-        <!-- Filtros -->
-        <div class="academia-filters" id="academia-filters">
-          <button class="filter-btn active" data-cat="">Todos</button>
-          <button class="filter-btn" data-cat="tributario">Tributario</button>
-          <button class="filter-btn" data-cat="laboral">Laboral</button>
-          <button class="filter-btn" data-cat="corporativo">Corporativo</button>
-          <button class="filter-btn" data-cat="sunat">SUNAT</button>
+        <div class="ac-courses-header">
+          <div>
+            <span class="ac-section-label">Catálogo</span>
+            <h2 class="ac-courses-title">Nuestros cursos</h2>
+          </div>
+          <div class="academia-filters" id="academia-filters">
+            <button class="filter-btn active" data-cat="">Todos</button>
+            <button class="filter-btn" data-cat="tributario">Tributario</button>
+            <button class="filter-btn" data-cat="laboral">Laboral</button>
+            <button class="filter-btn" data-cat="corporativo">Corporativo</button>
+            <button class="filter-btn" data-cat="sunat">SUNAT</button>
+          </div>
         </div>
-
-        <!-- Grid -->
         <div class="courses-grid" id="courses-grid">
           <div class="courses-loading" id="courses-loading">
             <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
@@ -52,8 +87,53 @@
     <!-- Beneficios -->
     <section class="academia-benefits">
       <div class="academia-benefits-inner">
-        <h2>¿Por qué elegir Academia Katarzyna?</h2>
+        <div class="ac-benefits-header">
+          <span class="ac-section-label">Lo que incluye</span>
+          <h2>Una formación pensada para profesionales</h2>
+        </div>
         <div class="benefits-grid" id="benefits-grid"></div>
+      </div>
+    </section>
+
+    <!-- Testimonios -->
+    <section class="ac-testimonials">
+      <div class="ac-testimonials-inner">
+        <div class="ac-section-header-center">
+          <span class="ac-section-label">Testimonios</span>
+          <h2>Lo que dicen nuestros estudiantes</h2>
+        </div>
+        <div class="ac-testimonials-grid">
+          <div class="ac-testimonial-card">
+            <p class="ac-testimonial-text">"El curso de derecho tributario me ayudó a entender las implicancias del IGV en las operaciones de mi empresa. Los ejemplos son muy prácticos y directamente aplicables."</p>
+            <div class="ac-testimonial-author">
+              <div class="ac-testimonial-avatar">G</div>
+              <div>
+                <strong>Geraldine M.</strong>
+                <span>Contadora, MYPE Lima</span>
+              </div>
+            </div>
+          </div>
+          <div class="ac-testimonial-card">
+            <p class="ac-testimonial-text">"Excelente formación, clara y con casos reales. Lo mejor es que puedes avanzar a tu propio ritmo y tener el material siempre disponible. Lo recomiendo totalmente."</p>
+            <div class="ac-testimonial-author">
+              <div class="ac-testimonial-avatar">R</div>
+              <div>
+                <strong>Rodrigo C.</strong>
+                <span>Empresario, sector comercio</span>
+              </div>
+            </div>
+          </div>
+          <div class="ac-testimonial-card">
+            <p class="ac-testimonial-text">"La parte de fiscalización SUNAT fue reveladora. Nunca había entendido tan claramente mis derechos y obligaciones. El certificado también fue valorado en mi empresa."</p>
+            <div class="ac-testimonial-author">
+              <div class="ac-testimonial-avatar">A</div>
+              <div>
+                <strong>Adriana V.</strong>
+                <span>Administradora, empresa importadora</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -61,10 +141,13 @@
     <section class="academia-cta">
       <div class="academia-cta-inner">
         <div>
-          <h2>¿Formación para tu equipo completo?</h2>
-          <p>Ofrecemos planes corporativos con precios especiales y seguimiento personalizado.</p>
+          <h2>¿Tienes dudas sobre cuál curso es el indicado para ti?</h2>
+          <p>Escríbenos y nuestro equipo te orientará sin costo según tu sector y necesidades específicas.</p>
         </div>
-        <a href="contacto.html" class="btn-cta-gold">Solicitar plan corporativo</a>
+        <div class="ac-cta-btns">
+          <a href="contacto.html" class="btn-cta-gold">Consultar ahora</a>
+          <a href="#cursos" class="btn-cta-outline">Ver todos los cursos</a>
+        </div>
       </div>
     </section>
   </main>
@@ -75,7 +158,7 @@
   <script src="./js/api.js"></script>
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
-  <script src="./js/academia.js"></script>
+  <script src="./js/academia.js?v=20260901a"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
