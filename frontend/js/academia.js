@@ -33,6 +33,22 @@
     return s;
   }
 
+  function parseAcJson(htmlStr) {
+    try {
+      var parsed = JSON.parse(htmlStr || '{}');
+      if (Array.isArray(parsed)) return { stats: parsed };
+      return parsed || {};
+    } catch (_) { return {}; }
+  }
+
+  function benefitIconHtml(iconKey) {
+    if (!iconKey) return benefitSvg('estrella');
+    if (iconKey.startsWith('http') || iconKey.startsWith('/')) {
+      return '<img src="' + escHtml(iconKey) + '" alt="" style="width:100%;height:100%;object-fit:contain;" />';
+    }
+    return benefitSvg(iconKey);
+  }
+
   async function loadPageContent() {
     var data = {};
     try {
@@ -45,66 +61,119 @@
     var services = data.services || [];
     var servicesMeta = data.services_meta || {};
 
-    // Hero kicker
+    var ac = parseAcJson(story.html);
+
+    // ── Hero ──
     var kicEl = document.querySelector('.academia-hero-kicker');
     if (kicEl && about.primary_label) kicEl.textContent = about.primary_label;
 
-    // Hero h1
     var h1El = document.querySelector('.academia-hero h1');
     if (h1El && about.title) h1El.textContent = about.title;
 
-    // Hero description
     var descEl = document.querySelector('.academia-hero-desc');
     if (descEl && about.content) descEl.textContent = about.content;
 
-    // Hero background image
     if (about.image_url) {
       var bgEl = document.querySelector('.academia-hero-bg');
       if (bgEl) bgEl.style.backgroundImage = 'url(' + about.image_url + ')';
     }
 
-    // Stats — rendered dynamically
+    // Hero buttons
+    var btn1 = ac.hero_btn1 || {};
+    var btn2 = ac.hero_btn2 || {};
+    var heroBtn1 = document.querySelector('.ac-btn-primary[href="#cursos"]');
+    if (heroBtn1 && btn1.label) { heroBtn1.textContent = btn1.label; if (btn1.href) heroBtn1.href = btn1.href; }
+    var heroBtn2 = document.querySelector('.ac-btn-secondary-hero');
+    if (heroBtn2 && btn2.label) { heroBtn2.textContent = btn2.label; if (btn2.href) heroBtn2.href = btn2.href; }
+
+    // ── Stats ──
     var statsContainer = document.getElementById('academia-stats');
     if (statsContainer) {
-      var stats = [];
-      try { stats = JSON.parse(story.html || '[]'); } catch (_) {}
-      statsContainer.innerHTML = stats.map(function (s, i) {
+      var stats = ac.stats || [];
+      statsContainer.innerHTML = stats.filter(function (s) { return s.num || s.label; }).map(function (s, i) {
         var div = '<div class="academia-stat"><span class="stat-num">' + statNumHtml(s.num) + '</span><span class="stat-label">' + escHtml(s.label) + '</span></div>';
         return (i > 0 ? '<div class="academia-stat-div"></div>' : '') + div;
       }).join('');
     }
 
-    // Benefits section title
+    // ── Intro section ──
+    var intro = ac.intro || {};
+    if (intro.section_label) {
+      var introLabelEl = document.querySelector('.ac-intro-text .ac-section-label');
+      if (introLabelEl) introLabelEl.textContent = intro.section_label;
+    }
+    if (intro.title) {
+      var introH2El = document.querySelector('.ac-intro-text h2');
+      if (introH2El) introH2El.textContent = intro.title;
+    }
+    if (intro.text) {
+      var introParaEl = document.querySelector('.ac-intro-text > p');
+      if (introParaEl) introParaEl.textContent = intro.text;
+    }
+    if (intro.image_url) {
+      var introImgEl = document.querySelector('.ac-intro-image img');
+      if (introImgEl) introImgEl.src = intro.image_url;
+    }
+    if (intro.bullets && intro.bullets.length) {
+      var bulletsList = document.querySelector('.ac-intro-bullets');
+      if (bulletsList) {
+        bulletsList.innerHTML = intro.bullets.map(function (b) {
+          return '<li>' + escHtml(b) + '</li>';
+        }).join('');
+      }
+    }
+    if (intro.btn_label) {
+      var introBtnEl = document.querySelector('.ac-intro-text .ac-btn-primary');
+      if (introBtnEl) { introBtnEl.textContent = intro.btn_label; if (intro.btn_href) introBtnEl.href = intro.btn_href; }
+    }
+
+    // ── Benefits ──
     var benefTitleEl = document.querySelector('.academia-benefits h2');
     if (benefTitleEl && servicesMeta.title) benefTitleEl.textContent = servicesMeta.title;
 
-    // Benefits — rendered dynamically
     var benefitsGrid = document.getElementById('benefits-grid');
     if (benefitsGrid && services.length) {
       benefitsGrid.innerHTML = services.map(function (s) {
         return '<div class="benefit-card">' +
-          '<div class="ac-benefit-icon">' + benefitSvg(s.icon || s.icon_url) + '</div>' +
+          '<div class="ac-benefit-icon">' + benefitIconHtml(s.icon || s.icon_url) + '</div>' +
           '<h3>' + escHtml(s.title) + '</h3>' +
           '<p>' + escHtml(s.description) + '</p>' +
           '</div>';
       }).join('');
     }
 
-    // CTA title
+    // ── Testimonials ──
+    var testimonials = ac.testimonials || [];
+    if (testimonials.length) {
+      var testimGrid = document.querySelector('.ac-testimonials-grid');
+      if (testimGrid) {
+        testimGrid.innerHTML = testimonials.map(function (t) {
+          var initials = escHtml(t.initials || (t.author || 'A').charAt(0).toUpperCase());
+          return '<div class="ac-testimonial-card">' +
+            '<p class="ac-testimonial-text">"' + escHtml(t.text) + '"</p>' +
+            '<div class="ac-testimonial-author">' +
+              '<div class="ac-testimonial-avatar">' + initials + '</div>' +
+              '<div>' +
+                '<strong>' + escHtml(t.author) + '</strong>' +
+                '<span>' + escHtml(t.role) + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
+
+    // ── CTA ──
     var ctaTitleEl = document.querySelector('.academia-cta h2');
     if (ctaTitleEl && story.title) ctaTitleEl.textContent = story.title;
 
-    // CTA description
     var ctaDescEl = document.querySelector('.academia-cta p');
     if (ctaDescEl && story.paragraphs) ctaDescEl.textContent = story.paragraphs;
 
-    // CTA button
-    if (about.secondary_label) {
-      var btn = document.querySelector('.btn-cta-gold');
-      if (btn) {
-        btn.textContent = about.secondary_label;
-        if (about.secondary_href) btn.href = about.secondary_href;
-      }
+    var ctaBtn = ac.cta_btn || {};
+    if (ctaBtn.label) {
+      var ctaBtnEl = document.querySelector('.btn-cta-gold');
+      if (ctaBtnEl) { ctaBtnEl.textContent = ctaBtn.label; if (ctaBtn.href) ctaBtnEl.href = ctaBtn.href; }
     }
   }
 

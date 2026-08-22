@@ -2609,7 +2609,7 @@ let currentAdminUserId = null;
     bindOnce('ac-add-include',  () => acDynListAdd('ac-includes-list'));
     bindOnce('ac-add-audience', () => acDynListAdd('ac-audience-list'));
 
-    // Page content — dynamic stat/benefit rows (append only, no re-render)
+    // Page content — dynamic rows (append only, no re-render)
     bindOnce('ac-stat-add', function () {
       const c = q("ac-stats-rows");
       if (c) c.appendChild(makeAcStatRow({ num: "", label: "" }));
@@ -2617,6 +2617,14 @@ let currentAdminUserId = null;
     bindOnce('ac-benefit-add', function () {
       const c = q("ac-benefits-rows");
       if (c) c.appendChild(makeAcBenefitRow({ icon: "estrella", title: "", description: "" }));
+    });
+    bindOnce('ac-intro-bullet-add', function () {
+      const c = q("ac-intro-bullets-rows");
+      if (c) c.appendChild(makeAcIntroBulletRow(""));
+    });
+    bindOnce('ac-testimonial-add', function () {
+      const c = q("ac-testimonials-rows");
+      if (c) c.appendChild(makeAcTestimonialRow({ text: "", author: "", role: "", initials: "" }));
     });
 
     // ── Gestionar orden modal ───────────────────────────────────────────────
@@ -3602,13 +3610,43 @@ let currentAdminUserId = null;
     ["rayo",     "Rayo / Dinamismo"],
   ];
 
+  var BENEFIT_ICON_SVG = {
+    docentes: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+    reloj:    '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    escudo:   '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    monitor:  '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    archivo:  '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+    chat:     '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    estrella: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    personas: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    check:    '<polyline points="20 6 9 17 4 12"/>',
+    rayo:     '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  };
+
+  function benefitIconPreviewHtml(iconVal) {
+    if (!iconVal) return '<span style="color:#aaa;font-size:.75rem;">Sin ícono</span>';
+    const isUrl = iconVal.startsWith("http") || iconVal.startsWith("/");
+    if (isUrl) return '<img src="' + safe(iconVal) + '" alt="ícono" style="width:100%;height:100%;object-fit:contain;">';
+    const path = BENEFIT_ICON_SVG[iconVal] || BENEFIT_ICON_SVG.estrella;
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="#06186d" stroke-width="1.8" style="width:22px;height:22px;">' + path + '</svg>';
+  }
+
+  function parseAcStoryJson(htmlStr) {
+    try {
+      var parsed = JSON.parse(htmlStr || "{}");
+      if (Array.isArray(parsed)) return { stats: parsed };
+      return parsed || {};
+    } catch (_) { return {}; }
+  }
+
+  // ── Stat rows ──
   function makeAcStatRow(s) {
     const row = document.createElement("div");
     row.style.cssText = "display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;";
     row.innerHTML =
       '<input type="text" class="ac-stat-num" placeholder="6+" value="' + safe(s.num || "") + '" style="width:90px;flex-shrink:0" />' +
-      '<input type="text" class="ac-stat-label" placeholder="Cursos" value="' + safe(s.label || "") + '" style="flex:1" />' +
-      '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>';
+      '<input type="text" class="ac-stat-label" placeholder="Cursos disponibles" value="' + safe(s.label || "") + '" style="flex:1" />' +
+      '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;" title="Eliminar">✕</button>';
     row.querySelector("button").addEventListener("click", function () { row.remove(); });
     return row;
   }
@@ -3618,30 +3656,6 @@ let currentAdminUserId = null;
     if (!container) return;
     container.innerHTML = "";
     (stats || []).forEach(function (s) { container.appendChild(makeAcStatRow(s)); });
-  }
-
-  function makeAcBenefitRow(b) {
-    const row = document.createElement("div");
-    row.style.cssText = "border:1px solid #e4e9f4;padding:.65rem .75rem;border-radius:6px;margin-bottom:.5rem;";
-    const iconOpts = BENEFIT_ICON_OPTS.map(function (opt) {
-      return '<option value="' + opt[0] + '"' + (b.icon === opt[0] ? " selected" : "") + ">" + opt[1] + "</option>";
-    }).join("");
-    row.innerHTML =
-      '<div style="display:flex;gap:.5rem;margin-bottom:.4rem;align-items:center;">' +
-        '<select class="ac-benefit-icon" style="flex-shrink:0;font-size:.8rem;">' + iconOpts + "</select>" +
-        '<input type="text" class="ac-benefit-title" placeholder="Título" value="' + safe(b.title || "") + '" style="flex:1" />' +
-        '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;">✕</button>' +
-      "</div>" +
-      '<input type="text" class="ac-benefit-desc" placeholder="Descripción" value="' + safe(b.description || "") + '" style="width:100%;box-sizing:border-box" />';
-    row.querySelector("button").addEventListener("click", function () { row.remove(); });
-    return row;
-  }
-
-  function renderAcBenefitRows(benefits) {
-    const container = q("ac-benefits-rows");
-    if (!container) return;
-    container.innerHTML = "";
-    (benefits || []).forEach(function (b) { container.appendChild(makeAcBenefitRow(b)); });
   }
 
   function getAcStats() {
@@ -3655,53 +3669,204 @@ let currentAdminUserId = null;
     }).filter(function (s) { return s.num || s.label; });
   }
 
+  // ── Intro bullet rows ──
+  function makeAcIntroBulletRow(text) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;gap:.5rem;align-items:center;margin-bottom:.35rem;";
+    row.innerHTML =
+      '<span style="color:#06186d;font-size:1rem;flex-shrink:0;">•</span>' +
+      '<input type="text" class="ac-intro-bullet-text" placeholder="Ej: Docentes con ejercicio activo" value="' + safe(text || "") + '" style="flex:1" />' +
+      '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;" title="Eliminar">✕</button>';
+    row.querySelector("button").addEventListener("click", function () { row.remove(); });
+    return row;
+  }
+
+  function renderAcIntroBulletRows(bullets) {
+    const container = q("ac-intro-bullets-rows");
+    if (!container) return;
+    container.innerHTML = "";
+    (bullets || []).forEach(function (t) { container.appendChild(makeAcIntroBulletRow(t)); });
+  }
+
+  function getAcIntroBullets() {
+    const container = q("ac-intro-bullets-rows");
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(".ac-intro-bullet-text"))
+      .map(function (inp) { return inp.value.trim(); })
+      .filter(Boolean);
+  }
+
+  // ── Benefit rows ──
+  function makeAcBenefitRow(b) {
+    const row = document.createElement("div");
+    row.style.cssText = "border:1px solid #e4e9f4;padding:.75rem;border-radius:6px;margin-bottom:.6rem;";
+    const iconVal = b.icon || b.icon_url || "estrella";
+    const isUrl = iconVal.startsWith("http") || iconVal.startsWith("/");
+    const iconOpts = '<option value="">— Ícono predefinido —</option>' + BENEFIT_ICON_OPTS.map(function (opt) {
+      return '<option value="' + opt[0] + '"' + (!isUrl && iconVal === opt[0] ? " selected" : "") + ">" + opt[1] + "</option>";
+    }).join("");
+
+    row.innerHTML =
+      '<div style="display:flex;gap:.5rem;margin-bottom:.5rem;align-items:center;">' +
+        '<input type="text" class="ac-benefit-title" placeholder="Título del beneficio" value="' + safe(b.title || "") + '" style="flex:1" />' +
+        '<button type="button" class="secondary small-btn danger" style="flex-shrink:0;padding:.25rem .5rem;" title="Eliminar">✕</button>' +
+      '</div>' +
+      '<input type="text" class="ac-benefit-desc" placeholder="Descripción breve" value="' + safe(b.description || "") + '" style="width:100%;box-sizing:border-box;margin-bottom:.6rem;" />' +
+      '<div class="ac-benefit-icon-wrap">' +
+        '<div class="ac-benefit-icon-preview-box" title="Vista previa del ícono">' + benefitIconPreviewHtml(iconVal) + '</div>' +
+        '<div style="flex:1;">' +
+          '<div class="image-picker-field" style="display:inline-flex;align-items:center;gap:.4rem;flex-wrap:wrap;background:none;border:none;padding:0;">' +
+            '<input type="hidden" class="ac-benefit-icon-val" value="' + safe(iconVal) + '">' +
+            '<button type="button" class="secondary small-btn media-picker-btn" style="font-size:.8rem;">Elegir imagen</button>' +
+          '</div>' +
+          '<span class="small muted" style="margin:0 .4rem;">o</span>' +
+          '<select class="ac-benefit-icon-preset" style="font-size:.8rem;">' + iconOpts + '</select>' +
+          '<p class="small muted" style="margin:.3rem 0 0;">Sube íconos a la carpeta <strong>iconos/</strong> de la galería de medios.</p>' +
+        '</div>' +
+      '</div>';
+
+    row.querySelector("button.danger").addEventListener("click", function () { row.remove(); });
+
+    const hiddenInput = row.querySelector(".ac-benefit-icon-val");
+    const previewBox  = row.querySelector(".ac-benefit-icon-preview-box");
+    const preset      = row.querySelector(".ac-benefit-icon-preset");
+
+    hiddenInput.addEventListener("input", function () {
+      const val = hiddenInput.value;
+      previewBox.innerHTML = benefitIconPreviewHtml(val);
+      const isImg = val.startsWith("http") || val.startsWith("/");
+      if (isImg) preset.value = "";
+    });
+
+    preset.addEventListener("change", function () {
+      if (preset.value) {
+        hiddenInput.value = preset.value;
+        hiddenInput.dispatchEvent(new Event("input"));
+      }
+    });
+
+    return row;
+  }
+
+  function renderAcBenefitRows(benefits) {
+    const container = q("ac-benefits-rows");
+    if (!container) return;
+    container.innerHTML = "";
+    (benefits || []).forEach(function (b) { container.appendChild(makeAcBenefitRow(b)); });
+  }
+
   function getAcBenefits() {
     const container = q("ac-benefits-rows");
     if (!container) return [];
     return Array.from(container.querySelectorAll(":scope > div")).map(function (row) {
       return {
-        icon:        (row.querySelector(".ac-benefit-icon")  || {}).value || "estrella",
-        title:       (row.querySelector(".ac-benefit-title") || {}).value || "",
-        description: (row.querySelector(".ac-benefit-desc")  || {}).value || "",
+        icon:        (row.querySelector(".ac-benefit-icon-val") || {}).value || "estrella",
+        title:       (row.querySelector(".ac-benefit-title")    || {}).value || "",
+        description: (row.querySelector(".ac-benefit-desc")     || {}).value || "",
       };
     }).filter(function (b) { return b.title || b.description; });
   }
 
+  // ── Testimonial rows ──
+  function makeAcTestimonialRow(t) {
+    const row = document.createElement("div");
+    row.style.cssText = "border:1px solid #e4e9f4;padding:.75rem;border-radius:6px;margin-bottom:.6rem;";
+    row.innerHTML =
+      '<div style="display:flex;justify-content:flex-end;margin-bottom:.4rem;">' +
+        '<button type="button" class="secondary small-btn danger" style="padding:.25rem .5rem;" title="Eliminar">✕ Quitar</button>' +
+      '</div>' +
+      '<div style="margin-bottom:.4rem;">' +
+        '<label style="font-size:.8rem;color:#666;">Testimonio (cita del estudiante)</label>' +
+        '<textarea class="ac-testimonial-text" rows="3" placeholder="El curso me ayudó a entender..." style="width:100%;box-sizing:border-box;">' + safe(t.text || "") + '</textarea>' +
+      '</div>' +
+      '<div class="grid-2" style="gap:.5rem;">' +
+        '<div><label style="font-size:.8rem;color:#666;">Nombre del autor</label>' +
+          '<input type="text" class="ac-testimonial-author" placeholder="Geraldine M." value="' + safe(t.author || "") + '" /></div>' +
+        '<div><label style="font-size:.8rem;color:#666;">Cargo / empresa</label>' +
+          '<input type="text" class="ac-testimonial-role" placeholder="Contadora, MYPE Lima" value="' + safe(t.role || "") + '" /></div>' +
+        '<div><label style="font-size:.8rem;color:#666;">Iniciales (ej: G)</label>' +
+          '<input type="text" class="ac-testimonial-initials" placeholder="G" maxlength="2" value="' + safe(t.initials || "") + '" style="max-width:60px;" /></div>' +
+      '</div>';
+    row.querySelector("button.danger").addEventListener("click", function () { row.remove(); });
+    return row;
+  }
+
+  function renderAcTestimonialRows(testimonials) {
+    const container = q("ac-testimonials-rows");
+    if (!container) return;
+    container.innerHTML = "";
+    (testimonials || []).forEach(function (t) { container.appendChild(makeAcTestimonialRow(t)); });
+  }
+
+  function getAcTestimonials() {
+    const container = q("ac-testimonials-rows");
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(":scope > div")).map(function (row) {
+      return {
+        text:     (row.querySelector(".ac-testimonial-text")     || {}).value || "",
+        author:   (row.querySelector(".ac-testimonial-author")   || {}).value || "",
+        role:     (row.querySelector(".ac-testimonial-role")     || {}).value || "",
+        initials: (row.querySelector(".ac-testimonial-initials") || {}).value || "",
+      };
+    }).filter(function (t) { return t.text || t.author; });
+  }
+
+  // ── Load / Save ──
   async function loadAcademiaPageContent() {
     const status = q("ac-page-status");
     if (status) status.textContent = "Cargando...";
     try {
       const res = await apiFetch("/config/page/academia");
-      if (!res.ok) {
-        if (status) status.textContent = "Error al cargar";
-        return;
-      }
+      if (!res.ok) { if (status) status.textContent = "Error al cargar"; return; }
       const data = await res.json();
       const about = data.about || {};
       const story = data.story || {};
       const services = data.services || [];
       const servicesMeta = data.services_meta || {};
 
+      // Parse extended JSON from story.html
+      const ac = parseAcStoryJson(story.html);
+
       // Hero
-      setVal("ac-page-kicker", about.primary_label || "");
-      setVal("ac-page-title", about.title || "");
-      setVal("ac-page-desc", about.content || "");
+      setVal("ac-page-kicker",    about.primary_label || "");
+      setVal("ac-page-title",     about.title || "");
+      setVal("ac-page-desc",      about.content || "");
       setImgPicker("ac-page-hero-image", about.image_url || "");
 
-      // Stats (stored as JSON in story.html) — filter out blank entries from old format
-      let stats = [];
-      try { stats = JSON.parse(story.html || "[]"); } catch (_) {}
-      renderAcStatRows(stats.filter(function (s) { return s.num || s.label; }));
+      // Hero buttons (from JSON, fallback to about fields for backward compat)
+      const btn1 = ac.hero_btn1 || {};
+      const btn2 = ac.hero_btn2 || {};
+      setVal("ac-hero-btn1-label", btn1.label || about.secondary_label || "");
+      setVal("ac-hero-btn1-href",  btn1.href  || about.primary_href    || "");
+      setVal("ac-hero-btn2-label", btn2.label || "");
+      setVal("ac-hero-btn2-href",  btn2.href  || "");
+
+      // Stats
+      renderAcStatRows((ac.stats || []).filter(function (s) { return s.num || s.label; }));
+
+      // Intro section (from JSON)
+      const intro = ac.intro || {};
+      setVal("ac-intro-label",     intro.section_label || "");
+      setVal("ac-intro-title",     intro.title         || "");
+      setVal("ac-intro-text",      intro.text          || "");
+      setImgPicker("ac-intro-image", intro.image_url   || "");
+      setVal("ac-intro-btn-label", intro.btn_label     || "");
+      setVal("ac-intro-btn-href",  intro.btn_href      || "");
+      renderAcIntroBulletRows(intro.bullets || []);
 
       // Benefits
       setVal("ac-benefits-title", servicesMeta.title || "");
       renderAcBenefitRows(services);
 
+      // Testimonials (from JSON)
+      renderAcTestimonialRows(ac.testimonials || []);
+
       // CTA
-      setVal("ac-cta-title",     story.title      || "");
-      setVal("ac-cta-desc",      story.paragraphs || "");
-      setVal("ac-cta-btn-label", about.secondary_label || "");
-      setVal("ac-cta-btn-href",  about.secondary_href  || "");
+      setVal("ac-cta-title", story.title      || "");
+      setVal("ac-cta-desc",  story.paragraphs || "");
+      const ctaBtn = ac.cta_btn || {};
+      setVal("ac-cta-btn-label", ctaBtn.label || "");
+      setVal("ac-cta-btn-href",  ctaBtn.href  || "");
 
       if (status) status.textContent = "";
     } catch (err) {
@@ -3716,20 +3881,49 @@ let currentAdminUserId = null;
 
     const stats = getAcStats();
     const benefits = getAcBenefits();
+    const testimonials = getAcTestimonials();
+    const bullets = getAcIntroBullets();
+
+    const acJson = {
+      stats,
+      hero_btn1: {
+        label: (q("ac-hero-btn1-label") || {}).value || "",
+        href:  (q("ac-hero-btn1-href")  || {}).value || "",
+      },
+      hero_btn2: {
+        label: (q("ac-hero-btn2-label") || {}).value || "",
+        href:  (q("ac-hero-btn2-href")  || {}).value || "",
+      },
+      intro: {
+        section_label: (q("ac-intro-label")     || {}).value || "",
+        title:         (q("ac-intro-title")      || {}).value || "",
+        text:          (q("ac-intro-text")       || {}).value || "",
+        image_url:     (q("ac-intro-image")      || {}).value || "",
+        btn_label:     (q("ac-intro-btn-label")  || {}).value || "",
+        btn_href:      (q("ac-intro-btn-href")   || {}).value || "",
+        bullets,
+      },
+      testimonials,
+      cta_btn: {
+        label: (q("ac-cta-btn-label") || {}).value || "",
+        href:  (q("ac-cta-btn-href")  || {}).value || "",
+      },
+    };
 
     const payload = {
       about: {
-        primary_label:   (q("ac-page-kicker")       || {}).value || "",
-        title:           (q("ac-page-title")         || {}).value || "",
-        content:         (q("ac-page-desc")          || {}).value || "",
-        image_url:       (q("ac-page-hero-image")    || {}).value || "",
-        secondary_label: (q("ac-cta-btn-label")      || {}).value || "",
-        secondary_href:  (q("ac-cta-btn-href")       || {}).value || "",
+        primary_label: (q("ac-page-kicker")    || {}).value || "",
+        title:         (q("ac-page-title")      || {}).value || "",
+        content:       (q("ac-page-desc")       || {}).value || "",
+        image_url:     (q("ac-page-hero-image") || {}).value || "",
+        primary_href:  "",
+        secondary_label: "",
+        secondary_href:  "",
       },
       story: {
         title:        (q("ac-cta-title") || {}).value || "",
         paragraphs:   (q("ac-cta-desc")  || {}).value || "",
-        content_html: JSON.stringify(stats),
+        content_html: JSON.stringify(acJson),
       },
       services_meta: { title: (q("ac-benefits-title") || {}).value || "" },
       services:      benefits,
@@ -3745,7 +3939,7 @@ let currentAdminUserId = null;
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("save");
-      if (status) status.textContent = "Contenido guardado";
+      if (status) status.textContent = "✓ Contenido guardado";
       setTimeout(() => { if (status) status.textContent = ""; }, 3000);
     } catch (err) {
       console.error("Error guardando contenido academia", err);
