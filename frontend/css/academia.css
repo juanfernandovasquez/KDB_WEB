@@ -20,13 +20,13 @@
   background-image: url('https://kdbweb-media-2026.s3.us-east-1.amazonaws.com/publicaciones/4f5e5c5e549e4ac99e1100e96b4fa9ad__MG_1297.JPG');
   background-size: cover;
   background-position: center 40%;
-  opacity: 0.18;
+  opacity: 1;
 }
 
 .academia-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(6,24,109,0.95) 0%, rgba(7,19,49,0.9) 100%);
+  background: linear-gradient(135deg, rgba(6,24,109,0.78) 0%, rgba(7,19,49,0.72) 100%);
 }
 
 .academia-hero-inner {
