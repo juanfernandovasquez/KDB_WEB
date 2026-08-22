@@ -22,7 +22,7 @@
   };
 
   function benefitSvg(iconKey) {
-    var path = BENEFIT_ICONS[iconKey] || BENEFIT_ICONS.estrella;
+    var path = BENEFIT_ICONS[iconKey] || BENEFIT_ICONS[iconKey && iconKey.split('/').pop()] || BENEFIT_ICONS.estrella;
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">' + path + '</svg>';
   }
 
@@ -83,7 +83,7 @@
     if (benefitsGrid && services.length) {
       benefitsGrid.innerHTML = services.map(function (s) {
         return '<div class="benefit-card">' +
-          '<div class="ac-benefit-icon">' + benefitSvg(s.icon) + '</div>' +
+          '<div class="ac-benefit-icon">' + benefitSvg(s.icon || s.icon_url) + '</div>' +
           '<h3>' + escHtml(s.title) + '</h3>' +
           '<p>' + escHtml(s.description) + '</p>' +
           '</div>';

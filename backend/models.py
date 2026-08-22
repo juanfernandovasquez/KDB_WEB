@@ -404,6 +404,7 @@ def fetch_services(page):
             data["bullets"] = json.loads(data.get("bullets") or "[]")
         except json.JSONDecodeError:
             data["bullets"] = []
+        data["icon"] = data.get("icon_url") or ""
         result.append(data)
     return result
 
@@ -446,7 +447,7 @@ def replace_services(page, services):
                     description,
                     json.dumps(bullets),
                     s.get("image_url"),
-                    s.get("icon_url"),
+                    s.get("icon_url") or s.get("icon"),
                 ),
             )
     conn.close()
