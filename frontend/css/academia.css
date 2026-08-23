@@ -669,17 +669,44 @@
 
 @media (max-width: 767px) {
   :root { --ac-max-w: calc(100% - 24px); }
+
+  /* Hero */
   .academia-hero { min-height: 100svh; }
+  .academia-hero-inner { padding: 3rem 0 3.5rem; }
+  .academia-hero-desc { font-size: 0.93rem; margin-bottom: 2rem; }
+  .ac-hero-btns { flex-direction: column; gap: 0.75rem; }
+  .ac-hero-btns a { width: 100%; justify-content: center; text-align: center; }
+
+  /* Stats */
   #academia-stats { grid-template-columns: repeat(2, 1fr); gap: 1.5rem 1rem; }
-  .ac-intro-grid { grid-template-columns: 1fr; }
+  #academia-stats .stat-num { font-size: 1.9rem; }
+
+  /* Intro */
+  .ac-intro { padding: 3.5rem 0; }
+  .ac-intro-grid { grid-template-columns: 1fr; gap: 2.5rem; }
   .ac-intro-image img { height: 260px; }
-  .ac-intro { padding: 4rem 0; }
+
+  /* Courses */
+  .academia-courses-section { padding: 3.5rem 0 4rem; }
+  .ac-courses-header { flex-direction: column; align-items: flex-start; }
   .courses-grid { grid-template-columns: 1fr; }
+  .course-card-footer { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .course-card-actions { width: 100%; }
+  .btn-card-detail, .btn-card-buy { flex: 1; justify-content: center; }
+
+  /* Benefits */
+  .academia-benefits { padding: 3.5rem 0 4rem; }
+  .ac-benefits-header { margin-bottom: 2rem; }
   .benefits-grid { grid-template-columns: 1fr; }
+
+  /* Testimonials */
+  .ac-testimonials { padding: 3.5rem 0 4rem; }
+  .ac-section-header-center { margin-bottom: 2rem; }
   .ac-testimonials-grid { grid-template-columns: 1fr; }
+
+  /* CTA */
+  .academia-cta { padding: 3.5rem 0; }
   .academia-cta-inner { grid-template-columns: 1fr; gap: 2rem; }
   .ac-cta-btns { flex-direction: column; width: 100%; }
   .btn-cta-gold, .btn-cta-outline { width: 100%; justify-content: center; }
-  .ac-hero-btns { flex-direction: column; }
-  .ac-courses-header { flex-direction: column; align-items: flex-start; }
 }
