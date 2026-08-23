@@ -50,18 +50,19 @@
   background-image: url('https://kdbweb-media-2026.s3.us-east-1.amazonaws.com/publicaciones/4f5e5c5e549e4ac99e1100e96b4fa9ad__MG_1297.JPG');
   background-size: cover;
   background-position: center 40%;
-  opacity: 0.5;
-  filter: grayscale(1) brightness(0.55);
+  background-color: #06186d;
+  background-blend-mode: luminosity;
+  opacity: 0.45;
 }
 
 .academia-hero-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(to right,
-    rgba(6,24,109,0.97) 0%,
-    rgba(6,24,109,0.88) 40%,
-    rgba(6,24,109,0.55) 65%,
-    rgba(6,24,109,0.15) 100%);
+    rgba(4,14,70,0.98) 0%,
+    rgba(6,24,109,0.93) 42%,
+    rgba(6,24,109,0.65) 68%,
+    rgba(6,24,109,0.25) 100%);
 }
 
 .academia-hero-inner {
