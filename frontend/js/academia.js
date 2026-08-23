@@ -74,8 +74,8 @@
     if (descEl && about.content) descEl.textContent = about.content;
 
     if (about.image_url) {
-      var bgEl = document.querySelector('.academia-hero-bg');
-      if (bgEl) bgEl.style.backgroundImage = 'url(' + about.image_url + ')';
+      var photoEl = document.querySelector('.academia-hero-photo');
+      if (photoEl) photoEl.src = about.image_url;
     }
 
     // Hero buttons
