@@ -2169,6 +2169,54 @@ let currentAdminUserId = null;
       .filter(Boolean);
   }
 
+  function acMakeInstructorRow(inst) {
+    inst = inst || {};
+    const div = document.createElement('div');
+    div.className = 'ac-instructor-row';
+    div.style.cssText = 'border:1px solid #e4e9f4;padding:1rem;margin-bottom:.75rem;display:grid;gap:.6rem;';
+    div.innerHTML =
+      '<div style="display:flex;gap:.5rem;align-items:center;">' +
+        '<div class="image-picker-field" style="flex:none;">' +
+          '<input type="hidden" class="ac-inst-photo" value="' + escHtml(inst.photo_url || '') + '" />' +
+          '<div class="img-picker-preview" style="margin-bottom:.3rem;">' +
+            (inst.photo_url
+              ? '<img class="img-picker-thumb" src="' + escHtml(inst.photo_url) + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:50%;" /><span class="img-picker-empty" style="display:none">Sin foto</span>'
+              : '<img class="img-picker-thumb" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:50%;display:none;" /><span class="img-picker-empty">Sin foto</span>') +
+          '</div>' +
+          '<div class="img-picker-actions" style="display:flex;gap:.3rem;flex-wrap:wrap;">' +
+            '<button type="button" class="secondary small-btn media-picker-btn" style="font-size:.72rem;">Foto</button>' +
+            '<button type="button" class="secondary small-btn danger img-picker-clear" style="font-size:.72rem;' + (inst.photo_url ? '' : 'display:none') + '">✕</button>' +
+          '</div>' +
+        '</div>' +
+        '<div style="flex:1;display:grid;gap:.4rem;">' +
+          '<input type="text" class="ac-inst-name" placeholder="Nombre del instructor" value="' + escHtml(inst.name || '') + '" />' +
+          '<input type="text" class="ac-inst-role" placeholder="Cargo o especialidad" value="' + escHtml(inst.role || '') + '" />' +
+        '</div>' +
+        '<button type="button" class="secondary small-btn danger ac-del-instructor" style="align-self:flex-start;">✕</button>' +
+      '</div>' +
+      '<textarea class="ac-inst-bio" rows="2" placeholder="Breve descripción del instructor" style="width:100%;box-sizing:border-box;">' + escHtml(inst.bio || '') + '</textarea>';
+    div.querySelector('.ac-del-instructor').addEventListener('click', () => div.remove());
+    return div;
+  }
+
+  function acRenderInstructors(list) {
+    const container = q('ac-instructors-list');
+    if (!container) return;
+    container.innerHTML = '';
+    (list || []).forEach(inst => container.appendChild(acMakeInstructorRow(inst)));
+  }
+
+  function acGetInstructors() {
+    const container = q('ac-instructors-list');
+    if (!container) return [];
+    return [...container.querySelectorAll('.ac-instructor-row')].map(row => ({
+      name:      row.querySelector('.ac-inst-name')?.value.trim() || '',
+      role:      row.querySelector('.ac-inst-role')?.value.trim() || '',
+      bio:       row.querySelector('.ac-inst-bio')?.value.trim() || '',
+      photo_url: row.querySelector('.ac-inst-photo')?.value.trim() || '',
+    })).filter(i => i.name);
+  }
+
   function acOpenForm(course) {
     acEditId = course?.id || null;
     q('ac-id').value = acEditId || '';
@@ -2192,6 +2240,7 @@ let currentAdminUserId = null;
     acDynListHtml('ac-learn-list',    course?.what_you_learn || []);
     acDynListHtml('ac-includes-list', course?.includes_list  || []);
     acDynListHtml('ac-audience-list', course?.audience       || []);
+    acRenderInstructors(course?.instructors || []);
     q('ac-form-card').classList.remove('hidden');
     q('ac-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     q('ac-save-status').textContent = '';
@@ -2230,6 +2279,7 @@ let currentAdminUserId = null;
       what_you_learn: acDynListGet('ac-learn-list'),
       includes_list:  acDynListGet('ac-includes-list'),
       audience:       acDynListGet('ac-audience-list'),
+      instructors:    acGetInstructors(),
     };
     status.textContent = 'Guardando…';
     try {
@@ -2594,9 +2644,13 @@ let currentAdminUserId = null;
     bindOnce('ac-save-btn', acSaveCourse);
 
     // Dynamic list "+" buttons for course fields
-    bindOnce('ac-add-learn',    () => acDynListAdd('ac-learn-list'));
-    bindOnce('ac-add-include',  () => acDynListAdd('ac-includes-list'));
-    bindOnce('ac-add-audience', () => acDynListAdd('ac-audience-list'));
+    bindOnce('ac-add-learn',      () => acDynListAdd('ac-learn-list'));
+    bindOnce('ac-add-include',    () => acDynListAdd('ac-includes-list'));
+    bindOnce('ac-add-audience',   () => acDynListAdd('ac-audience-list'));
+    bindOnce('ac-add-instructor', () => {
+      const container = q('ac-instructors-list');
+      if (container) container.appendChild(acMakeInstructorRow({}));
+    });
 
     // Page content — dynamic rows (append only, no re-render)
     bindOnce('ac-stat-add', function () {

@@ -1057,6 +1057,7 @@ def init_db():
             ("what_you_learn", "TEXT"),
             ("includes_list",  "TEXT"),
             ("audience",       "TEXT"),
+            ("instructors",    "TEXT"),
         ]:
             try:
                 conn.execute(f"ALTER TABLE courses ADD COLUMN {col_def[0]} {col_def[1]}")

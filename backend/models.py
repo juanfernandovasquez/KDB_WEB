@@ -1003,7 +1003,7 @@ def is_page_enabled(page):
 
 def _course_row_to_dict(row):
     d = dict(row)
-    for key in ("what_you_learn", "includes_list", "audience"):
+    for key in ("what_you_learn", "includes_list", "audience", "instructors"):
         raw = d.get(key)
         if raw:
             try:
@@ -1099,7 +1099,7 @@ def save_course(payload, course_id=None):
                   price=?, original_price=?, image_url=?, duration=?,
                   modules_count=?, lessons_count=?, level=?, is_published=?,
                   position=?, moodle_course_id=?,
-                  what_you_learn=?, includes_list=?, audience=?,
+                  what_you_learn=?, includes_list=?, audience=?, instructors=?,
                   updated_at=?
                 WHERE id=?
                 """,
@@ -1122,6 +1122,7 @@ def save_course(payload, course_id=None):
                     _json_list("what_you_learn"),
                     _json_list("includes_list"),
                     _json_list("audience"),
+                    _json_list("instructors"),
                     now,
                     course_id,
                 ),
@@ -1134,9 +1135,9 @@ def save_course(payload, course_id=None):
                   price, original_price, image_url, duration,
                   modules_count, lessons_count, level, is_published,
                   position, moodle_course_id,
-                  what_you_learn, includes_list, audience,
+                  what_you_learn, includes_list, audience, instructors,
                   created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload.get("slug"),
@@ -1157,6 +1158,7 @@ def save_course(payload, course_id=None):
                     _json_list("what_you_learn"),
                     _json_list("includes_list"),
                     _json_list("audience"),
+                    _json_list("instructors"),
                     now,
                     now,
                 ),

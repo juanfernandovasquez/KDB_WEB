@@ -183,6 +183,33 @@
     });
   }
 
+  function renderInstructorsTab(course) {
+    const instructors = Array.isArray(course.instructors) ? course.instructors.filter(i => i.name) : [];
+    const btn = document.getElementById('tab-instructors-btn');
+    if (!instructors.length) {
+      if (btn) btn.style.display = 'none';
+      return;
+    }
+    if (btn) btn.style.display = '';
+    const list = document.getElementById('instructors-list');
+    if (!list) return;
+    list.innerHTML = instructors.map(inst => {
+      const initials = escHtml((inst.name || 'I').trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase());
+      const avatar = inst.photo_url
+        ? `<img class="instructor-avatar" src="${escHtml(inst.photo_url)}" alt="${escHtml(inst.name)}" loading="lazy" />`
+        : `<div class="instructor-avatar instructor-avatar-initials">${initials}</div>`;
+      return `
+        <div class="instructor-card">
+          ${avatar}
+          <div class="instructor-info">
+            <h3 class="instructor-name">${escHtml(inst.name)}</h3>
+            ${inst.role ? `<p class="instructor-role">${escHtml(inst.role)}</p>` : ''}
+            ${inst.bio  ? `<p class="instructor-bio">${escHtml(inst.bio)}</p>`  : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
   async function loadRelated(currentSlug) {
     try {
       const resp = await fetch(`${window.API_BASE}/api/courses`);
@@ -222,6 +249,7 @@
       renderPurchaseCard(course);
       renderAboutTab(course);
       renderModulesTab(course);
+      renderInstructorsTab(course);
       main.classList.remove('curso-loading-state');
       loadRelated(slug);
     } catch {

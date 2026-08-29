@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
   <link rel="stylesheet" href="./css/footer.css" />
-  <link rel="stylesheet" href="./css/curso.css?v=20260829b" />
+  <link rel="stylesheet" href="./css/curso.css?v=20260829c" />
 </head>
 <body data-page="academia">
   <div id="site-header"></div>
@@ -92,6 +92,7 @@
         <div class="curso-tabs">
           <button class="curso-tab active" data-tab="about">Descripción</button>
           <button class="curso-tab" data-tab="modules">Contenido del curso</button>
+          <button class="curso-tab" data-tab="instructors" id="tab-instructors-btn" style="display:none">Instructores</button>
         </div>
 
         <!-- About tab -->
@@ -113,6 +114,11 @@
         <!-- Modules tab -->
         <div class="tab-content" id="tab-modules">
           <div class="module-accordion" id="module-accordion"></div>
+        </div>
+
+        <!-- Instructors tab -->
+        <div class="tab-content" id="tab-instructors">
+          <div class="instructors-list" id="instructors-list"></div>
         </div>
       </div>
 
@@ -156,7 +162,7 @@
   <script src="./js/api.js"></script>
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
-  <script src="./js/curso.js?v=20260829"></script>
+  <script src="./js/curso.js?v=20260829b"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>
