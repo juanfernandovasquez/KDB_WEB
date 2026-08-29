@@ -149,6 +149,9 @@
 
     accordion.innerHTML = modules.map((mod, idx) => {
       const lessons = (mod.lessons || []).map((l) => {
+        if (l.type === 'bullet') {
+          return `<li class="lesson-item lesson-bullet"><span class="lesson-bullet-dot"></span>${escHtml(l.title)}</li>`;
+        }
         const icon = typeIcons[l.type] || typeIcons.video;
         return `<li class="lesson-item">${icon}${escHtml(l.title)}<span class="lesson-duration">${escHtml(l.duration || '')}</span></li>`;
       }).join('');

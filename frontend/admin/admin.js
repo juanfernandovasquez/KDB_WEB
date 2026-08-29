@@ -2070,18 +2070,26 @@ let currentAdminUserId = null;
       .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
+  function acLessonTypeOptions(selected) {
+    return ['video','pdf','quiz','bullet'].map(t => {
+      const labels = { video:'Video', pdf:'PDF', quiz:'Quiz', bullet:'Bullet' };
+      return `<option value="${t}"${selected===t?' selected':''}>${labels[t]}</option>`;
+    }).join('');
+  }
+
   function acModuleHtml(mod, mi) {
-    const lessons = (mod.lessons || []).map((l, li) => `
+    const lessons = (mod.lessons || []).map((l, li) => {
+      const isBullet = l.type === 'bullet';
+      return `
       <div class="ac-lesson-row" data-li="${li}">
-        <input type="text" class="ac-lesson-title" placeholder="Lección ${li+1}" value="${escHtml(l.title||'')}">
-        <input type="text" class="ac-lesson-dur" placeholder="12:30" style="width:80px" value="${escHtml(l.duration||'')}">
+        <input type="text" class="ac-lesson-title" placeholder="${isBullet ? 'Texto del punto' : 'Lección '+(li+1)}" value="${escHtml(l.title||'')}">
+        <input type="text" class="ac-lesson-dur" placeholder="12:30" style="width:80px${isBullet?';display:none':''}" value="${escHtml(l.duration||'')}">
         <select class="ac-lesson-type form-select" style="width:90px">
-          <option value="video"${l.type==='video'?' selected':''}>Video</option>
-          <option value="pdf"${l.type==='pdf'?' selected':''}>PDF</option>
-          <option value="quiz"${l.type==='quiz'?' selected':''}>Quiz</option>
+          ${acLessonTypeOptions(l.type||'video')}
         </select>
         <button type="button" class="secondary small-btn danger ac-del-lesson">✕</button>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     return `
       <div class="ac-module-block" data-mi="${mi}" style="border:1px solid #e4e9f4;margin-bottom:.75rem;padding:1rem;">
@@ -2748,6 +2756,17 @@ let currentAdminUserId = null;
     // Module list event delegation (set up once, works for all dynamic content)
     const modList = q('ac-modules-list');
     if (modList) {
+      modList.addEventListener('change', (ev) => {
+        const sel = ev.target.closest('.ac-lesson-type');
+        if (!sel) return;
+        const row = sel.closest('.ac-lesson-row');
+        const durInput = row?.querySelector('.ac-lesson-dur');
+        const titleInput = row?.querySelector('.ac-lesson-title');
+        if (!durInput) return;
+        const isBullet = sel.value === 'bullet';
+        durInput.style.display = isBullet ? 'none' : '';
+        if (titleInput) titleInput.placeholder = isBullet ? 'Texto del punto' : 'Título de la lección';
+      });
       modList.addEventListener('click', (ev) => {
         if (ev.target.closest('.ac-del-module')) {
           ev.target.closest('.ac-module-block').remove();
@@ -2759,7 +2778,7 @@ let currentAdminUserId = null;
           const container = block.querySelector('.ac-lessons-list');
           const li = container.querySelectorAll('.ac-lesson-row').length;
           const tmp = document.createElement('div');
-          tmp.innerHTML = `<div class="ac-lesson-row"><input type="text" class="ac-lesson-title" placeholder="Lección ${li+1}"><input type="text" class="ac-lesson-dur" placeholder="12:30" style="width:80px"><select class="ac-lesson-type form-select" style="width:90px"><option value="video">Video</option><option value="pdf">PDF</option><option value="quiz">Quiz</option></select><button type="button" class="secondary small-btn danger ac-del-lesson">✕</button></div>`;
+          tmp.innerHTML = `<div class="ac-lesson-row"><input type="text" class="ac-lesson-title" placeholder="Lección ${li+1}"><input type="text" class="ac-lesson-dur" placeholder="12:30" style="width:80px"><select class="ac-lesson-type form-select" style="width:90px">${acLessonTypeOptions('video')}</select><button type="button" class="secondary small-btn danger ac-del-lesson">✕</button></div>`;
           container.appendChild(tmp.firstElementChild);
         }
       });

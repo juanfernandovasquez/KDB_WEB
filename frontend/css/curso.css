@@ -534,6 +534,15 @@
   white-space: nowrap;
 }
 
+.lesson-bullet { color: #4a5568; }
+.lesson-bullet-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-gold, #b07d2f);
+  flex-shrink: 0;
+}
+
 /* ── Sidebar ── */
 .curso-sidebar { position: relative; }
 
