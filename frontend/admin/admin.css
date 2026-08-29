@@ -89,16 +89,26 @@ header {
   z-index: 20;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: #fff;
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-header h1 span {
-  color: var(--gold-light);
+.header-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
+.header-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 /* ── Botón hamburguesa (mobile) ──────────────────────────────────── */
@@ -163,6 +173,72 @@ header h1 span {
   padding: 0 0.6rem;
 }
 
+/* Sidebar brand area */
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0.5rem;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.sidebar-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  margin-bottom: 0.15rem;
+}
+
+.sidebar-brand-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-brand-sub {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.38);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Sidebar nav groups */
+.sidebar-nav { padding: 0 0.1rem; }
+
+.sidebar-group-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  padding: 0.9rem 0.75rem 0.3rem;
+  margin: 0;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+/* Sidebar icons */
+.sb-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -178,20 +254,26 @@ header h1 span {
   background: transparent;
   border: none;
   border-radius: var(--r-sm);
-  padding: 0.65rem 0.75rem;
+  padding: 0.6rem 0.75rem;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.855rem;
   color: var(--sb-text);
   transition: background 0.15s, color 0.15s;
   position: relative;
   letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .sidebar button:hover {
   background: var(--sb-hover);
   color: var(--sb-text-hover);
 }
+
+.sidebar button:hover .sb-icon { opacity: 1; }
+.sidebar button.active .sb-icon { opacity: 1; }
 
 .sidebar button.active {
   background: var(--sb-active-bg);

@@ -5141,8 +5141,27 @@ let currentAdminUserId = null;
     bindAuthHandlers();
   };
 
+  function loadBrandLogo() {
+    fetch((window.API_BASE || '') + '/api/company')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        const url = data.logo_url;
+        const name = data.name || 'Katarzyna';
+        const nameEl = document.getElementById('admin-sidebar-name');
+        if (nameEl) nameEl.textContent = name;
+        if (!url) return;
+        ['admin-header-logo', 'admin-sidebar-logo'].forEach(id => {
+          const img = document.getElementById(id);
+          if (img) { img.src = url; img.style.display = ''; }
+        });
+      })
+      .catch(() => {});
+  }
+
   function init() {
     try {
+      loadBrandLogo();
       loadCompany();
       const initial = getSectionFromPath();
       applySection(initial);
