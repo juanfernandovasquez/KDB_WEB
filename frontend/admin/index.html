@@ -1779,6 +1779,43 @@
           </div>
         </div>
 
+        <!-- Course categories management -->
+        <div class="card" id="ac-categories-card">
+          <div class="card-head between">
+            <h3>Categorías de cursos</h3>
+            <button type="button" class="collapse-btn" data-collapse-target="ac-categories-card-body">+</button>
+          </div>
+          <div class="collapsible-body collapsed" id="ac-categories-card-body">
+            <div class="grid-2" style="margin-bottom:0.75rem;">
+              <div>
+                <label>Etiqueta</label>
+                <input type="text" id="ac-new-cat-label" placeholder="Ej. Tributario" />
+              </div>
+              <div>
+                <label>Slug (clave interna)</label>
+                <input type="text" id="ac-new-cat-slug" placeholder="Ej. tributario" />
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem;">
+              <button type="button" class="cta small-btn" id="ac-add-cat-btn">+ Agregar categoría</button>
+              <span class="status" id="ac-cat-status"></span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Etiqueta</th>
+                    <th>Slug</th>
+                    <th>Posición</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="ac-categories-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- Course form (hidden by default, shown on new/edit) -->
         <div class="card hidden" id="ac-form-card">
           <div class="section-head spaced">
@@ -1800,10 +1837,7 @@
             <div>
               <label>Categoría</label>
               <select id="ac-category" class="form-select">
-                <option value="tributario">Tributario</option>
-                <option value="sunat">SUNAT</option>
-                <option value="laboral">Laboral</option>
-                <option value="corporativo">Corporativo</option>
+                <option value="">Cargando…</option>
               </select>
             </div>
             <div>
@@ -2159,7 +2193,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260829e"></script>
+  <script type="module" src="./main.js?v=20260829f"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");

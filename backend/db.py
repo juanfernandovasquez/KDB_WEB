@@ -1064,6 +1064,40 @@ def init_db():
             except Exception:
                 pass  # column already exists
 
+        # ── Course categories ─────────────────────────────────────────────────────────
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS course_categories (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug TEXT NOT NULL UNIQUE,
+              label TEXT NOT NULL,
+              position INTEGER NOT NULL DEFAULT 0,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            )
+            """
+        )
+        _cc_migration = "course_categories_seed_v1"
+        _cc_done = conn.execute(
+            "SELECT 1 FROM db_migrations WHERE name = ?", (_cc_migration,)
+        ).fetchone()
+        if not _cc_done:
+            now_cc = datetime.utcnow().isoformat()
+            for _pos, (_slug, _label) in enumerate([
+                ('tributario', 'Tributario'),
+                ('laboral', 'Laboral'),
+                ('corporativo', 'Corporativo'),
+                ('sunat', 'SUNAT'),
+            ]):
+                conn.execute(
+                    "INSERT OR IGNORE INTO course_categories (slug, label, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                    (_slug, _label, _pos, now_cc, now_cc),
+                )
+            conn.execute(
+                "INSERT INTO db_migrations (name, applied_at) VALUES (?, ?)",
+                (_cc_migration, datetime.utcnow().isoformat()),
+            )
+
         # Bootstrap admin user if none exist and env vars are provided
         admin_count = conn.execute("SELECT COUNT(*) AS c FROM admin_users").fetchone()["c"]
         admin_user = (os.environ.get("ADMIN_USER") or "").strip()

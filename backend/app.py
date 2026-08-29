@@ -82,6 +82,11 @@ from models import (
     # payment config
     get_payment_config,
     save_payment_config,
+    # course categories
+    get_course_categories,
+    create_course_category,
+    update_course_category,
+    delete_course_category,
 )
 from s3_service import (
     create_media_folder,
@@ -1560,6 +1565,55 @@ def swagger_json():
         },
     }
     return jsonify(spec)
+
+
+# ─── Academia: Course Categories ─────────────────────────────────────────────
+
+@app.route("/api/courses/categories", methods=["GET"])
+def api_course_categories():
+    ensure_db()
+    return jsonify(get_course_categories())
+
+
+@app.route("/api/courses/categories", methods=["POST"])
+@require_admin()
+def api_create_course_category():
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    slug = (data.get("slug") or "").strip().lower()
+    label = (data.get("label") or "").strip()
+    if not slug or not label:
+        return jsonify(error="slug y label son requeridos"), 400
+    position = int(data.get("position") or 0)
+    try:
+        cat = create_course_category(slug, label, position)
+        return jsonify(cat), 201
+    except Exception as exc:
+        return jsonify(error=str(exc)), 400
+
+
+@app.route("/api/courses/categories/<int:cat_id>", methods=["PUT"])
+@require_admin()
+def api_update_course_category(cat_id):
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    slug = (data.get("slug") or "").strip().lower()
+    label = (data.get("label") or "").strip()
+    if not slug or not label:
+        return jsonify(error="slug y label son requeridos"), 400
+    position = int(data.get("position") or 0)
+    cat = update_course_category(cat_id, slug, label, position)
+    if not cat:
+        return jsonify(error="Categoría no encontrada"), 404
+    return jsonify(cat)
+
+
+@app.route("/api/courses/categories/<int:cat_id>", methods=["DELETE"])
+@require_admin()
+def api_delete_course_category(cat_id):
+    ensure_db()
+    delete_course_category(cat_id)
+    return jsonify(ok=True)
 
 
 # ─── Academia: Courses (público) ─────────────────────────────────────────────

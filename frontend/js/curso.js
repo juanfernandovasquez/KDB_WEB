@@ -14,9 +14,19 @@
       .replace(/"/g, '&quot;');
   }
 
+  let _catMap = {};
+
+  async function loadCategoryMap() {
+    try {
+      const res = await fetch((window.API_BASE || '') + '/api/courses/categories');
+      if (!res.ok) return;
+      const cats = await res.json();
+      cats.forEach((c) => { _catMap[c.slug] = c.label; });
+    } catch (_) {}
+  }
+
   function categoryLabel(cat) {
-    const map = { tributario: 'Tributario', laboral: 'Laboral', corporativo: 'Corporativo', sunat: 'SUNAT' };
-    return map[cat] || cat || 'General';
+    return _catMap[cat] || cat || 'General';
   }
 
   function calcDiscount(price, original) {
@@ -269,5 +279,5 @@
     });
   });
 
-  loadCourse();
+  loadCategoryMap().then(loadCourse);
 })();

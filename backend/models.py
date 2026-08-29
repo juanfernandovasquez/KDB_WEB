@@ -1196,6 +1196,60 @@ def delete_course(course_id):
     conn.close()
 
 
+# ─── Academia: Course Categories ──────────────────────────────────────────────
+
+def get_course_categories():
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT * FROM course_categories ORDER BY position ASC, label ASC"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def create_course_category(slug, label, position):
+    now = datetime.utcnow().isoformat()
+    conn = get_conn()
+    try:
+        with conn:
+            conn.execute(
+                "INSERT INTO course_categories (slug, label, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+                (slug, label, position, now, now),
+            )
+            row = conn.execute(
+                "SELECT * FROM course_categories WHERE slug = ?", (slug,)
+            ).fetchone()
+        return dict(row)
+    finally:
+        conn.close()
+
+
+def update_course_category(cat_id, slug, label, position):
+    now = datetime.utcnow().isoformat()
+    conn = get_conn()
+    try:
+        with conn:
+            conn.execute(
+                "UPDATE course_categories SET slug=?, label=?, position=?, updated_at=? WHERE id=?",
+                (slug, label, position, now, cat_id),
+            )
+            row = conn.execute(
+                "SELECT * FROM course_categories WHERE id = ?", (cat_id,)
+            ).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def delete_course_category(cat_id):
+    conn = get_conn()
+    try:
+        with conn:
+            conn.execute("DELETE FROM course_categories WHERE id=?", (cat_id,))
+    finally:
+        conn.close()
+
+
 # ─── Academia: Orders ─────────────────────────────────────────────────────────
 
 def create_order(payload):

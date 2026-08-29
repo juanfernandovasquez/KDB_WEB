@@ -2063,6 +2063,7 @@ let currentAdminUserId = null;
   let acEditId = null;
   let acCourses = [];
   let acEventsBound = false;
+  let _courseCategoriesCache = [];
 
   function acSlugify(str) {
     return str.toLowerCase()
@@ -2217,6 +2218,95 @@ let currentAdminUserId = null;
     })).filter(i => i.name);
   }
 
+  // ── Course category management ────────────────────────────────────────────
+  async function loadCourseCategories() {
+    try {
+      const res = await apiFetch('/api/courses/categories');
+      if (!res.ok) return;
+      _courseCategoriesCache = await res.json();
+    } catch (_) {
+      _courseCategoriesCache = [];
+    }
+    const sel = q('ac-category');
+    if (sel) {
+      const current = sel.value;
+      sel.innerHTML = _courseCategoriesCache.map(function(c) {
+        return '<option value="' + escHtml(c.slug) + '">' + escHtml(c.label) + '</option>';
+      }).join('');
+      if (current && [...sel.options].some(function(o) { return o.value === current; })) {
+        sel.value = current;
+      } else if (sel.options.length) {
+        sel.selectedIndex = 0;
+      }
+    }
+    renderCourseCategoriesTable();
+  }
+
+  function renderCourseCategoriesTable() {
+    const tbody = q('ac-categories-tbody');
+    if (!tbody) return;
+    if (!_courseCategoriesCache.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="muted small">Sin categorías. Agrega la primera arriba.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = _courseCategoriesCache.map(function(c) {
+      return '<tr>' +
+        '<td>' + escHtml(c.label) + '</td>' +
+        '<td><code>' + escHtml(c.slug) + '</code></td>' +
+        '<td>' + c.position + '</td>' +
+        '<td><button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '">Eliminar</button></td>' +
+        '</tr>';
+    }).join('');
+    tbody.querySelectorAll('.ac-del-cat-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { acDeleteCourseCategory(btn.dataset.id, btn.dataset.label); });
+    });
+  }
+
+  async function acAddCourseCategory() {
+    const label = (q('ac-new-cat-label')?.value || '').trim();
+    const slug = (q('ac-new-cat-slug')?.value || '').trim().toLowerCase();
+    const status = q('ac-cat-status');
+    if (!label || !slug) {
+      if (status) status.textContent = 'Etiqueta y slug son requeridos.';
+      return;
+    }
+    const position = _courseCategoriesCache.length;
+    try {
+      if (status) status.textContent = 'Guardando…';
+      const res = await apiFetch('/api/courses/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, label, position }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(function() { return {}; });
+        if (status) status.textContent = 'Error: ' + (err.error || res.status);
+        return;
+      }
+      if (q('ac-new-cat-label')) q('ac-new-cat-label').value = '';
+      if (q('ac-new-cat-slug')) q('ac-new-cat-slug').value = '';
+      if (status) { status.textContent = '✓ Categoría agregada'; setTimeout(function() { if (status) status.textContent = ''; }, 2500); }
+      await loadCourseCategories();
+    } catch (err) {
+      if (status) status.textContent = 'Error: ' + err.message;
+    }
+  }
+
+  async function acDeleteCourseCategory(id, label) {
+    if (!confirm('¿Eliminar la categoría "' + label + '"?\n\nLos cursos con esta categoría quedarán sin categoría asignada.')) return;
+    try {
+      const res = await apiFetch('/api/courses/categories/' + id, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(function() { return {}; });
+        alert('Error: ' + (err.error || res.status));
+        return;
+      }
+      await loadCourseCategories();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
   function acOpenForm(course) {
     acEditId = course?.id || null;
     q('ac-id').value = acEditId || '';
@@ -2225,7 +2315,12 @@ let currentAdminUserId = null;
     q('ac-slug').value = course?.slug || '';
     q('ac-subtitle').value = course?.subtitle || '';
     q('ac-description').value = course?.description || '';
-    q('ac-category').value = course?.category || 'tributario';
+    const _catSel = q('ac-category');
+    if (_catSel) {
+      const _catVal = course?.category || '';
+      _catSel.value = _catVal;
+      if (_catVal && _catSel.value !== _catVal && _catSel.options.length) _catSel.selectedIndex = 0;
+    }
     q('ac-price').value = course?.price || '';
     q('ac-original-price').value = course?.original_price || '';
     q('ac-duration').value = course?.duration || '';
@@ -2638,6 +2733,13 @@ let currentAdminUserId = null;
     if (acEventsBound) return;
     acEventsBound = true;
 
+    bindOnce('ac-add-cat-btn', acAddCourseCategory);
+    const _catLabelEl = q('ac-new-cat-label');
+    const _catSlugEl = q('ac-new-cat-slug');
+    if (_catLabelEl && _catSlugEl && !_catLabelEl.dataset.slugBound) {
+      _catLabelEl.dataset.slugBound = '1';
+      _catLabelEl.addEventListener('input', function() { _catSlugEl.value = acSlugify(_catLabelEl.value); });
+    }
     bindOnce('ac-new-btn', () => acOpenForm(null));
     bindOnce('ac-form-cancel', acCloseForm);
     bindOnce('ac-form-cancel2', acCloseForm);
@@ -4008,6 +4110,7 @@ let currentAdminUserId = null;
     hideAllSections();
     q("academia-section").classList.remove("hidden");
     bindAcademiaEvents();
+    await loadCourseCategories();
     await loadAcademiaAdmin();
     await loadAcademiaPageContent();
     const saveBtn = q("ac-page-save");

@@ -201,8 +201,9 @@ function applyActiveNavState() {
 function initHeaderScrollState() {
   const header = document.querySelector('.header-container');
   if (!header) return;
+  const solid = document.body?.hasAttribute('data-header-solid');
   const syncState = () => {
-    header.classList.toggle('is-scrolled', window.scrollY > 20);
+    header.classList.toggle('is-scrolled', solid || window.scrollY > 20);
   };
   syncState();
   window.addEventListener('scroll', syncState, { passive: true });

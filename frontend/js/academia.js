@@ -3,9 +3,10 @@
   const grid = document.getElementById('courses-grid');
   const loading = document.getElementById('courses-loading');
   const empty = document.getElementById('courses-empty');
-  const filterBtns = document.querySelectorAll('#academia-filters .filter-btn');
+  const filtersContainer = document.getElementById('academia-filters');
 
   let allCourses = [];
+  var _catMap = {};
 
   // SVG paths keyed by icon identifier (stored in services[].icon)
   var BENEFIT_ICONS = {
@@ -180,13 +181,28 @@
   loadPageContent();
 
   function categoryLabel(cat) {
-    var map = {
-      tributario: 'Tributario',
-      laboral: 'Laboral',
-      corporativo: 'Corporativo',
-      sunat: 'SUNAT',
-    };
-    return map[cat] || cat || 'General';
+    return _catMap[cat] || cat || 'General';
+  }
+
+  async function loadCategories() {
+    try {
+      var res = await fetch(window.API_BASE + '/api/courses/categories');
+      if (!res.ok) return;
+      var cats = await res.json();
+      _catMap = {};
+      cats.forEach(function(c) { _catMap[c.slug] = c.label; });
+      // Remove existing category filter buttons (keep "Todos")
+      if (filtersContainer) {
+        filtersContainer.querySelectorAll('.filter-btn[data-cat]:not([data-cat=""])').forEach(function(b) { b.remove(); });
+        cats.forEach(function(c) {
+          var btn = document.createElement('button');
+          btn.className = 'filter-btn';
+          btn.dataset.cat = c.slug;
+          btn.textContent = c.label;
+          filtersContainer.appendChild(btn);
+        });
+      }
+    } catch (_) {}
   }
 
   function renderCourses(courses) {
@@ -263,13 +279,15 @@
     }
   }
 
-  filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      filterBtns.forEach(function (b) { b.classList.remove('active'); });
+  if (filtersContainer) {
+    filtersContainer.addEventListener('click', function(e) {
+      var btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      filtersContainer.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
-      applyFilter(btn.dataset.cat);
+      applyFilter(btn.dataset.cat || '');
     });
-  });
+  }
 
   function escHtml(str) {
     return String(str || '')
@@ -279,5 +297,9 @@
       .replace(/"/g, '&quot;');
   }
 
-  loadCourses();
+  async function init() {
+    await loadCategories();
+    loadCourses();
+  }
+  init();
 })();
