@@ -256,6 +256,14 @@
           '</div>' +
         '</div>';
 
+      var detailUrl = 'curso.html?slug=' + encodeURIComponent(course.slug);
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function (e) {
+        if (!e.target.closest('.btn-card-buy')) {
+          window.location.href = detailUrl;
+        }
+      });
+
       grid.appendChild(card);
     });
   }
