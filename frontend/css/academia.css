@@ -325,6 +325,7 @@
   box-shadow: 0 2px 12px rgba(6,24,109,0.06);
   display: flex;
   flex-direction: column;
+  position: relative;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .course-card:hover {
@@ -408,7 +409,15 @@
 
 .course-card-actions { display: flex; gap: 0.5rem; }
 
+.btn-card-detail::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
 .btn-card-detail {
+  position: relative;
+  z-index: 1;
   padding: 0.45rem 0.85rem;
   font-family: inherit;
   font-size: 0.72rem;
@@ -425,6 +434,8 @@
 .btn-card-detail:hover { background: var(--brand-blue, #06186d); color: #fff; }
 
 .btn-card-buy {
+  position: relative;
+  z-index: 1;
   padding: 0.45rem 0.85rem;
   font-family: inherit;
   font-size: 0.72rem;
