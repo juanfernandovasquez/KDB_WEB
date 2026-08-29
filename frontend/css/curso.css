@@ -543,6 +543,8 @@
   flex-shrink: 0;
 }
 
+#about-description { white-space: pre-wrap; }
+
 /* ── Sidebar ── */
 .curso-sidebar { position: relative; }
 
