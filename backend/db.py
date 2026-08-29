@@ -1058,6 +1058,7 @@ def init_db():
             ("includes_list",  "TEXT"),
             ("audience",       "TEXT"),
             ("instructors",    "TEXT"),
+            ("video_url",      "TEXT"),
         ]:
             try:
                 conn.execute(f"ALTER TABLE courses ADD COLUMN {col_def[0]} {col_def[1]}")

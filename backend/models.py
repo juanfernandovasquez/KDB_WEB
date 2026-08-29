@@ -1100,7 +1100,7 @@ def save_course(payload, course_id=None):
                   modules_count=?, lessons_count=?, level=?, is_published=?,
                   position=?, moodle_course_id=?,
                   what_you_learn=?, includes_list=?, audience=?, instructors=?,
-                  updated_at=?
+                  video_url=?, updated_at=?
                 WHERE id=?
                 """,
                 (
@@ -1123,6 +1123,7 @@ def save_course(payload, course_id=None):
                     _json_list("includes_list"),
                     _json_list("audience"),
                     _json_list("instructors"),
+                    payload.get("video_url") or None,
                     now,
                     course_id,
                 ),
@@ -1136,8 +1137,8 @@ def save_course(payload, course_id=None):
                   modules_count, lessons_count, level, is_published,
                   position, moodle_course_id,
                   what_you_learn, includes_list, audience, instructors,
-                  created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  video_url, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload.get("slug"),
@@ -1159,6 +1160,7 @@ def save_course(payload, course_id=None):
                     _json_list("includes_list"),
                     _json_list("audience"),
                     _json_list("instructors"),
+                    payload.get("video_url") or None,
                     now,
                     now,
                 ),

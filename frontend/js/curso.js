@@ -34,6 +34,36 @@
     return Math.round((1 - price / original) * 100);
   }
 
+  function getYouTubeId(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  function openVideoModal(ytId) {
+    const modal = document.getElementById('video-modal');
+    const mediaEl = document.getElementById('video-modal-media');
+    if (!modal || !mediaEl) return;
+    mediaEl.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const mediaEl = document.getElementById('video-modal-media');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    if (mediaEl) mediaEl.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  function initVideoModal() {
+    document.getElementById('video-modal-close')?.addEventListener('click', closeVideoModal);
+    document.getElementById('video-modal-overlay')?.addEventListener('click', closeVideoModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeVideoModal(); });
+  }
+
   function renderHero(course) {
     document.title = `${course.title} | Katarzyna Academia`;
     document.getElementById('breadcrumb-title').textContent = course.title;
@@ -83,6 +113,14 @@
     } else {
       document.getElementById('purchase-card-img').style.background = 'var(--brand-blue,#06186d)';
       thumb.style.display = 'none';
+    }
+
+    // Video overlay
+    const ytId = getYouTubeId(course.video_url);
+    const overlay = document.querySelector('.play-overlay');
+    if (ytId && overlay) {
+      overlay.classList.add('has-video');
+      overlay.addEventListener('click', () => openVideoModal(ytId));
     }
 
     // Price
@@ -257,6 +295,7 @@
 
       renderHero(course);
       renderPurchaseCard(course);
+      initVideoModal();
       renderAboutTab(course);
       renderModulesTab(course);
       renderInstructorsTab(course);

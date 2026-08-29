@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/header.css" />
   <link rel="stylesheet" href="./css/footer.css" />
-  <link rel="stylesheet" href="./css/curso.css?v=20260829c" />
+  <link rel="stylesheet" href="./css/curso.css?v=20260829d" />
 </head>
 <body data-page="academia" data-header-solid="true">
   <div id="site-header"></div>
@@ -156,13 +156,24 @@
     </div>
   </div>
 
+  <!-- Video preview modal -->
+  <div id="video-modal" class="video-modal hidden" role="dialog" aria-modal="true" aria-label="Video del curso">
+    <div class="video-modal-overlay" id="video-modal-overlay"></div>
+    <div class="video-modal-inner">
+      <button type="button" class="video-modal-close" id="video-modal-close" aria-label="Cerrar video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="video-modal-media" id="video-modal-media"></div>
+    </div>
+  </div>
+
   <div id="site-footer"></div>
 
   <script src="./js/config.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/header.js"></script>
   <script src="./js/footer.js"></script>
-  <script src="./js/curso.js?v=20260829c"></script>
+  <script src="./js/curso.js?v=20260829e"></script>
   <script src="./js/page-reveal.js"></script>
   <script src="./js/img-reveal.js"></script>
 </body>

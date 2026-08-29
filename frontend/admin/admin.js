@@ -2329,6 +2329,7 @@ let currentAdminUserId = null;
     q('ac-published').value = course?.is_published ? '1' : '0';
     // image picker
     setImgPicker('ac-image-url', course?.image_url || '');
+    q('ac-video-url').value = course?.video_url || '';
     // modules
     acRenderModules(course?.modules || []);
     // dynamic lists
@@ -2364,6 +2365,7 @@ let currentAdminUserId = null;
       price: parseFloat(q('ac-price').value) || 0,
       original_price: parseFloat(q('ac-original-price').value) || null,
       image_url: q('ac-image-url').value.trim() || null,
+      video_url: q('ac-video-url').value.trim() || null,
       duration: q('ac-duration').value.trim(),
       level: q('ac-level').value,
       moodle_course_id: parseInt(q('ac-moodle-course-id').value) || null,
