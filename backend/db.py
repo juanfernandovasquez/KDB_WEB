@@ -1053,6 +1053,12 @@ def init_db():
             """
         )
 
+        for col in ["yape_enabled INTEGER DEFAULT 1", "plin_enabled INTEGER DEFAULT 1", "bank_enabled INTEGER DEFAULT 1"]:
+            try:
+                conn.execute(f"ALTER TABLE payment_config ADD COLUMN {col}")
+            except Exception:
+                pass
+
         # ── Extra course content fields ───────────────────────────────────────
         for col_def in [
             ("what_you_learn", "TEXT"),
