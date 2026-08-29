@@ -4265,6 +4265,15 @@ let currentAdminUserId = null;
       setImgPicker('pay-plin-qr-url', data.plin_qr_url || '');
       payBankData = Array.isArray(data.bank_accounts) ? data.bank_accounts : [];
       payRenderBanks();
+      const setToggle = (id, labelId, val) => {
+        const el = q(id); if (!el) return;
+        el.checked = val !== false;
+        const lbl = q(labelId); if (lbl) lbl.textContent = el.checked ? 'Habilitado' : 'Deshabilitado';
+        el.addEventListener('change', () => { if (lbl) lbl.textContent = el.checked ? 'Habilitado' : 'Deshabilitado'; });
+      };
+      setToggle('pay-yape-enabled', 'pay-yape-enabled-label', data.yape_enabled);
+      setToggle('pay-plin-enabled', 'pay-plin-enabled-label', data.plin_enabled);
+      setToggle('pay-bank-enabled', 'pay-bank-enabled-label', data.bank_enabled);
     } catch (err) {
       console.error('Error cargando config de pagos', err);
     }
@@ -4279,6 +4288,9 @@ let currentAdminUserId = null;
       plin_number: (q('pay-plin-number')?.value || '').trim(),
       plin_qr_url: (q('pay-plin-qr-url')?.value || '').trim(),
       bank_accounts: payGetBanks(),
+      yape_enabled: q('pay-yape-enabled')?.checked !== false,
+      plin_enabled: q('pay-plin-enabled')?.checked !== false,
+      bank_enabled: q('pay-bank-enabled')?.checked !== false,
     };
     try {
       const res = await apiFetch('/config/payment', {

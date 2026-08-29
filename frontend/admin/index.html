@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel Admin · Katarzyna</title>
-  <link rel="stylesheet" href="./admin.css?v=20260829i">
+  <link rel="stylesheet" href="./admin.css?v=20260829j">
 </head>
 <body>
   <header>
@@ -618,6 +618,11 @@
         <div class="card">
           <div class="card-head between">
             <h3>Yape</h3>
+            <label class="pay-toggle">
+              <input type="checkbox" id="pay-yape-enabled" checked />
+              <span class="pay-toggle-track"><span class="pay-toggle-thumb"></span></span>
+              <span class="pay-toggle-label" id="pay-yape-enabled-label">Habilitado</span>
+            </label>
           </div>
           <div class="grid-2" style="margin-top:.75rem;">
             <div>
@@ -645,6 +650,11 @@
         <div class="card">
           <div class="card-head between">
             <h3>Plin</h3>
+            <label class="pay-toggle">
+              <input type="checkbox" id="pay-plin-enabled" checked />
+              <span class="pay-toggle-track"><span class="pay-toggle-thumb"></span></span>
+              <span class="pay-toggle-label" id="pay-plin-enabled-label">Habilitado</span>
+            </label>
           </div>
           <div class="grid-2" style="margin-top:.75rem;">
             <div>
@@ -671,8 +681,15 @@
         <!-- Cuentas bancarias -->
         <div class="card">
           <div class="card-head between">
-            <h3>Cuentas bancarias</h3>
-            <button type="button" class="secondary small-btn" id="pay-add-bank">+ Agregar banco</button>
+            <h3>Transferencia bancaria</h3>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <label class="pay-toggle">
+                <input type="checkbox" id="pay-bank-enabled" checked />
+                <span class="pay-toggle-track"><span class="pay-toggle-thumb"></span></span>
+                <span class="pay-toggle-label" id="pay-bank-enabled-label">Habilitado</span>
+              </label>
+              <button type="button" class="secondary small-btn" id="pay-add-bank">+ Agregar banco</button>
+            </div>
           </div>
           <p class="small muted" style="margin:.25rem 0 1rem;">Agrega las cuentas bancarias que se mostrarán en la opción "Transferencia". Ejemplo: BCP, BBVA.</p>
           <div id="pay-banks-list"></div>
@@ -2250,7 +2267,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260829i"></script>
+  <script type="module" src="./main.js?v=20260829j"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");

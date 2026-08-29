@@ -251,6 +251,33 @@
       } else {
         bankList.innerHTML = '<div class="pay-instr-box"><p class="muted small">Datos bancarios no configurados aún.</p></div>';
       }
+
+      // Hide disabled payment methods
+      const methods = [
+        { enabled: paymentConfig.yape_enabled, lbl: 'lbl-yape', instr: 'instr-yape', value: 'yape' },
+        { enabled: paymentConfig.plin_enabled, lbl: 'lbl-plin', instr: 'instr-plin', value: 'plin' },
+        { enabled: paymentConfig.bank_enabled, lbl: 'lbl-bank', instr: 'instr-bank', value: 'transferencia' },
+      ];
+      methods.forEach(m => {
+        if (m.enabled === false) {
+          document.getElementById(m.lbl)?.classList.add('hidden');
+          document.getElementById(m.instr)?.classList.add('hidden');
+          const radio = document.querySelector(`input[name="pay_method"][value="${m.value}"]`);
+          if (radio) radio.disabled = true;
+        }
+      });
+      // Auto-select first available method
+      const firstEnabled = methods.find(m => m.enabled !== false);
+      if (firstEnabled) {
+        const currentRadio = document.querySelector('input[name="pay_method"]:checked');
+        if (currentRadio && currentRadio.disabled) {
+          const nextRadio = document.querySelector(`input[name="pay_method"][value="${firstEnabled.value}"]`);
+          if (nextRadio) {
+            nextRadio.checked = true;
+            nextRadio.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+      }
     } catch (_) {
       // silent fail — page still works without payment config
     }
