@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel de contenido</title>
-  <link rel="stylesheet" href="./admin.css?v=20260829c">
+  <link rel="stylesheet" href="./admin.css?v=20260829d">
 </head>
 <body>
   <header>
@@ -1843,10 +1843,6 @@
               <input type="text" id="ac-subtitle" placeholder="Frase breve del curso" />
             </div>
             <div class="full">
-              <label>Acerca de este curso <small class="muted">(sección principal en el tab "Descripción")</small></label>
-              <textarea id="ac-description" rows="4" placeholder="Texto largo del curso..."></textarea>
-            </div>
-            <div class="full">
               <label>Imagen del curso</label>
               <div class="image-picker-field">
                 <input type="hidden" id="ac-image-url" />
@@ -1872,7 +1868,16 @@
             <div id="ac-modules-list"></div>
           </div>
 
-          <!-- What you'll learn -->
+          <!-- About (Descripción tab: sección 1) -->
+          <div style="margin-top:1.5rem;">
+            <div class="section-head" style="margin-bottom:.5rem;">
+              <h4 style="margin:0;">Acerca de este curso <small class="muted" style="font-weight:400;">(opcional)</small></h4>
+            </div>
+            <p class="small muted" style="margin-bottom:.75rem;">Texto principal del tab "Descripción" en la página del curso.</p>
+            <textarea id="ac-description" rows="4" placeholder="Texto largo del curso..." style="width:100%;box-sizing:border-box;"></textarea>
+          </div>
+
+          <!-- What you'll learn (Descripción tab: sección 2) -->
           <div style="margin-top:1.5rem;">
             <div class="section-head spaced" style="margin-bottom:.5rem;">
               <h4 style="margin:0;">¿Qué aprenderás? <small class="muted" style="font-weight:400;">(opcional)</small></h4>
@@ -1882,17 +1887,7 @@
             <div id="ac-learn-list"></div>
           </div>
 
-          <!-- Course includes -->
-          <div style="margin-top:1.5rem;">
-            <div class="section-head spaced" style="margin-bottom:.5rem;">
-              <h4 style="margin:0;">Este curso incluye <small class="muted" style="font-weight:400;">(opcional)</small></h4>
-              <button type="button" class="secondary small-btn" id="ac-add-include">+ Agregar</button>
-            </div>
-            <p class="small muted" style="margin-bottom:.75rem;">Características del curso (acceso ilimitado, certificado, etc.). Si no se configura se usan valores por defecto.</p>
-            <div id="ac-includes-list"></div>
-          </div>
-
-          <!-- Audience -->
+          <!-- Audience (Descripción tab: sección 3) -->
           <div style="margin-top:1.5rem;">
             <div class="section-head spaced" style="margin-bottom:.5rem;">
               <h4 style="margin:0;">¿Para quién es este curso? <small class="muted" style="font-weight:400;">(opcional)</small></h4>
@@ -1900,6 +1895,16 @@
             </div>
             <p class="small muted" style="margin-bottom:.75rem;">Perfil del estudiante ideal. Se muestra en la pestaña "Descripción".</p>
             <div id="ac-audience-list"></div>
+          </div>
+
+          <!-- Course includes (Descripción tab: sección 4) -->
+          <div style="margin-top:1.5rem;">
+            <div class="section-head spaced" style="margin-bottom:.5rem;">
+              <h4 style="margin:0;">Este curso incluye <small class="muted" style="font-weight:400;">(opcional)</small></h4>
+              <button type="button" class="secondary small-btn" id="ac-add-include">+ Agregar</button>
+            </div>
+            <p class="small muted" style="margin-bottom:.75rem;">Características del curso (acceso ilimitado, certificado, etc.). Si no se configura se usan valores por defecto.</p>
+            <div id="ac-includes-list"></div>
           </div>
 
           <div class="row row-space-top">
@@ -2144,7 +2149,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260829c"></script>
+  <script type="module" src="./main.js?v=20260829d"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");
