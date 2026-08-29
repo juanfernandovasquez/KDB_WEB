@@ -550,43 +550,24 @@
     if (!file) return;
     setMediaStatus("Optimizando imagen...");
     file = await compressImageFile(file);
-    setMediaStatus("Preparando subida...");
+    setMediaStatus("Subiendo imagen...");
     try {
-      const res = await apiFetch("/api/media/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: file.name,
-          content_type: file.type || "",
-          size: file.size || 0,
-          prefix: currentMediaPrefix,
-        }),
-      });
+      const form = new FormData();
+      form.append("file", file, file.name);
+      if (currentMediaPrefix) form.append("prefix", currentMediaPrefix);
+      const res = await apiFetch("/api/media/upload", { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMediaStatus(data.error || "No se pudo preparar la subida");
+        setMediaStatus(data.error || "Error al subir la imagen");
         return;
       }
-      const post = data.post || {};
-      const form = new FormData();
-      Object.entries(post.fields || {}).forEach(([k, v]) => form.append(k, v));
-      form.append("file", file);
-      const uploadRes = await fetch(post.url, { method: "POST", body: form });
-      if (!uploadRes.ok) {
-        setMediaStatus("Error al subir la imagen");
-        return;
-      }
-      if (data.url) {
-        mediaCache.unshift({
-          key: data.key || file.name,
-          url: data.url,
-          size: file.size || 0,
-          last_modified: new Date().toISOString(),
-        });
-        renderMediaBrowser();
-      } else {
-        await loadMediaLibrary();
-      }
+      mediaCache.unshift({
+        key: data.key || file.name,
+        url: data.url,
+        size: file.size || 0,
+        last_modified: new Date().toISOString(),
+      });
+      renderMediaBrowser();
       setMediaStatus("Imagen subida");
     } catch (err) {
       console.error("Error uploading media", err);

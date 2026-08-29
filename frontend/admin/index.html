@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel de contenido</title>
-  <link rel="stylesheet" href="./admin.css?v=20260907">
+  <link rel="stylesheet" href="./admin.css?v=20260829">
 </head>
 <body>
   <header>
@@ -1698,6 +1698,13 @@
                     </div>
                   </div>
                 </div>
+              </div>
+              <div class="row between" style="margin:.75rem 0 .4rem;align-items:center;">
+                <p class="small muted" style="margin:0;">Puntos destacados (lista de ventajas)</p>
+                <button type="button" class="secondary small-btn" id="ac-intro-bullet-add">+ Agregar punto</button>
+              </div>
+              <div id="ac-intro-bullets-rows"></div>
+              <div class="grid-2" style="margin-top:.75rem;">
                 <div>
                   <label>Texto del botón</label>
                   <input type="text" id="ac-intro-btn-label" placeholder="Explorar cursos" />
@@ -1707,11 +1714,6 @@
                   <input type="text" id="ac-intro-btn-href" placeholder="#cursos" />
                 </div>
               </div>
-              <div class="row between" style="margin:.75rem 0 .4rem;align-items:center;">
-                <p class="small muted" style="margin:0;">Puntos destacados (lista de ventajas)</p>
-                <button type="button" class="secondary small-btn" id="ac-intro-bullet-add">+ Agregar punto</button>
-              </div>
-              <div id="ac-intro-bullets-rows"></div>
             </div>
 
             <!-- 4. Beneficios -->
@@ -2142,7 +2144,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260907"></script>
+  <script type="module" src="./main.js?v=20260829"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");

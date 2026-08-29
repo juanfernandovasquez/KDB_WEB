@@ -991,6 +991,28 @@ def api_media_list():
     return jsonify(items=items, folders=folders, next_token=next_token, prefix=resolved_prefix), 200
 
 
+@app.route("/api/media/upload", methods=["POST"])
+@require_admin()
+def api_media_upload():
+    """Server-side media upload — bypasses S3 CORS restrictions."""
+    import mimetypes as _mimetypes
+    file = request.files.get("file")
+    if not file or not file.filename:
+        return jsonify(error="No se recibió ningún archivo"), 400
+    content_type = file.content_type or _mimetypes.guess_type(file.filename)[0] or ""
+    if content_type and not content_type.lower().startswith("image/"):
+        return jsonify(error="Solo se aceptan imágenes"), 400
+    prefix = (request.form.get("prefix") or "").strip() or None
+    try:
+        result = upload_file_object(file.stream, file.filename, content_type=content_type or None, prefix_override=prefix)
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception:
+        app.logger.exception("Error uploading media server-side")
+        return jsonify(error="No se pudo subir el archivo"), 500
+    return jsonify(result), 200
+
+
 @app.route("/api/media/presign", methods=["POST"])
 @require_admin()
 def api_media_presign():
