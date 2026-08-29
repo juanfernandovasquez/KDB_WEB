@@ -164,6 +164,11 @@
                   <span class="pay-opt-icon">🏦</span>
                   <span>Transferencia</span>
                 </label>
+                <label class="pay-method-opt hidden" id="lbl-card">
+                  <input type="radio" name="pay_method" value="tarjeta" />
+                  <span class="pay-opt-icon">💳</span>
+                  <span>Tarjeta</span>
+                </label>
               </div>
 
               <!-- Yape instructions -->
@@ -213,6 +218,14 @@
                   </div>
                 </div>
                 <p class="pay-instr-note" style="margin-top:.75rem;">Indica tu nombre y el nombre del curso en la descripción de la transferencia.</p>
+              </div>
+
+              <!-- Tarjeta instructions -->
+              <div class="pay-instructions hidden" id="instr-card">
+                <div class="pay-instr-box" style="text-align:center;">
+                  <p style="margin-bottom:1rem;">Haz clic en el botón para pagar con tu tarjeta de crédito o débito de forma segura.</p>
+                  <a id="card-pay-link" href="#" target="_blank" rel="noopener" class="cta" style="display:inline-block;">Pagar con tarjeta →</a>
+                </div>
               </div>
 
               <!-- N° de operación (opcional) -->

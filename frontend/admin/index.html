@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel Admin · Katarzyna</title>
-  <link rel="stylesheet" href="./admin.css?v=20260829j">
+  <link rel="stylesheet" href="./admin.css?v=20260829k">
 </head>
 <body>
   <header>
@@ -675,6 +675,23 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta -->
+        <div class="card">
+          <div class="card-head between">
+            <h3>Tarjeta de crédito / débito</h3>
+            <label class="pay-toggle">
+              <input type="checkbox" id="pay-card-enabled" />
+              <span class="pay-toggle-track"><span class="pay-toggle-thumb"></span></span>
+              <span class="pay-toggle-label" id="pay-card-enabled-label">Deshabilitado</span>
+            </label>
+          </div>
+          <div style="margin-top:.75rem;">
+            <label>Link de pago (Culqi, Stripe, PayPal, etc.)</label>
+            <input type="url" id="pay-card-link" placeholder="https://checkout.culqi.com/..." />
+            <p class="small muted" style="margin-top:.35rem;">Al habilitarlo, el alumno verá un botón que abre este link para pagar con tarjeta.</p>
           </div>
         </div>
 
@@ -2267,7 +2284,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260829j"></script>
+  <script type="module" src="./main.js?v=20260829k"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");

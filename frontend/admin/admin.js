@@ -4274,6 +4274,8 @@ let currentAdminUserId = null;
       setToggle('pay-yape-enabled', 'pay-yape-enabled-label', data.yape_enabled);
       setToggle('pay-plin-enabled', 'pay-plin-enabled-label', data.plin_enabled);
       setToggle('pay-bank-enabled', 'pay-bank-enabled-label', data.bank_enabled);
+      setToggle('pay-card-enabled', 'pay-card-enabled-label', data.card_enabled);
+      setVal('pay-card-link', data.card_link || '');
     } catch (err) {
       console.error('Error cargando config de pagos', err);
     }
@@ -4291,6 +4293,8 @@ let currentAdminUserId = null;
       yape_enabled: q('pay-yape-enabled')?.checked !== false,
       plin_enabled: q('pay-plin-enabled')?.checked !== false,
       bank_enabled: q('pay-bank-enabled')?.checked !== false,
+      card_enabled: !!q('pay-card-enabled')?.checked,
+      card_link: (q('pay-card-link')?.value || '').trim(),
     };
     try {
       const res = await apiFetch('/config/payment', {

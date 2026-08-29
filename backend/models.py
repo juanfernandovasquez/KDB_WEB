@@ -1558,7 +1558,8 @@ def get_payment_config():
     conn.close()
     if not row:
         return {"yape_number": "", "yape_qr_url": "", "plin_number": "", "plin_qr_url": "",
-                "bank_accounts": [], "yape_enabled": True, "plin_enabled": True, "bank_enabled": True}
+                "bank_accounts": [], "yape_enabled": True, "plin_enabled": True,
+                "bank_enabled": True, "card_enabled": False, "card_link": ""}
     d = dict(row)
     try:
         d["bank_accounts"] = json.loads(d.get("bank_accounts") or "[]")
@@ -1567,21 +1568,25 @@ def get_payment_config():
     d["yape_enabled"] = bool(d.get("yape_enabled", 1))
     d["plin_enabled"] = bool(d.get("plin_enabled", 1))
     d["bank_enabled"] = bool(d.get("bank_enabled", 1))
+    d["card_enabled"] = bool(d.get("card_enabled", 0))
+    d["card_link"]    = d.get("card_link") or ""
     return d
 
 
 def save_payment_config(payload):
     bank_accounts = json.dumps(payload.get("bank_accounts") or [])
-    yape_enabled = 1 if payload.get("yape_enabled", True) else 0
-    plin_enabled  = 1 if payload.get("plin_enabled",  True) else 0
-    bank_enabled  = 1 if payload.get("bank_enabled",  True) else 0
+    yape_enabled = 1 if payload.get("yape_enabled", True)  else 0
+    plin_enabled  = 1 if payload.get("plin_enabled",  True)  else 0
+    bank_enabled  = 1 if payload.get("bank_enabled",  True)  else 0
+    card_enabled  = 1 if payload.get("card_enabled",  False) else 0
     conn = get_conn()
     with conn:
         conn.execute(
             """
             INSERT INTO payment_config (id, yape_number, yape_qr_url, plin_number, plin_qr_url,
-                                        bank_accounts, yape_enabled, plin_enabled, bank_enabled)
-            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+                                        bank_accounts, yape_enabled, plin_enabled, bank_enabled,
+                                        card_enabled, card_link)
+            VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               yape_number   = excluded.yape_number,
               yape_qr_url   = excluded.yape_qr_url,
@@ -1590,7 +1595,9 @@ def save_payment_config(payload):
               bank_accounts = excluded.bank_accounts,
               yape_enabled  = excluded.yape_enabled,
               plin_enabled  = excluded.plin_enabled,
-              bank_enabled  = excluded.bank_enabled
+              bank_enabled  = excluded.bank_enabled,
+              card_enabled  = excluded.card_enabled,
+              card_link     = excluded.card_link
             """,
             (
                 payload.get("yape_number", ""),
@@ -1599,6 +1606,7 @@ def save_payment_config(payload):
                 payload.get("plin_qr_url", ""),
                 bank_accounts,
                 yape_enabled, plin_enabled, bank_enabled,
+                card_enabled, payload.get("card_link", ""),
             ),
         )
     conn.close()

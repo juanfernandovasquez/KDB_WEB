@@ -1053,7 +1053,9 @@ def init_db():
             """
         )
 
-        for col in ["yape_enabled INTEGER DEFAULT 1", "plin_enabled INTEGER DEFAULT 1", "bank_enabled INTEGER DEFAULT 1"]:
+        for col in ["yape_enabled INTEGER DEFAULT 1", "plin_enabled INTEGER DEFAULT 1",
+                    "bank_enabled INTEGER DEFAULT 1", "card_enabled INTEGER DEFAULT 0",
+                    "card_link TEXT"]:
             try:
                 conn.execute(f"ALTER TABLE payment_config ADD COLUMN {col}")
             except Exception:

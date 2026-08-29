@@ -252,11 +252,16 @@
         bankList.innerHTML = '<div class="pay-instr-box"><p class="muted small">Datos bancarios no configurados aún.</p></div>';
       }
 
-      // Hide disabled payment methods
+      // Card link
+      const cardLink = document.getElementById('card-pay-link');
+      if (cardLink && paymentConfig.card_link) cardLink.href = paymentConfig.card_link;
+
+      // Show/hide payment methods
       const methods = [
         { enabled: paymentConfig.yape_enabled, lbl: 'lbl-yape', instr: 'instr-yape', value: 'yape' },
         { enabled: paymentConfig.plin_enabled, lbl: 'lbl-plin', instr: 'instr-plin', value: 'plin' },
         { enabled: paymentConfig.bank_enabled, lbl: 'lbl-bank', instr: 'instr-bank', value: 'transferencia' },
+        { enabled: paymentConfig.card_enabled, lbl: 'lbl-card', instr: 'instr-card', value: 'tarjeta' },
       ];
       methods.forEach(m => {
         if (!m.enabled) {
