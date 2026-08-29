@@ -1032,6 +1032,7 @@ def init_db():
             ("payment_method_detail","TEXT"),
             ("moodle_user_id",       "INTEGER"),
             ("operation_number",     "TEXT"),
+            ("comprobante_url",      "TEXT"),
         ]:
             try:
                 conn.execute(f"ALTER TABLE orders ADD COLUMN {col_def[0]} {col_def[1]}")

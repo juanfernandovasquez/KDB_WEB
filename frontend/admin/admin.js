@@ -2621,6 +2621,34 @@ let currentAdminUserId = null;
 
   let _ordersCache = [];
   let _managedOrderId = null;
+  let _paymentConfigCache = null;
+
+  async function loadPaymentConfigForOrders() {
+    try {
+      const res = await apiFetch('/api/payment-config');
+      if (res.ok) _paymentConfigCache = await res.json();
+    } catch (_) {}
+  }
+
+  function renderMgmtBankInfo(order, el) {
+    if (!_paymentConfigCache) { el.style.display = 'none'; return; }
+    const method = (order.payment_method || '').toLowerCase();
+    let html = '';
+    if (method === 'yape' && _paymentConfigCache.yape_number) {
+      html = `<strong>Yape:</strong> ${escHtml(_paymentConfigCache.yape_number)}`;
+    } else if (method === 'plin' && _paymentConfigCache.plin_number) {
+      html = `<strong>Plin:</strong> ${escHtml(_paymentConfigCache.plin_number)}`;
+    } else if (method === 'transferencia' && Array.isArray(_paymentConfigCache.bank_accounts) && _paymentConfigCache.bank_accounts.length) {
+      html = _paymentConfigCache.bank_accounts.map(b => {
+        const name = escHtml(b.bank_name || b.name || '');
+        const acct = escHtml(b.account_number || b.account || '');
+        const cci  = b.cci ? ` · <span class="muted">CCI: ${escHtml(b.cci)}</span>` : '';
+        return `<div><strong>${name}</strong>${acct ? ' — ' + acct : ''}${cci}</div>`;
+      }).join('');
+    }
+    if (html) { el.innerHTML = html; el.style.display = ''; }
+    else el.style.display = 'none';
+  }
 
   function openManageModal(orderId) {
     const o = _ordersCache.find(x => x.id === orderId);
@@ -2648,6 +2676,7 @@ let currentAdminUserId = null;
     q('mgmt-pay-badge').innerHTML = isPaid
       ? '<span class="badge-active">Pagado</span>'
       : '<span class="badge-inactive">Pendiente</span>';
+    renderMgmtBankInfo(o, q('mgmt-bank-info'));
     q('mgmt-pay-form').style.display = '';
     q('mgmt-confirm-pay').style.display = isPaid ? 'none' : '';
     q('mgmt-confirm-pay').textContent = '✓ Confirmar pago';
@@ -2676,6 +2705,19 @@ let currentAdminUserId = null;
     taxpayerEl.textContent = [o.taxpayer_id, o.taxpayer_name].filter(Boolean).join(' · ') || '';
     q('mgmt-comp-number').value = o.comprobante_number || '';
     q('mgmt-comp-status').textContent = '';
+    const compDocCur = q('mgmt-comp-doc-current');
+    if (compDocCur) {
+      compDocCur.innerHTML = o.comprobante_url
+        ? `<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;"><a href="${escHtml(o.comprobante_url)}" target="_blank" class="voucher-link small">📄 Ver documento adjunto</a><button type="button" class="link-btn danger small" id="mgmt-comp-doc-delete">✕ Quitar</button></div>`
+        : '<span class="small muted">Sin documento adjunto</span>';
+      const delBtn = document.getElementById('mgmt-comp-doc-delete');
+      if (delBtn) delBtn.addEventListener('click', async () => {
+        const res = await mgmtApiCall(`/api/admin/orders/${_managedOrderId}`, { comprobante_url: null });
+        if (res.ok) { q('mgmt-comp-status').textContent = '✓ Documento eliminado.'; await mgmtRefresh(); }
+        else q('mgmt-comp-status').textContent = 'Error al eliminar.';
+      });
+    }
+    q('mgmt-comp-doc-file') && (q('mgmt-comp-doc-file').value = '');
 
     // Moodle section
     q('mgmt-moodle-badge').innerHTML = o.moodle_enrolled
@@ -2725,6 +2767,27 @@ let currentAdminUserId = null;
       const o = _ordersCache.find(x => x.id === id);
       if (o) o.voucher_url = voucher_url;
       statusEl.textContent = '✓ Constancia guardada.';
+      setTimeout(() => mgmtRefresh(), 1000);
+    } catch (err) {
+      statusEl.textContent = `Error: ${err.message}`;
+    }
+  }
+
+  async function uploadMgmtComprobante(file) {
+    const id = _managedOrderId;
+    const statusEl = q('mgmt-comp-status');
+    if (file.size > 10 * 1024 * 1024) { statusEl.textContent = 'Archivo demasiado grande (máx 10 MB).'; return; }
+    statusEl.textContent = 'Subiendo archivo…';
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await apiFetch(`/api/admin/orders/${id}/comprobante-upload`, { method: 'POST', body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        statusEl.textContent = `Error: ${err.error || res.status}`;
+        return;
+      }
+      statusEl.textContent = '✓ Documento guardado.';
       setTimeout(() => mgmtRefresh(), 1000);
     } catch (err) {
       statusEl.textContent = `Error: ${err.message}`;
@@ -2820,6 +2883,24 @@ let currentAdminUserId = null;
           const f = e.dataTransfer.files[0]; if (f) uploadMgmtVoucher(f);
         });
         fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadMgmtVoucher(fileInput.files[0]); });
+      }
+    }
+
+    // Comprobante document upload
+    {
+      const dropzone = q('mgmt-comp-doc-dropzone');
+      const fileInput = q('mgmt-comp-doc-file');
+      const browse = q('mgmt-comp-doc-browse');
+      if (dropzone && fileInput) {
+        browse?.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', e => {
+          e.preventDefault(); dropzone.classList.remove('dragover');
+          const f = e.dataTransfer.files[0]; if (f) uploadMgmtComprobante(f);
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadMgmtComprobante(fileInput.files[0]); });
       }
     }
 
@@ -4113,6 +4194,7 @@ let currentAdminUserId = null;
     q("academia-section").classList.remove("hidden");
     bindAcademiaEvents();
     await loadCourseCategories();
+    await loadPaymentConfigForOrders();
     await loadAcademiaAdmin();
     await loadAcademiaPageContent();
     const saveBtn = q("ac-page-save");

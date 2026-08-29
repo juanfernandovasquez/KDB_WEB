@@ -2109,9 +2109,10 @@
               <!-- Pago -->
               <div class="mgmt-section">
                 <h4 class="mgmt-section-title">Pago</h4>
-                <div class="mgmt-row" style="margin-bottom:.75rem;">
+                <div class="mgmt-row" style="margin-bottom:.5rem;">
                   <span class="mgmt-sum-lbl">Estado</span><span id="mgmt-pay-badge"></span>
                 </div>
+                <div id="mgmt-bank-info" style="display:none;margin-bottom:.75rem;padding:.6rem .75rem;background:var(--bg-soft,#f4f6fb);border-radius:6px;font-size:.8rem;"></div>
                 <div id="mgmt-pay-form">
                   <label class="mgmt-label">N° de operación <span class="muted">(opcional)</span></label>
                   <input type="text" id="mgmt-pay-opnum" class="mgmt-input" placeholder="Ej. 12345678" />
@@ -2136,7 +2137,7 @@
 
               <!-- Comprobante -->
               <div class="mgmt-section">
-                <h4 class="mgmt-section-title">Comprobante fiscal</h4>
+                <h4 class="mgmt-section-title">Factura o boleta emitida</h4>
                 <div class="mgmt-row" style="margin-bottom:.6rem;">
                   <span class="mgmt-sum-lbl">Tipo</span><span id="mgmt-comp-type"></span>
                 </div>
@@ -2144,6 +2145,14 @@
                 <label class="mgmt-label">N° de comprobante</label>
                 <input type="text" id="mgmt-comp-number" class="mgmt-input" placeholder="B001-00123 o F001-00045" />
                 <button type="button" class="secondary mgmt-btn-full" id="mgmt-save-comp" style="margin-top:.5rem;">Guardar N°</button>
+                <div style="margin-top:.75rem;">
+                  <div id="mgmt-comp-doc-current" style="margin-bottom:.5rem;"></div>
+                  <div id="mgmt-comp-doc-dropzone" class="mgmt-dropzone">
+                    <input type="file" id="mgmt-comp-doc-file" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" />
+                    <p style="margin:0;font-size:.8rem;">Adjuntar PDF/imagen · <button type="button" class="link-btn" id="mgmt-comp-doc-browse">seleccionar</button></p>
+                    <p class="small muted" style="margin:.2rem 0 0;">JPG, PNG, PDF · Máx. 10 MB</p>
+                  </div>
+                </div>
                 <p class="small mgmt-status" id="mgmt-comp-status"></p>
               </div>
 
@@ -2198,7 +2207,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260829g"></script>
+  <script type="module" src="./main.js?v=20260829h"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");

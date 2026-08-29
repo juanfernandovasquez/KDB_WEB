@@ -3,6 +3,6 @@
 // while progressively extracting shared pieces into modules.
 import "./utils.js?v=20260202";
 import "./editors.js?v=20260726";
-import "./admin.js?v=20260829g";
+import "./admin.js?v=20260829h";
 
 console.info("admin main module loaded (legacy bootstrap + modules)");

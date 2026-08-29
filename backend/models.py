@@ -1318,7 +1318,7 @@ def admin_update_order(order_id, data):
         "status", "gateway_ref", "notes",
         "comprobante_number", "comprobante_issued_at",
         "moodle_enrolled", "moodle_enrolled_at", "moodle_user_email", "moodle_user_id",
-        "payment_method", "operation_number", "voucher_url",
+        "payment_method", "operation_number", "voucher_url", "comprobante_url",
     }
     sets = []
     params = []

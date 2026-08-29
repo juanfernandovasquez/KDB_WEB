@@ -1863,6 +1863,34 @@ def api_admin_voucher_upload(order_id):
         return jsonify(error=str(exc)), 500
 
 
+@app.route("/api/admin/orders/<int:order_id>/comprobante-upload", methods=["POST"])
+@require_admin()
+def api_admin_comprobante_upload(order_id):
+    """Admin sube la factura o boleta emitida (PDF/imagen) directamente al servidor."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    f = request.files.get("file")
+    if not f:
+        return jsonify(error="No se recibió archivo"), 400
+    ct = f.content_type or ""
+    if ct not in _ALLOWED_VOUCHER_TYPES:
+        return jsonify(error="Tipo de archivo no permitido"), 400
+    f.stream.seek(0, 2)
+    size = f.stream.tell()
+    f.stream.seek(0)
+    if size > 10 * 1024 * 1024:
+        return jsonify(error="Archivo demasiado grande (máx 10 MB)"), 400
+    try:
+        result = upload_file_object(f.stream, f.filename or "comprobante", content_type=ct, prefix_override="comprobantes/")
+        admin_update_order(order_id, {"comprobante_url": result["url"]})
+        return jsonify(comprobante_url=result["url"])
+    except Exception as exc:
+        app.logger.exception("Error uploading comprobante")
+        return jsonify(error=str(exc)), 500
+
+
 # ─── Academia: Checkout (simulación) ─────────────────────────────────────────
 
 def _send_moodle_credentials(student_email, student_name, course_title,
