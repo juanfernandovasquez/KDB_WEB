@@ -259,7 +259,7 @@
         { enabled: paymentConfig.bank_enabled, lbl: 'lbl-bank', instr: 'instr-bank', value: 'transferencia' },
       ];
       methods.forEach(m => {
-        if (m.enabled === false) {
+        if (!m.enabled) {
           document.getElementById(m.lbl)?.classList.add('hidden');
           document.getElementById(m.instr)?.classList.add('hidden');
           const radio = document.querySelector(`input[name="pay_method"][value="${m.value}"]`);
@@ -267,7 +267,7 @@
         }
       });
       // Auto-select first available method
-      const firstEnabled = methods.find(m => m.enabled !== false);
+      const firstEnabled = methods.find(m => m.enabled);
       if (firstEnabled) {
         const currentRadio = document.querySelector('input[name="pay_method"]:checked');
         if (currentRadio && currentRadio.disabled) {
