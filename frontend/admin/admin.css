@@ -103,6 +103,9 @@ header {
   opacity: 0.92;
 }
 
+/* Logo del header solo visible en mobile — en desktop el sidebar ya lo muestra */
+@media (min-width: 901px) { .header-logo-mobile { display: none !important; } }
+
 .header-title {
   font-size: 0.85rem;
   font-weight: 600;
