@@ -2219,14 +2219,14 @@ let currentAdminUserId = null;
   }
 
   // ── Course category management ────────────────────────────────────────────
+  let _moodleCategoriesCache = [];
+
   async function loadCourseCategories() {
     try {
       const res = await apiFetch('/api/courses/categories');
-      if (!res.ok) return;
-      _courseCategoriesCache = await res.json();
-    } catch (_) {
-      _courseCategoriesCache = [];
-    }
+      if (res.ok) _courseCategoriesCache = await res.json();
+    } catch (_) { _courseCategoriesCache = []; }
+
     const sel = q('ac-category');
     if (sel) {
       const current = sel.value;
@@ -2239,42 +2239,74 @@ let currentAdminUserId = null;
         sel.selectedIndex = 0;
       }
     }
+
+    // Cargar también categorías de Moodle en paralelo
+    try {
+      const mRes = await apiFetch('/api/admin/moodle/categories');
+      if (mRes.ok) _moodleCategoriesCache = await mRes.json();
+    } catch (_) { _moodleCategoriesCache = []; }
+
     renderCourseCategoriesTable();
   }
 
   function renderCourseCategoriesTable() {
     const tbody = q('ac-categories-tbody');
     if (!tbody) return;
-    if (!_courseCategoriesCache.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="muted small">Sin categorías. Agrega la primera arriba.</td></tr>';
+
+    // Moodle-only: categorías en Moodle sin vínculo a KDB
+    const moodleOnly = _moodleCategoriesCache.filter(function(mc) { return !mc.linked; });
+
+    let html = '';
+
+    // KDB categories (linked or not)
+    if (_courseCategoriesCache.length) {
+      _courseCategoriesCache.forEach(function(c) {
+        const moodleBadge = c.moodle_category_id
+          ? '<span class="status-tag tag-success" style="margin-left:.4rem;">Moodle ✓</span>'
+          : '<span class="status-tag tag-pending" style="margin-left:.4rem;">Sin vincular</span>';
+        html +=
+          '<tr data-cat-id="' + c.id + '">' +
+          '<td>' + escHtml(c.label) + moodleBadge + '</td>' +
+          '<td><code>' + escHtml(c.slug) + '</code></td>' +
+          '<td>' + c.position + '</td>' +
+          '<td style="display:flex;gap:.4rem;flex-wrap:wrap;">' +
+            '<button type="button" class="secondary small-btn ac-edit-cat-btn" data-id="' + c.id + '">Editar</button>' +
+            '<button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '">Eliminar</button>' +
+          '</td></tr>' +
+          '<tr class="ac-edit-cat-row hidden" data-for-cat="' + c.id + '">' +
+          '<td colspan="4" style="padding:.6rem 0;">' +
+            '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">' +
+              '<input type="text" class="ac-edit-cat-label" placeholder="Etiqueta" value="' + escHtml(c.label) + '" style="width:160px;" />' +
+              '<input type="text" class="ac-edit-cat-slug" placeholder="slug" value="' + escHtml(c.slug) + '" style="width:140px;" />' +
+              '<input type="number" class="ac-edit-cat-position" placeholder="Posición" value="' + c.position + '" style="width:70px;" min="0" />' +
+              '<button type="button" class="cta small-btn ac-edit-cat-save" data-id="' + c.id + '">Guardar</button>' +
+              '<button type="button" class="secondary small-btn ac-edit-cat-cancel" data-id="' + c.id + '">Cancelar</button>' +
+              '<span class="ac-edit-cat-status small muted"></span>' +
+            '</div>' +
+          '</td></tr>';
+      });
+    }
+
+    // Moodle-only categories (separator + rows)
+    if (moodleOnly.length) {
+      html += '<tr><td colspan="4" style="padding:.5rem 0;border-top:2px solid #e5e7eb;">' +
+        '<span class="small muted" style="font-weight:600;">Solo en Moodle — no importadas a KDB</span></td></tr>';
+      moodleOnly.forEach(function(mc) {
+        html +=
+          '<tr>' +
+          '<td>' + escHtml(mc.name) + '<span class="status-tag" style="margin-left:.4rem;background:#dbeafe;color:#1d4ed8;">Solo Moodle</span></td>' +
+          '<td><span class="small muted">ID: ' + mc.moodle_category_id + '</span></td>' +
+          '<td>—</td>' +
+          '<td><button type="button" class="cta small-btn ac-import-moodle-cat-btn" data-mid="' + mc.moodle_category_id + '" data-name="' + escHtml(mc.name) + '">Importar a KDB</button></td>' +
+          '</tr>';
+      });
+    }
+
+    if (!html) {
+      tbody.innerHTML = '<tr><td colspan="4" class="muted small">Sin categorías.</td></tr>';
       return;
     }
-    tbody.innerHTML = _courseCategoriesCache.map(function(c) {
-      const moodleBadge = c.moodle_category_id
-        ? '<span class="status-tag tag-success" style="margin-left:.4rem;">Moodle ✓</span>'
-        : '<span class="status-tag tag-pending" style="margin-left:.4rem;">Sin vincular</span>';
-      return '<tr data-cat-id="' + c.id + '">' +
-        '<td>' + escHtml(c.label) + moodleBadge + '</td>' +
-        '<td><code>' + escHtml(c.slug) + '</code></td>' +
-        '<td>' + c.position + '</td>' +
-        '<td style="display:flex;gap:.4rem;">' +
-          '<button type="button" class="secondary small-btn ac-edit-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '" data-slug="' + escHtml(c.slug) + '" data-position="' + c.position + '">Editar</button>' +
-          '<button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '">Eliminar</button>' +
-        '</td>' +
-        '</tr>' +
-        '<tr class="ac-edit-cat-row hidden" data-for-cat="' + c.id + '">' +
-        '<td colspan="4" style="padding:.6rem 0;">' +
-          '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">' +
-            '<input type="text" class="ac-edit-cat-label" placeholder="Etiqueta" value="' + escHtml(c.label) + '" style="width:160px;" />' +
-            '<input type="text" class="ac-edit-cat-slug" placeholder="slug" value="' + escHtml(c.slug) + '" style="width:140px;" />' +
-            '<input type="number" class="ac-edit-cat-position" placeholder="Posición" value="' + c.position + '" style="width:70px;" min="0" />' +
-            '<button type="button" class="cta small-btn ac-edit-cat-save" data-id="' + c.id + '">Guardar</button>' +
-            '<button type="button" class="secondary small-btn ac-edit-cat-cancel" data-id="' + c.id + '">Cancelar</button>' +
-            '<span class="ac-edit-cat-status small muted"></span>' +
-          '</div>' +
-        '</td>' +
-        '</tr>';
-    }).join('');
+    tbody.innerHTML = html;
 
     tbody.querySelectorAll('.ac-edit-cat-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
@@ -2299,21 +2331,33 @@ let currentAdminUserId = null;
         status.textContent = 'Guardando…';
         try {
           const res = await apiFetch('/api/courses/categories/' + btn.dataset.id, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ slug, label, position }),
           });
           const data = await res.json().catch(function() { return {}; });
           if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }
           status.textContent = '✓ Guardado';
           setTimeout(function() { loadCourseCategories(); }, 800);
-        } catch (err) {
-          status.textContent = 'Error: ' + err.message;
-        }
+        } catch (err) { status.textContent = 'Error: ' + err.message; }
       });
     });
     tbody.querySelectorAll('.ac-del-cat-btn').forEach(function(btn) {
       btn.addEventListener('click', function() { acDeleteCourseCategory(btn.dataset.id, btn.dataset.label); });
+    });
+    tbody.querySelectorAll('.ac-import-moodle-cat-btn').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        btn.disabled = true;
+        btn.textContent = 'Importando…';
+        try {
+          const res = await apiFetch('/api/admin/moodle/categories/import', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ moodle_category_id: parseInt(btn.dataset.mid), name: btn.dataset.name }),
+          });
+          const data = await res.json().catch(function() { return {}; });
+          if (!res.ok) { btn.disabled = false; btn.textContent = 'Importar a KDB'; alert('Error: ' + (data.error || res.status)); return; }
+          await loadCourseCategories();
+        } catch (err) { btn.disabled = false; btn.textContent = 'Importar a KDB'; alert('Error: ' + err.message); }
+      });
     });
   }
 

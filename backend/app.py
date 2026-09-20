@@ -1791,6 +1791,57 @@ def api_admin_delete_course(course_id):
     return jsonify(message="Curso eliminado"), 200
 
 
+# ─── Academia: Moodle category list & import ─────────────────────────────────
+
+@app.route("/api/admin/moodle/categories", methods=["GET"])
+@require_admin()
+def api_admin_moodle_categories():
+    """Lista categorías de Moodle cruzadas con las de KDB."""
+    ensure_db()
+    try:
+        from moodle_service import get_moodle_categories
+        moodle_cats = get_moodle_categories()
+    except Exception as exc:
+        return jsonify(error=str(exc)), 500
+    kdb_cats = get_course_categories()
+    result = []
+    for mc in moodle_cats:
+        kdb_cat = next((c for c in kdb_cats if c.get("moodle_category_id") == mc["id"]), None)
+        result.append({
+            "moodle_category_id": mc["id"],
+            "name": mc.get("name", ""),
+            "parent": mc.get("parent", 0),
+            "linked": kdb_cat is not None,
+            "kdb_id": kdb_cat["id"] if kdb_cat else None,
+            "kdb_slug": kdb_cat["slug"] if kdb_cat else None,
+        })
+    return jsonify(result)
+
+
+@app.route("/api/admin/moodle/categories/import", methods=["POST"])
+@require_admin()
+def api_admin_moodle_import_category():
+    """Importa una categoría existente de Moodle a KDB (no la crea en Moodle)."""
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    moodle_category_id = data.get("moodle_category_id")
+    name = (data.get("name") or "").strip()
+    if not moodle_category_id or not name:
+        return jsonify(error="moodle_category_id y name son requeridos"), 400
+    kdb_cats = get_course_categories()
+    if any(c.get("moodle_category_id") == moodle_category_id for c in kdb_cats):
+        return jsonify(error="Ya existe una categoría KDB vinculada a esta de Moodle"), 409
+    import re as _re
+    base_slug = _re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-') or "categoria"
+    slug, counter = base_slug, 0
+    existing_slugs = {c["slug"] for c in kdb_cats}
+    while slug in existing_slugs:
+        counter += 1
+        slug = f"{base_slug}-{counter}"
+    cat = create_course_category(slug, name, len(kdb_cats), moodle_category_id=moodle_category_id)
+    return jsonify(cat), 201
+
+
 # ─── Academia: Moodle course list & import ───────────────────────────────────
 
 @app.route("/api/admin/moodle/courses", methods=["GET"])
