@@ -1587,6 +1587,12 @@ def api_create_course_category():
     position = int(data.get("position") or 0)
     try:
         cat = create_course_category(slug, label, position)
+        try:
+            from moodle_service import create_moodle_category
+            moodle_cat_id = create_moodle_category(label)
+            cat = update_course_category(cat["id"], slug, label, position, moodle_category_id=moodle_cat_id)
+        except Exception as m_exc:
+            logger.warning("Moodle create_category failed: %s", m_exc)
         return jsonify(cat), 201
     except Exception as exc:
         return jsonify(error=str(exc)), 400
@@ -1602,9 +1608,18 @@ def api_update_course_category(cat_id):
     if not slug or not label:
         return jsonify(error="slug y label son requeridos"), 400
     position = int(data.get("position") or 0)
-    cat = update_course_category(cat_id, slug, label, position)
+    existing_cats = get_course_categories()
+    existing = next((c for c in existing_cats if c["id"] == cat_id), None)
+    moodle_cat_id = existing.get("moodle_category_id") if existing else None
+    cat = update_course_category(cat_id, slug, label, position, moodle_category_id=moodle_cat_id)
     if not cat:
         return jsonify(error="Categoría no encontrada"), 404
+    if moodle_cat_id:
+        try:
+            from moodle_service import update_moodle_category
+            update_moodle_category(moodle_cat_id, label)
+        except Exception as m_exc:
+            logger.warning("Moodle update_category failed: %s", m_exc)
     return jsonify(cat)
 
 
@@ -1612,6 +1627,14 @@ def api_update_course_category(cat_id):
 @require_admin()
 def api_delete_course_category(cat_id):
     ensure_db()
+    existing_cats = get_course_categories()
+    existing = next((c for c in existing_cats if c["id"] == cat_id), None)
+    if existing and existing.get("moodle_category_id"):
+        try:
+            from moodle_service import delete_moodle_category
+            delete_moodle_category(existing["moodle_category_id"])
+        except Exception as m_exc:
+            logger.warning("Moodle delete_category failed: %s", m_exc)
     delete_course_category(cat_id)
     return jsonify(ok=True)
 
@@ -1652,6 +1675,33 @@ def api_save_payment_config():
     return jsonify(message="Configuración de pagos guardada"), 200
 
 
+# ─── Academia: Moodle sync helper ────────────────────────────────────────────
+
+def _push_course_to_moodle(course_data):
+    """Empuja título, descripción, categoría y visibilidad a Moodle si el curso tiene moodle_course_id."""
+    moodle_course_id = course_data.get("moodle_course_id")
+    if not moodle_course_id:
+        return
+    try:
+        from moodle_service import update_moodle_course_metadata
+        category_slug = course_data.get("category")
+        moodle_cat_id = None
+        if category_slug:
+            cats = get_course_categories()
+            cat = next((c for c in cats if c["slug"] == category_slug), None)
+            if cat:
+                moodle_cat_id = cat.get("moodle_category_id")
+        update_moodle_course_metadata(
+            moodle_course_id,
+            title=course_data.get("title", ""),
+            description=course_data.get("description", ""),
+            moodle_category_id=moodle_cat_id,
+            visible=bool(course_data.get("is_published", False)),
+        )
+    except Exception as exc:
+        logger.warning("Moodle course push failed (course_id=%s): %s", moodle_course_id, exc)
+
+
 # ─── Academia: Courses (admin CRUD) ──────────────────────────────────────────
 
 @app.route("/api/admin/courses", methods=["GET"])
@@ -1671,6 +1721,7 @@ def api_admin_create_course():
         return jsonify(error="title y slug son requeridos"), 400
     try:
         cid = save_course(data)
+        _push_course_to_moodle(data)
         return jsonify(id=cid, message="Curso creado"), 201
     except Exception as exc:
         return jsonify(error=str(exc)), 400
@@ -1702,9 +1753,31 @@ def api_admin_update_course(course_id):
         merged["modules"] = incoming["modules"]
     try:
         save_course(merged, course_id=course_id)
+        _push_course_to_moodle(merged)
         return jsonify(message="Curso actualizado"), 200
     except Exception as exc:
         return jsonify(error=str(exc)), 400
+
+
+@app.route("/api/admin/courses/<int:course_id>/moodle", methods=["GET"])
+@require_admin()
+def api_admin_course_moodle_data(course_id):
+    """Retorna los campos actuales del curso en Moodle para precargar el formulario."""
+    ensure_db()
+    course = fetch_course_by_id(course_id)
+    if not course or not course.get("moodle_course_id"):
+        return jsonify(error="Curso sin Moodle ID"), 404
+    try:
+        from moodle_service import get_moodle_course_by_id
+        mdata = get_moodle_course_by_id(course["moodle_course_id"])
+        if not mdata:
+            return jsonify(error="Curso no encontrado en Moodle"), 404
+        cats = get_course_categories()
+        cat = next((c for c in cats if c.get("moodle_category_id") == mdata.get("moodle_category_id")), None)
+        mdata["kdb_category_slug"] = cat["slug"] if cat else None
+        return jsonify(mdata)
+    except Exception as exc:
+        return jsonify(error=str(exc)), 500
 
 
 @app.route("/api/admin/courses/<int:course_id>", methods=["DELETE"])

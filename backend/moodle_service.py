@@ -164,6 +164,79 @@ def get_moodle_courses():
     return courses
 
 
+def get_moodle_categories():
+    """Retorna todas las categorías de Moodle."""
+    return _call("core_course_get_categories")
+
+
+def create_moodle_category(name, description="", parent=0):
+    """Crea una categoría en Moodle y retorna su ID."""
+    result = _call(
+        "core_course_create_categories",
+        **{
+            "categories[0][name]": name,
+            "categories[0][description]": description or "",
+            "categories[0][parent]": parent,
+        },
+    )
+    return result[0]["id"]
+
+
+def update_moodle_category(moodle_cat_id, name, description=""):
+    """Actualiza nombre/descripción de una categoría en Moodle."""
+    _call(
+        "core_course_update_categories",
+        **{
+            "categories[0][id]": moodle_cat_id,
+            "categories[0][name]": name,
+            "categories[0][description]": description or "",
+        },
+    )
+    logger.info("Moodle: categoría %s actualizada a '%s'", moodle_cat_id, name)
+
+
+def delete_moodle_category(moodle_cat_id, newcategory=0):
+    """Elimina una categoría en Moodle. Los cursos se mueven a newcategory (0 = raíz)."""
+    _call(
+        "core_course_delete_categories",
+        **{
+            "categories[0][id]": moodle_cat_id,
+            "categories[0][recursive]": 0,
+            "categories[0][newcategory]": newcategory,
+        },
+    )
+    logger.info("Moodle: categoría %s eliminada", moodle_cat_id)
+
+
+def update_moodle_course_metadata(moodle_course_id, title, description, moodle_category_id=None, visible=True):
+    """Empuja metadatos de un curso a Moodle (título, descripción, categoría, visibilidad)."""
+    params = {
+        "courses[0][id]": moodle_course_id,
+        "courses[0][fullname]": title,
+        "courses[0][summary]": description or "",
+        "courses[0][visible]": 1 if visible else 0,
+    }
+    if moodle_category_id:
+        params["courses[0][categoryid]"] = moodle_category_id
+    _call("core_course_update_courses", **params)
+    logger.info("Moodle: metadatos de curso %s actualizados", moodle_course_id)
+
+
+def get_moodle_course_by_id(moodle_course_id):
+    """Retorna los metadatos de un curso de Moodle por su ID."""
+    result = _call("core_course_get_courses", **{"options[ids][0]": moodle_course_id})
+    if not result:
+        return None
+    c = result[0]
+    return {
+        "moodle_course_id": c["id"],
+        "title": c.get("fullname", ""),
+        "description": _strip_html(c.get("summary", "")),
+        "visible": bool(c.get("visible", 1)),
+        "moodle_category_id": c.get("categoryid"),
+    }
+
+
 def provision_student(email, firstname, lastname, moodle_course_id):
     """
     Punto de entrada principal.

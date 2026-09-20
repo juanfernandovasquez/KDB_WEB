@@ -2307,7 +2307,7 @@ let currentAdminUserId = null;
     }
   }
 
-  function acOpenForm(course) {
+  async function acOpenForm(course) {
     acEditId = course?.id || null;
     q('ac-id').value = acEditId || '';
     q('ac-form-title').textContent = acEditId ? 'Editar curso' : 'Nuevo curso';
@@ -2327,12 +2327,9 @@ let currentAdminUserId = null;
     q('ac-level').value = course?.level || 'Todos los niveles';
     q('ac-moodle-course-id').value = course?.moodle_course_id || '';
     q('ac-published').value = course?.is_published ? '1' : '0';
-    // image picker
     setImgPicker('ac-image-url', course?.image_url || '');
     q('ac-video-url').value = course?.video_url || '';
-    // modules
     acRenderModules(course?.modules || []);
-    // dynamic lists
     acDynListHtml('ac-learn-list',    course?.what_you_learn || []);
     acDynListHtml('ac-includes-list', course?.includes_list  || []);
     acDynListHtml('ac-audience-list', course?.audience       || []);
@@ -2340,6 +2337,27 @@ let currentAdminUserId = null;
     q('ac-form-card').classList.remove('hidden');
     q('ac-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     q('ac-save-status').textContent = '';
+
+    // Si el curso tiene Moodle ID, cargar datos frescos desde Moodle
+    if (course?.id && course?.moodle_course_id) {
+      q('ac-save-status').textContent = 'Cargando datos de Moodle…';
+      try {
+        const res = await apiFetch(`/api/admin/courses/${course.id}/moodle`);
+        if (res.ok) {
+          const md = await res.json();
+          if (md.title) q('ac-title').value = md.title;
+          if (md.description) q('ac-description').value = md.description;
+          q('ac-published').value = md.visible ? '1' : '0';
+          if (md.kdb_category_slug && _catSel) _catSel.value = md.kdb_category_slug;
+          q('ac-save-status').textContent = '↺ Datos sincronizados desde Moodle';
+          setTimeout(() => { q('ac-save-status').textContent = ''; }, 2500);
+        } else {
+          q('ac-save-status').textContent = '';
+        }
+      } catch (_) {
+        q('ac-save-status').textContent = '';
+      }
+    }
   }
 
   function acCloseForm() {
@@ -2392,8 +2410,8 @@ let currentAdminUserId = null;
         status.textContent = `Error: ${data.error || res.status}`;
         return;
       }
-      status.textContent = '✓ Guardado';
-      setTimeout(() => { acCloseForm(); loadAcademiaAdmin(); }, 800);
+      status.textContent = payload.moodle_course_id ? '✓ Guardado y sincronizado con Moodle' : '✓ Guardado';
+      setTimeout(() => { acCloseForm(); loadAcademiaAdmin(); }, 1200);
     } catch (err) {
       status.textContent = `Error: ${err.message || 'No se pudo guardar'}`;
     }

@@ -1108,6 +1108,18 @@ def init_db():
                 (_cc_migration, datetime.utcnow().isoformat()),
             )
 
+        # Migration: add moodle_category_id to course_categories
+        _mig_mcat = "course_categories_moodle_cat_id_v1"
+        if not conn.execute("SELECT 1 FROM db_migrations WHERE name = ?", (_mig_mcat,)).fetchone():
+            try:
+                conn.execute("ALTER TABLE course_categories ADD COLUMN moodle_category_id INTEGER")
+            except Exception:
+                pass
+            conn.execute(
+                "INSERT INTO db_migrations (name, applied_at) VALUES (?, ?)",
+                (_mig_mcat, datetime.utcnow().isoformat()),
+            )
+
         # Bootstrap admin user if none exist and env vars are provided
         admin_count = conn.execute("SELECT COUNT(*) AS c FROM admin_users").fetchone()["c"]
         admin_user = (os.environ.get("ADMIN_USER") or "").strip()

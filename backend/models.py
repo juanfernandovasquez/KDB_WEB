@@ -1209,14 +1209,14 @@ def get_course_categories():
     return [dict(r) for r in rows]
 
 
-def create_course_category(slug, label, position):
+def create_course_category(slug, label, position, moodle_category_id=None):
     now = datetime.utcnow().isoformat()
     conn = get_conn()
     try:
         with conn:
             conn.execute(
-                "INSERT INTO course_categories (slug, label, position, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-                (slug, label, position, now, now),
+                "INSERT INTO course_categories (slug, label, position, moodle_category_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (slug, label, position, moodle_category_id, now, now),
             )
             row = conn.execute(
                 "SELECT * FROM course_categories WHERE slug = ?", (slug,)
@@ -1226,14 +1226,14 @@ def create_course_category(slug, label, position):
         conn.close()
 
 
-def update_course_category(cat_id, slug, label, position):
+def update_course_category(cat_id, slug, label, position, moodle_category_id=None):
     now = datetime.utcnow().isoformat()
     conn = get_conn()
     try:
         with conn:
             conn.execute(
-                "UPDATE course_categories SET slug=?, label=?, position=?, updated_at=? WHERE id=?",
-                (slug, label, position, now, cat_id),
+                "UPDATE course_categories SET slug=?, label=?, position=?, moodle_category_id=?, updated_at=? WHERE id=?",
+                (slug, label, position, moodle_category_id, now, cat_id),
             )
             row = conn.execute(
                 "SELECT * FROM course_categories WHERE id = ?", (cat_id,)
