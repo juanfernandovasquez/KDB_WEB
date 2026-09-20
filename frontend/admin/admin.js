@@ -2250,13 +2250,68 @@ let currentAdminUserId = null;
       return;
     }
     tbody.innerHTML = _courseCategoriesCache.map(function(c) {
-      return '<tr>' +
-        '<td>' + escHtml(c.label) + '</td>' +
+      const moodleBadge = c.moodle_category_id
+        ? '<span class="status-tag tag-success" style="margin-left:.4rem;">Moodle ✓</span>'
+        : '<span class="status-tag tag-pending" style="margin-left:.4rem;">Sin vincular</span>';
+      return '<tr data-cat-id="' + c.id + '">' +
+        '<td>' + escHtml(c.label) + moodleBadge + '</td>' +
         '<td><code>' + escHtml(c.slug) + '</code></td>' +
         '<td>' + c.position + '</td>' +
-        '<td><button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '">Eliminar</button></td>' +
+        '<td style="display:flex;gap:.4rem;">' +
+          '<button type="button" class="secondary small-btn ac-edit-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '" data-slug="' + escHtml(c.slug) + '" data-position="' + c.position + '">Editar</button>' +
+          '<button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '">Eliminar</button>' +
+        '</td>' +
+        '</tr>' +
+        '<tr class="ac-edit-cat-row hidden" data-for-cat="' + c.id + '">' +
+        '<td colspan="4" style="padding:.6rem 0;">' +
+          '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">' +
+            '<input type="text" class="ac-edit-cat-label" placeholder="Etiqueta" value="' + escHtml(c.label) + '" style="width:160px;" />' +
+            '<input type="text" class="ac-edit-cat-slug" placeholder="slug" value="' + escHtml(c.slug) + '" style="width:140px;" />' +
+            '<input type="number" class="ac-edit-cat-position" placeholder="Posición" value="' + c.position + '" style="width:70px;" min="0" />' +
+            '<button type="button" class="cta small-btn ac-edit-cat-save" data-id="' + c.id + '">Guardar</button>' +
+            '<button type="button" class="secondary small-btn ac-edit-cat-cancel" data-id="' + c.id + '">Cancelar</button>' +
+            '<span class="ac-edit-cat-status small muted"></span>' +
+          '</div>' +
+        '</td>' +
         '</tr>';
     }).join('');
+
+    tbody.querySelectorAll('.ac-edit-cat-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const editRow = tbody.querySelector('.ac-edit-cat-row[data-for-cat="' + btn.dataset.id + '"]');
+        if (editRow) editRow.classList.toggle('hidden');
+      });
+    });
+    tbody.querySelectorAll('.ac-edit-cat-cancel').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const editRow = tbody.querySelector('.ac-edit-cat-row[data-for-cat="' + btn.dataset.id + '"]');
+        if (editRow) editRow.classList.add('hidden');
+      });
+    });
+    tbody.querySelectorAll('.ac-edit-cat-save').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        const editRow = tbody.querySelector('.ac-edit-cat-row[data-for-cat="' + btn.dataset.id + '"]');
+        const label = editRow.querySelector('.ac-edit-cat-label').value.trim();
+        const slug = editRow.querySelector('.ac-edit-cat-slug').value.trim().toLowerCase();
+        const position = parseInt(editRow.querySelector('.ac-edit-cat-position').value) || 0;
+        const status = editRow.querySelector('.ac-edit-cat-status');
+        if (!label || !slug) { status.textContent = 'Etiqueta y slug requeridos.'; return; }
+        status.textContent = 'Guardando…';
+        try {
+          const res = await apiFetch('/api/courses/categories/' + btn.dataset.id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug, label, position }),
+          });
+          const data = await res.json().catch(function() { return {}; });
+          if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }
+          status.textContent = '✓ Guardado';
+          setTimeout(function() { loadCourseCategories(); }, 800);
+        } catch (err) {
+          status.textContent = 'Error: ' + err.message;
+        }
+      });
+    });
     tbody.querySelectorAll('.ac-del-cat-btn').forEach(function(btn) {
       btn.addEventListener('click', function() { acDeleteCourseCategory(btn.dataset.id, btn.dataset.label); });
     });

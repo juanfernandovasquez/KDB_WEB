@@ -1592,7 +1592,7 @@ def api_create_course_category():
             moodle_cat_id = create_moodle_category(label)
             cat = update_course_category(cat["id"], slug, label, position, moodle_category_id=moodle_cat_id)
         except Exception as m_exc:
-            logger.warning("Moodle create_category failed: %s", m_exc)
+            app.logger.warning("Moodle create_category failed: %s", m_exc)
         return jsonify(cat), 201
     except Exception as exc:
         return jsonify(error=str(exc)), 400
@@ -1619,7 +1619,7 @@ def api_update_course_category(cat_id):
             from moodle_service import update_moodle_category
             update_moodle_category(moodle_cat_id, label)
         except Exception as m_exc:
-            logger.warning("Moodle update_category failed: %s", m_exc)
+            app.logger.warning("Moodle update_category failed: %s", m_exc)
     return jsonify(cat)
 
 
@@ -1634,7 +1634,7 @@ def api_delete_course_category(cat_id):
             from moodle_service import delete_moodle_category
             delete_moodle_category(existing["moodle_category_id"])
         except Exception as m_exc:
-            logger.warning("Moodle delete_category failed: %s", m_exc)
+            app.logger.warning("Moodle delete_category failed: %s", m_exc)
     delete_course_category(cat_id)
     return jsonify(ok=True)
 
@@ -1699,7 +1699,7 @@ def _push_course_to_moodle(course_data):
             visible=bool(course_data.get("is_published", False)),
         )
     except Exception as exc:
-        logger.warning("Moodle course push failed (course_id=%s): %s", moodle_course_id, exc)
+        app.logger.warning("Moodle course push failed (course_id=%s): %s", moodle_course_id, exc)
 
 
 # ─── Academia: Courses (admin CRUD) ──────────────────────────────────────────
