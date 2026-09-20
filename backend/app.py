@@ -1718,6 +1718,85 @@ def api_admin_delete_course(course_id):
     return jsonify(message="Curso eliminado"), 200
 
 
+# ─── Academia: Moodle course list & import ───────────────────────────────────
+
+@app.route("/api/admin/moodle/courses", methods=["GET"])
+@require_admin()
+def api_admin_moodle_list_courses():
+    ensure_db()
+    try:
+        from moodle_service import get_moodle_courses
+        moodle_courses = get_moodle_courses()
+    except Exception as exc:
+        app.logger.error("moodle list courses error: %s", exc)
+        return jsonify(error=str(exc)), 500
+
+    existing_by_mid = {
+        c["moodle_course_id"]: c
+        for c in fetch_courses(published_only=False)
+        if c.get("moodle_course_id")
+    }
+    for c in moodle_courses:
+        kdb = existing_by_mid.get(c["moodle_course_id"])
+        c["imported"] = kdb is not None
+        c["kdb_id"] = kdb["id"] if kdb else None
+        c["kdb_slug"] = kdb["slug"] if kdb else None
+    return jsonify(moodle_courses)
+
+
+@app.route("/api/admin/moodle/courses/import", methods=["POST"])
+@require_admin()
+def api_admin_moodle_import_course():
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    moodle_course_id = data.get("moodle_course_id")
+    if not moodle_course_id:
+        return jsonify(error="moodle_course_id requerido"), 400
+
+    try:
+        from moodle_service import get_moodle_courses
+        all_courses = get_moodle_courses()
+        mc = next((c for c in all_courses if c["moodle_course_id"] == moodle_course_id), None)
+        if not mc:
+            return jsonify(error="Curso no encontrado en Moodle"), 404
+    except Exception as exc:
+        return jsonify(error=str(exc)), 500
+
+    import re as _re
+    existing = next(
+        (c for c in fetch_courses(published_only=False) if c.get("moodle_course_id") == moodle_course_id),
+        None,
+    )
+
+    if existing:
+        save_course({
+            **existing,
+            "title": mc["title"],
+            "description": mc["description"] or existing.get("description", ""),
+            "image_url": mc.get("image_url") or existing.get("image_url"),
+            "moodle_course_id": moodle_course_id,
+        }, course_id=existing["id"])
+        return jsonify(message="Curso actualizado desde Moodle", course_id=existing["id"], action="updated"), 200
+
+    base = mc.get("shortname") or mc.get("title", "")
+    slug = _re.sub(r'[^a-z0-9]+', '-', base.lower()).strip('-') or "curso"
+    test_slug, counter = slug, 0
+    while fetch_course_by_slug(test_slug, published_only=False):
+        counter += 1
+        test_slug = f"{slug}-{counter}"
+
+    course_id = save_course({
+        "title": mc["title"],
+        "slug": test_slug,
+        "description": mc.get("description", ""),
+        "moodle_course_id": moodle_course_id,
+        "image_url": mc.get("image_url"),
+        "price": 0,
+        "is_published": 0,
+    })
+    return jsonify(message="Curso importado desde Moodle", course_id=course_id, action="created"), 201
+
+
 # ─── Academia: Moodle course visibility toggle ────────────────────────────────
 
 @app.route("/api/admin/courses/<int:course_id>/moodle_visibility", methods=["POST"])

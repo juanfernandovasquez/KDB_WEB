@@ -1,4 +1,5 @@
 import os
+import re as _re
 import time
 import secrets
 import string
@@ -132,6 +133,35 @@ def set_course_visibility(moodle_course_id, visible: bool):
         },
     )
     logger.info("Moodle: curso %s visible=%s", moodle_course_id, visible)
+
+
+def _strip_html(text):
+    return _re.sub(r'<[^>]+>', '', text or '').strip()
+
+
+def get_moodle_courses():
+    """Retorna todos los cursos de Moodle (excluye el sitio raíz id=1)."""
+    result = _call("core_course_get_courses")
+    courses = []
+    for c in result:
+        if c.get("id") == 1:
+            continue
+        image_url = None
+        for f in c.get("overviewfiles", []):
+            if f.get("mimetype", "").startswith("image/"):
+                raw = f.get("fileurl", "")
+                if raw:
+                    image_url = (raw + f"?token={MOODLE_TOKEN}") if MOODLE_TOKEN and "token=" not in raw else raw
+                break
+        courses.append({
+            "moodle_course_id": c["id"],
+            "title": c.get("fullname", ""),
+            "shortname": c.get("shortname", ""),
+            "description": _strip_html(c.get("summary", "")),
+            "visible": bool(c.get("visible", 1)),
+            "image_url": image_url,
+        })
+    return courses
 
 
 def provision_student(email, firstname, lastname, moodle_course_id):

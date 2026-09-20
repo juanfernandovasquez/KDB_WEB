@@ -2136,3 +2136,13 @@ button.secondary.small-btn {
 .pay-toggle-label { font-size: .8rem; color: var(--muted); font-weight: 500; min-width: 70px; }
 .pay-toggle input:checked ~ * ~ .pay-toggle-label { color: var(--success, #15803d); }
 .ac-benefit-icon-preview-box svg { width: 22px; height: 22px; }
+
+/* ── Moodle import modal ─────────────────────────────────────────────────── */
+.status-tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+  white-space: nowrap;
+}
+.tag-success { background: #dcfce7; color: #15803d; }
+.tag-pending { background: #fef9c3; color: #854d0e; }
