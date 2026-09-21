@@ -1597,7 +1597,7 @@ def api_create_course_category():
         cat = create_course_category(slug, label, position)
         try:
             from moodle_service import create_moodle_category
-            moodle_cat_id = create_moodle_category(label)
+            moodle_cat_id = create_moodle_category(label, idnumber=slug)
             cat = update_course_category(cat["id"], slug, label, position, moodle_category_id=moodle_cat_id)
         except Exception as m_exc:
             app.logger.warning("Moodle create_category failed: %s", m_exc)
@@ -1617,7 +1617,9 @@ def api_update_course_category(cat_id):
         return jsonify(error="slug y label son requeridos"), 400
     position = int(data.get("position") or 0)
     description = (data.get("description") or "").strip()
-    visible = data.get("visible")
+    idnumber = data.get("idnumber")
+    if idnumber is not None:
+        idnumber = idnumber.strip()
     existing_cats = get_course_categories()
     existing = next((c for c in existing_cats if c["id"] == cat_id), None)
     moodle_cat_id = existing.get("moodle_category_id") if existing else None
@@ -1627,7 +1629,7 @@ def api_update_course_category(cat_id):
     if moodle_cat_id:
         try:
             from moodle_service import update_moodle_category
-            update_moodle_category(moodle_cat_id, label, description=description)
+            update_moodle_category(moodle_cat_id, label, description=description, idnumber=idnumber)
         except Exception as m_exc:
             app.logger.warning("Moodle update_category failed: %s", m_exc)
     return jsonify(cat)
@@ -1820,6 +1822,7 @@ def api_admin_moodle_categories():
         result.append({
             "moodle_category_id": mc["id"],
             "name": mc.get("name", ""),
+            "idnumber": mc.get("idnumber") or "",
             "description": mc.get("description", ""),
             "parent": mc.get("parent", 0),
             "coursecount": mc.get("coursecount", 0),

@@ -169,41 +169,42 @@ def get_moodle_categories():
     return _call("core_course_get_categories")
 
 
-def create_moodle_category(name, description="", parent=0):
+def create_moodle_category(name, idnumber="", description="", parent=0):
     """Crea una categoría en Moodle y retorna su ID."""
     result = _call(
         "core_course_create_categories",
         **{
             "categories[0][name]": name,
+            "categories[0][idnumber]": idnumber or "",
             "categories[0][description]": description or "",
+            "categories[0][descriptionformat]": 1,
             "categories[0][parent]": parent,
         },
     )
     return result[0]["id"]
 
 
-def update_moodle_category(moodle_cat_id, name, description=""):
-    """Actualiza nombre y descripción de una categoría en Moodle."""
-    _call(
-        "core_course_update_categories",
-        **{
-            "categories[0][id]": moodle_cat_id,
-            "categories[0][name]": name,
-            "categories[0][description]": description or "",
-            "categories[0][descriptionformat]": 1,
-        },
-    )
+def update_moodle_category(moodle_cat_id, name, description="", idnumber=None):
+    """Actualiza nombre, descripción e idnumber de una categoría en Moodle."""
+    params = {
+        "categories[0][id]": moodle_cat_id,
+        "categories[0][name]": name,
+        "categories[0][description]": description or "",
+        "categories[0][descriptionformat]": 1,
+    }
+    if idnumber is not None:
+        params["categories[0][idnumber]"] = idnumber
+    _call("core_course_update_categories", **params)
     logger.info("Moodle: categoría %s actualizada a '%s'", moodle_cat_id, name)
 
 
-def delete_moodle_category(moodle_cat_id, newcategory=0):
-    """Elimina una categoría en Moodle. Los cursos se mueven a newcategory (0 = raíz)."""
+def delete_moodle_category(moodle_cat_id):
+    """Elimina una categoría en Moodle recursivamente."""
     _call(
         "core_course_delete_categories",
         **{
             "categories[0][id]": moodle_cat_id,
-            "categories[0][recursive]": 0,
-            "categories[0][newcategory]": newcategory,
+            "categories[0][recursive]": 1,
         },
     )
     logger.info("Moodle: categoría %s eliminada", moodle_cat_id)

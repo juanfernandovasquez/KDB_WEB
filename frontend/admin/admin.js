@@ -2275,10 +2275,12 @@ let currentAdminUserId = null;
         : '<span class="status-tag tag-pending">Oculta</span>';
       const coursesBadge = '<span style="display:inline-flex;align-items:center;gap:.2rem;background:#f0f4ff;color:#3451b2;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600;">' + (c.coursecount || 0) + ' curso' + (c.coursecount === 1 ? '' : 's') + '</span>';
       const descHtml = c.description ? '<div class="small muted" style="margin-top:.2rem;line-height:1.35;">' + escHtml(c.description) + '</div>' : '';
+      const idnumHtml = c.idnumber ? '<code class="small muted" style="margin-top:.15rem;display:block;">' + escHtml(c.idnumber) + '</code>' : '<span class="small muted" style="opacity:.5;">—</span>';
 
       html +=
         '<tr data-cat-id="' + kdbId + '">' +
         '<td><span style="font-weight:600;">' + escHtml(c.name) + '</span>' + descHtml + '</td>' +
+        '<td>' + idnumHtml + '</td>' +
         '<td style="text-align:center;">' + coursesBadge + '</td>' +
         '<td>' + visTag + '</td>' +
         '<td style="display:flex;gap:.4rem;flex-wrap:wrap;">' +
@@ -2286,10 +2288,11 @@ let currentAdminUserId = null;
           '<button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + kdbId + '" data-label="' + escHtml(c.name) + '">Eliminar</button>' +
         '</td></tr>' +
         '<tr class="ac-edit-cat-row hidden" data-for-cat="' + kdbId + '">' +
-        '<td colspan="4" style="padding:.6rem 0;">' +
+        '<td colspan="5" style="padding:.6rem 0;">' +
           '<div style="display:flex;gap:.5rem;align-items:flex-start;flex-wrap:wrap;">' +
             '<div style="display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:220px;">' +
               '<input type="text" class="ac-edit-cat-label" placeholder="Nombre" value="' + escHtml(c.name) + '" />' +
+              '<input type="text" class="ac-edit-cat-idnumber" placeholder="Número ID (ej: tributario)" value="' + escHtml(c.idnumber || '') + '" />' +
               '<textarea class="ac-edit-cat-desc" placeholder="Descripción (opcional)" rows="2" style="resize:vertical;">' + escHtml(c.description || '') + '</textarea>' +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:.3rem;">' +
@@ -2319,6 +2322,7 @@ let currentAdminUserId = null;
       btn.addEventListener('click', async function() {
         const editRow = tbody.querySelector('.ac-edit-cat-row[data-for-cat="' + btn.dataset.id + '"]');
         const label = editRow.querySelector('.ac-edit-cat-label').value.trim();
+        const idnumber = editRow.querySelector('.ac-edit-cat-idnumber').value.trim();
         const description = editRow.querySelector('.ac-edit-cat-desc').value.trim();
         const status = editRow.querySelector('.ac-edit-cat-status');
         if (!label) { status.textContent = 'El nombre es requerido.'; return; }
@@ -2326,7 +2330,7 @@ let currentAdminUserId = null;
         try {
           const res = await apiFetch('/api/courses/categories/' + btn.dataset.id, {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug: btn.dataset.slug, label, description, position: 0 }),
+            body: JSON.stringify({ slug: btn.dataset.slug, label, idnumber, description, position: 0 }),
           });
           const data = await res.json().catch(function() { return {}; });
           if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }
