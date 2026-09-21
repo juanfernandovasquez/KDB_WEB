@@ -188,6 +188,7 @@ def update_moodle_category(moodle_cat_id, name, description="", visible=None):
         "categories[0][id]": moodle_cat_id,
         "categories[0][name]": name,
         "categories[0][description]": description or "",
+        "categories[0][descriptionformat]": 1,
     }
     if visible is not None:
         params["categories[0][visible]"] = 1 if visible else 0
