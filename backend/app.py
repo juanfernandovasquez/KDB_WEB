@@ -1954,7 +1954,12 @@ def api_admin_moodle_import_course():
 @app.route("/api/admin/moodle/courses/sync", methods=["POST"])
 @require_admin()
 def api_admin_moodle_sync_courses():
-    """Auto-importa cursos de Moodle que aún no tienen entrada en KDB."""
+    """
+    Sincroniza KDB con Moodle por ID:
+    - Actualiza título/descripción/imagen/categoría de cursos ya vinculados
+    - Crea stubs para cursos de Moodle sin entrada en KDB
+    - Limpia moodle_course_id de KDB cuando el ID ya no existe en Moodle
+    """
     ensure_db()
     try:
         from moodle_service import get_moodle_courses
@@ -1964,39 +1969,75 @@ def api_admin_moodle_sync_courses():
         return jsonify(error=str(exc)), 500
 
     import re as _re
-    existing_mids = {
-        c["moodle_course_id"]
-        for c in fetch_courses(published_only=False)
+
+    moodle_by_id = {c["moodle_course_id"]: c for c in moodle_courses}
+    kdb_courses = fetch_courses(published_only=False)
+    kdb_by_moodle_id = {
+        c["moodle_course_id"]: c
+        for c in kdb_courses
         if c.get("moodle_course_id")
     }
-    existing_slugs = {c["slug"] for c in fetch_courses(published_only=False)}
+    existing_slugs = {c["slug"] for c in kdb_courses}
+
+    # Resolve KDB categories by moodle_category_id
+    kdb_cats = get_course_categories()
+    cat_by_moodle_id = {
+        c["moodle_category_id"]: c["slug"]
+        for c in kdb_cats
+        if c.get("moodle_category_id")
+    }
+
+    # 1. Clear stale links: KDB courses whose moodle_course_id no longer exists in Moodle
+    cleared = 0
+    for kdb_course in kdb_courses:
+        mid = kdb_course.get("moodle_course_id")
+        if mid and mid not in moodle_by_id:
+            save_course({**kdb_course, "moodle_course_id": None}, course_id=kdb_course["id"])
+            cleared += 1
+            app.logger.info("Sync: cleared stale moodle_course_id=%s from KDB course '%s'", mid, kdb_course["slug"])
+
+    # 2. Upsert: update existing or create stub for each Moodle course
+    updated = 0
     imported = 0
     for mc in moodle_courses:
         mid = mc["moodle_course_id"]
-        if mid in existing_mids:
-            continue
-        base = mc.get("shortname") or mc.get("title", "")
-        slug = _re.sub(r'[^a-z0-9]+', '-', base.lower()).strip('-') or "curso"
-        test_slug, counter = slug, 0
-        while test_slug in existing_slugs:
-            counter += 1
-            test_slug = f"{slug}-{counter}"
-        try:
-            save_course({
-                "title": mc["title"],
-                "slug": test_slug,
-                "description": mc.get("description", ""),
-                "moodle_course_id": mid,
-                "image_url": mc.get("image_url"),
-                "price": 0,
-                "is_published": 0,
-            })
-            existing_slugs.add(test_slug)
-            existing_mids.add(mid)
-            imported += 1
-        except Exception as exc:
-            app.logger.warning("Auto-sync course '%s' failed: %s", mc.get("title"), exc)
-    return jsonify(imported=imported)
+        kdb = kdb_by_moodle_id.get(mid)
+        category_slug = cat_by_moodle_id.get(mc.get("moodle_category_id")) if mc.get("moodle_category_id") else None
+
+        if kdb:
+            patch = {**kdb, "title": mc["title"]}
+            if mc.get("description"):
+                patch["description"] = mc["description"]
+            if mc.get("image_url"):
+                patch["image_url"] = mc["image_url"]
+            if category_slug:
+                patch["category"] = category_slug
+            save_course(patch, course_id=kdb["id"])
+            updated += 1
+        else:
+            base = mc.get("shortname") or mc.get("title", "")
+            slug = _re.sub(r'[^a-z0-9]+', '-', base.lower()).strip('-') or "curso"
+            test_slug, counter = slug, 0
+            while test_slug in existing_slugs:
+                counter += 1
+                test_slug = f"{slug}-{counter}"
+            try:
+                save_course({
+                    "title": mc["title"],
+                    "slug": test_slug,
+                    "description": mc.get("description", ""),
+                    "moodle_course_id": mid,
+                    "image_url": mc.get("image_url"),
+                    "category": category_slug,
+                    "price": 0,
+                    "is_published": 0,
+                })
+                existing_slugs.add(test_slug)
+                imported += 1
+            except Exception as exc:
+                app.logger.warning("Auto-sync course '%s' failed: %s", mc.get("title"), exc)
+
+    return jsonify(imported=imported, updated=updated, cleared=cleared)
 
 
 # ─── Academia: Moodle course visibility toggle ────────────────────────────────

@@ -160,6 +160,7 @@ def get_moodle_courses():
             "description": _strip_html(c.get("summary", "")),
             "visible": bool(c.get("visible", 1)),
             "image_url": image_url,
+            "moodle_category_id": c.get("categoryid"),
         })
     return courses
 

@@ -2511,18 +2511,34 @@ let currentAdminUserId = null;
     }
   }
 
-  async function acDeleteCourse(id, title) {
-    if (!confirm(`¿Eliminar el curso "${title}"? Esta acción no se puede deshacer.`)) return;
+  async function acDeleteCourse(id, title, btn) {
+    if (btn.dataset.confirming !== '1') {
+      btn.dataset.confirming = '1';
+      btn.textContent = '¿Confirmar?';
+      btn.style.cssText = 'background:#c0392b;color:#fff;border-color:#c0392b;';
+      setTimeout(() => {
+        if (btn.dataset.confirming === '1') {
+          btn.dataset.confirming = '';
+          btn.textContent = 'Eliminar';
+          btn.style.cssText = '';
+        }
+      }, 4000);
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Eliminando…';
     try {
       const res = await apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(`Error al eliminar: ${data.error || res.status}`);
+        btn.textContent = `Error: ${data.error || res.status}`;
+        btn.disabled = false;
         return;
       }
       loadAcademiaAdmin();
     } catch (err) {
-      alert(`Error al eliminar: ${err.message}`);
+      btn.textContent = `Error: ${err.message}`;
+      btn.disabled = false;
     }
   }
 
@@ -2545,7 +2561,7 @@ let currentAdminUserId = null;
         tbody.innerHTML = courses.map(c => {
           const catLabel = _courseCategoriesCache.find(cat => cat.slug === c.category)?.label || c.category || '—';
           const moodleTag = c.moodle_course_id
-            ? `<span class="status-tag tag-success" style="margin-left:.35rem;font-size:.72rem;">Moodle #${c.moodle_course_id}</span>`
+            ? `<a href="https://cursos.katarzyna.pe/course/view.php?id=${c.moodle_course_id}" target="_blank" class="status-tag tag-success" style="margin-left:.35rem;font-size:.72rem;text-decoration:none;">Moodle #${c.moodle_course_id} ↗</a>`
             : `<span class="status-tag tag-pending" style="margin-left:.35rem;font-size:.72rem;">Sin vincular</span>`;
           return `<tr>
             <td><strong>${escHtml(c.title)}</strong>${moodleTag}<br><small class="muted">${escHtml(c.slug)}</small></td>
@@ -2572,7 +2588,7 @@ let currentAdminUserId = null;
           });
         });
         tbody.querySelectorAll('.ac-del-btn').forEach(btn => {
-          btn.addEventListener('click', () => acDeleteCourse(btn.dataset.id, btn.dataset.title));
+          btn.addEventListener('click', () => acDeleteCourse(btn.dataset.id, btn.dataset.title, btn));
         });
       }
     } catch (err) {
