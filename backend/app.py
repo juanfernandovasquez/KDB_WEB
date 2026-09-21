@@ -1690,7 +1690,7 @@ def api_save_payment_config():
 # ─── Academia: Moodle sync helper ────────────────────────────────────────────
 
 def _push_course_to_moodle(course_data):
-    """Empuja título, descripción, categoría y visibilidad a Moodle si el curso tiene moodle_course_id."""
+    """Empuja título, descripción y categoría a Moodle. La visibilidad en Moodle es independiente."""
     moodle_course_id = course_data.get("moodle_course_id")
     if not moodle_course_id:
         return
@@ -1708,7 +1708,6 @@ def _push_course_to_moodle(course_data):
             title=course_data.get("title", ""),
             description=course_data.get("description", ""),
             moodle_category_id=moodle_cat_id,
-            visible=bool(course_data.get("is_published", False)),
         )
     except Exception as exc:
         app.logger.warning("Moodle course push failed (course_id=%s): %s", moodle_course_id, exc)

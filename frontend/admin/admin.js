@@ -2441,7 +2441,7 @@ let currentAdminUserId = null;
           const md = await res.json();
           if (md.title) q('ac-title').value = md.title;
           if (md.description) q('ac-description').value = md.description;
-          q('ac-published').value = md.visible ? '1' : '0';
+          // No sobreescribir is_published con visible de Moodle — son independientes
           if (md.kdb_category_slug && _catSel) _catSel.value = md.kdb_category_slug;
           q('ac-save-status').textContent = '↺ Sincronizado desde Moodle';
           setTimeout(() => { q('ac-save-status').textContent = ''; }, 2500);

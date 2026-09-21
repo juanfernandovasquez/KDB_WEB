@@ -211,13 +211,12 @@ def delete_moodle_category(moodle_cat_id):
     logger.info("Moodle: categoría %s eliminada", moodle_cat_id)
 
 
-def update_moodle_course_metadata(moodle_course_id, title, description, moodle_category_id=None, visible=True):
-    """Empuja metadatos de un curso a Moodle (título, descripción, categoría, visibilidad)."""
+def update_moodle_course_metadata(moodle_course_id, title, description, moodle_category_id=None):
+    """Empuja título, descripción y categoría a Moodle. No toca la visibilidad."""
     params = {
         "courses[0][id]": moodle_course_id,
         "courses[0][fullname]": title,
         "courses[0][summary]": description or "",
-        "courses[0][visible]": 1 if visible else 0,
     }
     if moodle_category_id:
         params["courses[0][categoryid]"] = moodle_category_id
