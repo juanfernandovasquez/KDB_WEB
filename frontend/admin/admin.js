@@ -2527,6 +2527,9 @@ let currentAdminUserId = null;
   }
 
   async function loadAcademiaAdmin() {
+    // Auto-sync Moodle courses silently (creates stubs for unlinked Moodle courses)
+    apiFetch('/api/admin/moodle/courses/sync', { method: 'POST' }).catch(() => {});
+
     // Load courses
     const tbody = q('ac-table-body');
     const countEl = q('ac-count');
@@ -2552,13 +2555,11 @@ let currentAdminUserId = null;
             <td class="row" style="gap:.35rem;flex-wrap:wrap;">
               <a class="secondary small-btn" href="/curso.html?slug=${encodeURIComponent(c.slug)}" target="_blank">Ver</a>
               <button type="button" class="secondary small-btn ac-edit-btn" data-id="${c.id}">Editar</button>
-              ${c.moodle_course_id ? `<button type="button" class="secondary small-btn ac-moodle-hide-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Ocultar Moodle</button>
-              <button type="button" class="cta small-btn ac-moodle-show-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Activar Moodle</button>` : ''}
               <button type="button" class="secondary small-btn danger ac-del-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Eliminar</button>
             </td>
           </tr>`;
         }).join('');
-        // bind edit/delete/moodle visibility
+        // bind edit/delete
         tbody.querySelectorAll('.ac-edit-btn').forEach(btn => {
           btn.addEventListener('click', async () => {
             try {
@@ -2572,19 +2573,6 @@ let currentAdminUserId = null;
         });
         tbody.querySelectorAll('.ac-del-btn').forEach(btn => {
           btn.addEventListener('click', () => acDeleteCourse(btn.dataset.id, btn.dataset.title));
-        });
-        const toggleMoodleVisibility = async (id, visible) => {
-          const r = await apiFetch(`/api/admin/courses/${id}/moodle_visibility`, {
-            method: 'POST', body: JSON.stringify({ visible })
-          });
-          const data = await r.json();
-          alert(data.message || data.error);
-        };
-        tbody.querySelectorAll('.ac-moodle-hide-btn').forEach(btn => {
-          btn.addEventListener('click', () => toggleMoodleVisibility(btn.dataset.id, false));
-        });
-        tbody.querySelectorAll('.ac-moodle-show-btn').forEach(btn => {
-          btn.addEventListener('click', () => toggleMoodleVisibility(btn.dataset.id, true));
         });
       }
     } catch (err) {
@@ -2911,118 +2899,6 @@ let currentAdminUserId = null;
     }
   }
 
-  // ── Moodle import modal ───────────────────────────────────────────────────
-
-  function acOpenMoodleImport() {
-    const modal = q('ac-moodle-import-modal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    acLoadMoodleCourses();
-  }
-
-  function acCloseMoodleImport() {
-    const modal = q('ac-moodle-import-modal');
-    if (!modal) return;
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  async function acLoadMoodleCourses() {
-    const loading = q('ac-moodle-import-loading');
-    const list = q('ac-moodle-import-list');
-    if (loading) loading.style.display = '';
-    if (list) list.innerHTML = '';
-
-    try {
-      const res = await apiFetch('/api/admin/moodle/courses');
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Error al conectar con Moodle');
-      }
-      const courses = await res.json();
-      if (loading) loading.style.display = 'none';
-
-      if (!courses.length) {
-        if (list) list.innerHTML = '<p class="small muted">No hay cursos en Moodle todavía.</p>';
-        return;
-      }
-
-      list.innerHTML = courses.map(c => {
-        const badge = c.imported
-          ? `<span class="status-tag tag-success">Importado</span>`
-          : `<span class="status-tag tag-pending">Sin importar</span>`;
-        const visibility = c.visible ? '' : '<span class="small muted" style="margin-left:.35rem;">(oculto en Moodle)</span>';
-        const img = c.image_url
-          ? `<img src="${escHtml(c.image_url)}" alt="" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;" />`
-          : `<div style="width:64px;height:48px;background:#e4e9f4;border-radius:6px;flex-shrink:0;"></div>`;
-        const editLink = c.imported && c.kdb_slug
-          ? `<a class="secondary small-btn" href="/curso.html?slug=${encodeURIComponent(c.kdb_slug)}" target="_blank" style="margin-right:.4rem;">Ver</a>`
-          : '';
-        const btnLabel = c.imported ? 'Sincronizar' : 'Importar';
-        return `
-          <div class="moodle-import-row" data-mid="${c.moodle_course_id}" style="display:flex;align-items:center;gap:.9rem;padding:.8rem 0;border-bottom:1px solid #f0f2f7;">
-            ${img}
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
-                <strong style="font-size:.93rem;color:var(--brand-blue,#06186d);">${escHtml(c.title)}</strong>
-                ${badge}${visibility}
-              </div>
-              <p class="small muted" style="margin:.2rem 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml((c.description || '').slice(0, 100))}</p>
-              <p class="small muted" style="margin:.15rem 0 0;">ID Moodle: ${c.moodle_course_id}${c.kdb_id ? ` · KDB ID: ${c.kdb_id}` : ''}</p>
-            </div>
-            <div style="flex-shrink:0;display:flex;gap:.4rem;align-items:center;">
-              ${editLink}
-              <button type="button" class="cta small-btn ac-moodle-do-import" data-mid="${c.moodle_course_id}" data-imported="${c.imported ? '1' : '0'}">${btnLabel}</button>
-            </div>
-          </div>`;
-      }).join('');
-
-      list.querySelectorAll('.ac-moodle-do-import').forEach(btn => {
-        btn.addEventListener('click', () => acDoImportMoodleCourse(btn));
-      });
-
-    } catch (err) {
-      if (loading) loading.style.display = 'none';
-      if (list) list.innerHTML = `<p class="small" style="color:#c0392b;">Error: ${escHtml(err.message)}</p>`;
-    }
-  }
-
-  async function acDoImportMoodleCourse(btn) {
-    const mid = parseInt(btn.dataset.mid);
-    const isUpdate = btn.dataset.imported === '1';
-    btn.disabled = true;
-    btn.textContent = isUpdate ? 'Sincronizando…' : 'Importando…';
-
-    try {
-      const res = await apiFetch('/api/admin/moodle/courses/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ moodle_course_id: mid }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Error al importar');
-
-      btn.textContent = isUpdate ? '✓ Sincronizado' : '✓ Importado';
-      btn.dataset.imported = '1';
-      const row = btn.closest('.moodle-import-row');
-      if (row) {
-        const badge = row.querySelector('.status-tag');
-        if (badge) { badge.className = 'status-tag tag-success'; badge.textContent = 'Importado'; }
-      }
-      setTimeout(() => {
-        btn.textContent = 'Sincronizar';
-        btn.disabled = false;
-      }, 2000);
-
-      await loadAcademiaAdmin();
-    } catch (err) {
-      btn.textContent = isUpdate ? 'Sincronizar' : 'Importar';
-      btn.disabled = false;
-      alert('Error: ' + err.message);
-    }
-  }
-
   function bindAcademiaEvents() {
     if (acEventsBound) return;
     acEventsBound = true;
@@ -3038,8 +2914,7 @@ let currentAdminUserId = null;
     bindOnce('ac-form-cancel', acCloseForm);
     bindOnce('ac-form-cancel2', acCloseForm);
     bindOnce('ac-save-btn', acSaveCourse);
-    bindOnce('ac-import-moodle-btn', acOpenMoodleImport);
-    bindOnce('ac-moodle-import-close', acCloseMoodleImport);
+
 
     // Dynamic list "+" buttons for course fields
     bindOnce('ac-add-learn',      () => acDynListAdd('ac-learn-list'));

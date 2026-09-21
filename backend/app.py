@@ -1949,6 +1949,56 @@ def api_admin_moodle_import_course():
     return jsonify(message="Curso importado desde Moodle", course_id=course_id, action="created"), 201
 
 
+# ─── Academia: Moodle course auto-sync ───────────────────────────────────────
+
+@app.route("/api/admin/moodle/courses/sync", methods=["POST"])
+@require_admin()
+def api_admin_moodle_sync_courses():
+    """Auto-importa cursos de Moodle que aún no tienen entrada en KDB."""
+    ensure_db()
+    try:
+        from moodle_service import get_moodle_courses
+        moodle_courses = get_moodle_courses()
+    except Exception as exc:
+        app.logger.error("moodle sync courses error: %s", exc)
+        return jsonify(error=str(exc)), 500
+
+    import re as _re
+    existing_mids = {
+        c["moodle_course_id"]
+        for c in fetch_courses(published_only=False)
+        if c.get("moodle_course_id")
+    }
+    existing_slugs = {c["slug"] for c in fetch_courses(published_only=False)}
+    imported = 0
+    for mc in moodle_courses:
+        mid = mc["moodle_course_id"]
+        if mid in existing_mids:
+            continue
+        base = mc.get("shortname") or mc.get("title", "")
+        slug = _re.sub(r'[^a-z0-9]+', '-', base.lower()).strip('-') or "curso"
+        test_slug, counter = slug, 0
+        while test_slug in existing_slugs:
+            counter += 1
+            test_slug = f"{slug}-{counter}"
+        try:
+            save_course({
+                "title": mc["title"],
+                "slug": test_slug,
+                "description": mc.get("description", ""),
+                "moodle_course_id": mid,
+                "image_url": mc.get("image_url"),
+                "price": 0,
+                "is_published": 0,
+            })
+            existing_slugs.add(test_slug)
+            existing_mids.add(mid)
+            imported += 1
+        except Exception as exc:
+            app.logger.warning("Auto-sync course '%s' failed: %s", mc.get("title"), exc)
+    return jsonify(imported=imported)
+
+
 # ─── Academia: Moodle course visibility toggle ────────────────────────────────
 
 @app.route("/api/admin/courses/<int:course_id>/moodle_visibility", methods=["POST"])
