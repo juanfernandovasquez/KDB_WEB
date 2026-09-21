@@ -1063,11 +1063,12 @@ def init_db():
 
         # ── Extra course content fields ───────────────────────────────────────
         for col_def in [
-            ("what_you_learn", "TEXT"),
-            ("includes_list",  "TEXT"),
-            ("audience",       "TEXT"),
-            ("instructors",    "TEXT"),
-            ("video_url",      "TEXT"),
+            ("what_you_learn",  "TEXT"),
+            ("includes_list",   "TEXT"),
+            ("audience",        "TEXT"),
+            ("instructors",     "TEXT"),
+            ("video_url",       "TEXT"),
+            ("moodle_visible",  "INTEGER"),
         ]:
             try:
                 conn.execute(f"ALTER TABLE courses ADD COLUMN {col_def[0]} {col_def[1]}")

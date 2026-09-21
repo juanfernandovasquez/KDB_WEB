@@ -2005,7 +2005,7 @@ def api_admin_moodle_sync_courses():
         category_slug = cat_by_moodle_id.get(mc.get("moodle_category_id")) if mc.get("moodle_category_id") else None
 
         if kdb:
-            patch = {**kdb, "title": mc["title"]}
+            patch = {**kdb, "title": mc["title"], "moodle_visible": mc.get("visible", True)}
             if mc.get("description"):
                 patch["description"] = mc["description"]
             if mc.get("image_url"):
@@ -2027,6 +2027,7 @@ def api_admin_moodle_sync_courses():
                     "slug": test_slug,
                     "description": mc.get("description", ""),
                     "moodle_course_id": mid,
+                    "moodle_visible": mc.get("visible", True),
                     "image_url": mc.get("image_url"),
                     "category": category_slug,
                     "price": 0,

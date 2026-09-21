@@ -2563,11 +2563,19 @@ let currentAdminUserId = null;
           const moodleTag = c.moodle_course_id
             ? `<a href="https://cursos.katarzyna.pe/course/view.php?id=${c.moodle_course_id}" target="_blank" class="status-tag tag-success" style="margin-left:.35rem;font-size:.72rem;text-decoration:none;">Moodle #${c.moodle_course_id} ↗</a>`
             : `<span class="status-tag tag-pending" style="margin-left:.35rem;font-size:.72rem;">Sin vincular</span>`;
+          const kdbBadge = c.is_published
+            ? `<span class="badge-active">Publicado en KDB</span>`
+            : `<span class="badge-inactive">Borrador — no visible en KDB</span>`;
+          const moodleVisBadge = c.moodle_course_id
+            ? (c.moodle_visible
+                ? `<span class="badge-active" style="margin-top:.25rem;">Visible en Moodle</span>`
+                : `<span class="badge-inactive" style="margin-top:.25rem;">Oculto en Moodle</span>`)
+            : '';
           return `<tr>
             <td><strong>${escHtml(c.title)}</strong>${moodleTag}<br><small class="muted">${escHtml(c.slug)}</small></td>
             <td>${escHtml(catLabel)}</td>
             <td>S/ ${Number(c.price).toFixed(0)}${c.original_price ? ` <small class="muted" style="text-decoration:line-through">S/ ${Number(c.original_price).toFixed(0)}</small>` : ''}</td>
-            <td><span class="${c.is_published ? 'badge-active' : 'badge-inactive'}">${c.is_published ? 'Publicado' : 'Borrador'}</span></td>
+            <td style="display:flex;flex-direction:column;gap:.25rem;">${kdbBadge}${moodleVisBadge}</td>
             <td class="row" style="gap:.35rem;flex-wrap:wrap;">
               <a class="secondary small-btn" href="/curso.html?slug=${encodeURIComponent(c.slug)}" target="_blank">Ver</a>
               <button type="button" class="secondary small-btn ac-edit-btn" data-id="${c.id}">Editar</button>

@@ -1098,7 +1098,7 @@ def save_course(payload, course_id=None):
                   slug=?, title=?, subtitle=?, description=?, category=?,
                   price=?, original_price=?, image_url=?, duration=?,
                   modules_count=?, lessons_count=?, level=?, is_published=?,
-                  position=?, moodle_course_id=?,
+                  position=?, moodle_course_id=?, moodle_visible=?,
                   what_you_learn=?, includes_list=?, audience=?, instructors=?,
                   video_url=?, updated_at=?
                 WHERE id=?
@@ -1119,6 +1119,7 @@ def save_course(payload, course_id=None):
                     1 if payload.get("is_published") else 0,
                     payload.get("position", 0),
                     payload.get("moodle_course_id"),
+                    1 if payload.get("moodle_visible") else (0 if "moodle_visible" in payload else None),
                     _json_list("what_you_learn"),
                     _json_list("includes_list"),
                     _json_list("audience"),
@@ -1135,10 +1136,10 @@ def save_course(payload, course_id=None):
                 INSERT INTO courses (slug, title, subtitle, description, category,
                   price, original_price, image_url, duration,
                   modules_count, lessons_count, level, is_published,
-                  position, moodle_course_id,
+                  position, moodle_course_id, moodle_visible,
                   what_you_learn, includes_list, audience, instructors,
                   video_url, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload.get("slug"),
@@ -1156,6 +1157,7 @@ def save_course(payload, course_id=None):
                     1 if payload.get("is_published") else 0,
                     payload.get("position", 0),
                     payload.get("moodle_course_id"),
+                    1 if payload.get("moodle_visible") else (0 if "moodle_visible" in payload else None),
                     _json_list("what_you_learn"),
                     _json_list("includes_list"),
                     _json_list("audience"),
