@@ -1758,6 +1758,8 @@ def api_admin_update_course(course_id):
         return jsonify(error="Curso no encontrado"), 404
     # Merge: existing values are the base, incoming fields override
     merged = {**existing, **incoming}
+    # moodle_course_id es inmutable una vez asignado — se ignora si viene en el payload
+    merged["moodle_course_id"] = existing.get("moodle_course_id")
     # Remove modules from merged dict (save_course handles them from incoming only)
     merged.pop("modules", None)
     if "modules" in incoming:
