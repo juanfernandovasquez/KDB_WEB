@@ -2414,13 +2414,27 @@ let currentAdminUserId = null;
     acDynListHtml('ac-includes-list', course?.includes_list  || []);
     acDynListHtml('ac-audience-list', course?.audience       || []);
     acRenderInstructors(course?.instructors || []);
+    // Banner Moodle
+    const banner = q('ac-moodle-ref-banner');
+    const refId = q('ac-moodle-ref-id');
+    if (banner && refId) {
+      if (course?.moodle_course_id) {
+        refId.textContent = course.moodle_course_id;
+        banner.classList.remove('hidden');
+        banner.style.display = 'flex';
+      } else {
+        banner.classList.add('hidden');
+        banner.style.display = 'none';
+      }
+    }
+
     q('ac-form-card').classList.remove('hidden');
     q('ac-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     q('ac-save-status').textContent = '';
 
     // Si el curso tiene Moodle ID, cargar datos frescos desde Moodle
     if (course?.id && course?.moodle_course_id) {
-      q('ac-save-status').textContent = 'Cargando datos de Moodle…';
+      q('ac-save-status').textContent = 'Sincronizando con Moodle…';
       try {
         const res = await apiFetch(`/api/admin/courses/${course.id}/moodle`);
         if (res.ok) {
@@ -2429,7 +2443,7 @@ let currentAdminUserId = null;
           if (md.description) q('ac-description').value = md.description;
           q('ac-published').value = md.visible ? '1' : '0';
           if (md.kdb_category_slug && _catSel) _catSel.value = md.kdb_category_slug;
-          q('ac-save-status').textContent = '↺ Datos sincronizados desde Moodle';
+          q('ac-save-status').textContent = '↺ Sincronizado desde Moodle';
           setTimeout(() => { q('ac-save-status').textContent = ''; }, 2500);
         } else {
           q('ac-save-status').textContent = '';
@@ -2525,10 +2539,14 @@ let currentAdminUserId = null;
       if (!courses.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="muted small">Sin cursos. Haz clic en "+ Nuevo curso" para crear el primero.</td></tr>';
       } else {
-        tbody.innerHTML = courses.map(c => `
-          <tr>
-            <td><strong>${escHtml(c.title)}</strong><br><small class="muted">${escHtml(c.slug)}</small>${c.moodle_course_id ? `<br><small class="muted">Moodle ID: ${c.moodle_course_id}</small>` : ''}</td>
-            <td>${escHtml(c.category || '—')}</td>
+        tbody.innerHTML = courses.map(c => {
+          const catLabel = _courseCategoriesCache.find(cat => cat.slug === c.category)?.label || c.category || '—';
+          const moodleTag = c.moodle_course_id
+            ? `<span class="status-tag tag-success" style="margin-left:.35rem;font-size:.72rem;">Moodle #${c.moodle_course_id}</span>`
+            : `<span class="status-tag tag-pending" style="margin-left:.35rem;font-size:.72rem;">Sin vincular</span>`;
+          return `<tr>
+            <td><strong>${escHtml(c.title)}</strong>${moodleTag}<br><small class="muted">${escHtml(c.slug)}</small></td>
+            <td>${escHtml(catLabel)}</td>
             <td>S/ ${Number(c.price).toFixed(0)}${c.original_price ? ` <small class="muted" style="text-decoration:line-through">S/ ${Number(c.original_price).toFixed(0)}</small>` : ''}</td>
             <td><span class="${c.is_published ? 'badge-active' : 'badge-inactive'}">${c.is_published ? 'Publicado' : 'Borrador'}</span></td>
             <td class="row" style="gap:.35rem;flex-wrap:wrap;">
@@ -2538,7 +2556,8 @@ let currentAdminUserId = null;
               <button type="button" class="cta small-btn ac-moodle-show-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Activar Moodle</button>` : ''}
               <button type="button" class="secondary small-btn danger ac-del-btn" data-id="${c.id}" data-title="${escHtml(c.title)}">Eliminar</button>
             </td>
-          </tr>`).join('');
+          </tr>`;
+        }).join('');
         // bind edit/delete/moodle visibility
         tbody.querySelectorAll('.ac-edit-btn').forEach(btn => {
           btn.addEventListener('click', async () => {

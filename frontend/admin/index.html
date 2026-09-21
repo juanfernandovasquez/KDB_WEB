@@ -1894,75 +1894,103 @@
 
           <input type="hidden" id="ac-id" />
 
-          <div class="grid-2">
-            <div class="full">
-              <label>Título del curso *</label>
-              <input type="text" id="ac-title" placeholder="Ej. Fiscalización Tributaria SUNAT" />
-            </div>
+          <!-- Moodle reference banner (shown when linked) -->
+          <div id="ac-moodle-ref-banner" class="hidden" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:.7rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;font-size:.875rem;">
+            <span style="font-size:1.1rem;">🔗</span>
             <div>
-              <label>Slug (URL) *</label>
-              <input type="text" id="ac-slug" placeholder="fiscalizacion-tributaria-sunat" />
+              <strong>Vinculado a Moodle</strong> — ID: <code id="ac-moodle-ref-id"></code>
+              <span class="muted" style="margin-left:.5rem;">El título, descripción y categoría se sincronizan con Moodle al abrir y guardar.</span>
             </div>
-            <div>
-              <label>Categoría</label>
-              <select id="ac-category" class="form-select">
-                <option value="">Cargando…</option>
-              </select>
+          </div>
+
+          <!-- ── Sección Moodle ─────────────────────────────────────── -->
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;">
+              <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;">Datos Moodle</span>
+              <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+              <span class="small muted">Se sincronizan con cursos.katarzyna.pe</span>
             </div>
-            <div>
-              <label>Precio (S/)</label>
-              <input type="number" id="ac-price" min="0" step="1" placeholder="197" />
-            </div>
-            <div>
-              <label>Precio original (S/) <small class="muted">— opcional, para mostrar descuento</small></label>
-              <input type="number" id="ac-original-price" min="0" step="1" placeholder="297" />
-            </div>
-            <div>
-              <label>Duración total</label>
-              <input type="text" id="ac-duration" placeholder="Ej. 4 horas" />
-            </div>
-            <div>
-              <label>Nivel</label>
-              <select id="ac-level" class="form-select">
-                <option value="Todos los niveles">Todos los niveles</option>
-                <option value="Básico">Básico</option>
-                <option value="Intermedio">Intermedio</option>
-                <option value="Avanzado">Avanzado</option>
-              </select>
-            </div>
-            <div>
-              <label>ID del curso en Moodle <small class="muted">— visible en la URL del curso en cursos.katarzyna.pe</small></label>
-              <input type="number" id="ac-moodle-course-id" min="1" step="1" placeholder="Ej. 3" />
-            </div>
-            <div>
-              <label>Publicado</label>
-              <select id="ac-published" class="form-select">
-                <option value="1">Sí — visible en el sitio</option>
-                <option value="0">No — borrador</option>
-              </select>
-            </div>
-            <div class="full">
-              <label>Subtítulo <small class="muted">(aparece debajo del título en la tarjeta)</small></label>
-              <input type="text" id="ac-subtitle" placeholder="Frase breve del curso" />
-            </div>
-            <div class="full">
-              <label>Imagen del curso</label>
-              <div class="image-picker-field">
-                <input type="hidden" id="ac-image-url" />
-                <div class="img-picker-preview">
-                  <img class="img-picker-thumb" alt="Vista previa" style="display:none" />
-                  <span class="img-picker-empty">Sin imagen seleccionada</span>
-                </div>
-                <div class="img-picker-actions">
-                  <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
-                  <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
-                </div>
+            <div class="grid-2">
+              <div class="full">
+                <label>Título del curso *</label>
+                <input type="text" id="ac-title" placeholder="Ej. Fiscalización Tributaria SUNAT" />
+              </div>
+              <div>
+                <label>Categoría</label>
+                <select id="ac-category" class="form-select">
+                  <option value="">Cargando…</option>
+                </select>
+              </div>
+              <div>
+                <label>ID del curso en Moodle <small class="muted">— número en la URL de cursos.katarzyna.pe</small></label>
+                <input type="number" id="ac-moodle-course-id" min="1" step="1" placeholder="Ej. 3" />
+              </div>
+              <div>
+                <label>Publicado / Visible</label>
+                <select id="ac-published" class="form-select">
+                  <option value="1">Sí — visible en el sitio</option>
+                  <option value="0">No — borrador</option>
+                </select>
               </div>
             </div>
-            <div class="full" style="margin-top:.75rem;">
-              <label>URL de video de preview (YouTube)</label>
-              <input type="text" id="ac-video-url" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;box-sizing:border-box;" />
-              <p class="small muted" style="margin-top:.25rem;">Opcional. Si se ingresa, aparecerá un botón de play sobre la imagen del curso.</p>
+          </div>
+
+          <!-- ── Sección KDB ─────────────────────────────────────────── -->
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;">
+              <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;">Datos KDB</span>
+              <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+              <span class="small muted">Solo en este sitio, no van a Moodle</span>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Slug (URL) *</label>
+                <input type="text" id="ac-slug" placeholder="fiscalizacion-tributaria-sunat" />
+              </div>
+              <div>
+                <label>Precio (S/)</label>
+                <input type="number" id="ac-price" min="0" step="1" placeholder="197" />
+              </div>
+              <div>
+                <label>Precio original (S/) <small class="muted">— para mostrar descuento</small></label>
+                <input type="number" id="ac-original-price" min="0" step="1" placeholder="297" />
+              </div>
+              <div>
+                <label>Duración total</label>
+                <input type="text" id="ac-duration" placeholder="Ej. 4 horas" />
+              </div>
+              <div>
+                <label>Nivel</label>
+                <select id="ac-level" class="form-select">
+                  <option value="Todos los niveles">Todos los niveles</option>
+                  <option value="Básico">Básico</option>
+                  <option value="Intermedio">Intermedio</option>
+                  <option value="Avanzado">Avanzado</option>
+                </select>
+              </div>
+              <div>
+                <label>Subtítulo <small class="muted">(debajo del título en la tarjeta)</small></label>
+                <input type="text" id="ac-subtitle" placeholder="Frase breve del curso" />
+              </div>
+              <div class="full">
+                <label>Imagen del curso</label>
+                <div class="image-picker-field">
+                  <input type="hidden" id="ac-image-url" />
+                  <div class="img-picker-preview">
+                    <img class="img-picker-thumb" alt="Vista previa" style="display:none" />
+                    <span class="img-picker-empty">Sin imagen seleccionada</span>
+                  </div>
+                  <div class="img-picker-actions">
+                    <button type="button" class="secondary small-btn media-picker-btn">Elegir imagen</button>
+                    <button type="button" class="secondary small-btn danger img-picker-clear" style="display:none">&#10005; Quitar</button>
+                  </div>
+                </div>
+              </div>
+              <div class="full">
+                <label>URL de video de preview (YouTube)</label>
+                <input type="text" id="ac-video-url" placeholder="https://www.youtube.com/watch?v=..." style="width:100%;box-sizing:border-box;" />
+                <p class="small muted" style="margin-top:.25rem;">Opcional. Aparecerá un botón de play sobre la imagen.</p>
+              </div>
             </div>
           </div>
 
@@ -2300,7 +2328,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260920h"></script>
+  <script type="module" src="./main.js?v=20260920i"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");
