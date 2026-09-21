@@ -182,17 +182,17 @@ def create_moodle_category(name, description="", parent=0):
     return result[0]["id"]
 
 
-def update_moodle_category(moodle_cat_id, name, description="", visible=None):
-    """Actualiza nombre/descripción/visibilidad de una categoría en Moodle."""
-    params = {
-        "categories[0][id]": moodle_cat_id,
-        "categories[0][name]": name,
-        "categories[0][description]": description or "",
-        "categories[0][descriptionformat]": 1,
-    }
-    if visible is not None:
-        params["categories[0][visible]"] = 1 if visible else 0
-    _call("core_course_update_categories", **params)
+def update_moodle_category(moodle_cat_id, name, description=""):
+    """Actualiza nombre y descripción de una categoría en Moodle."""
+    _call(
+        "core_course_update_categories",
+        **{
+            "categories[0][id]": moodle_cat_id,
+            "categories[0][name]": name,
+            "categories[0][description]": description or "",
+            "categories[0][descriptionformat]": 1,
+        },
+    )
     logger.info("Moodle: categoría %s actualizada a '%s'", moodle_cat_id, name)
 
 

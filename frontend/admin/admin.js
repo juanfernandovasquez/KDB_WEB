@@ -2293,9 +2293,6 @@ let currentAdminUserId = null;
               '<textarea class="ac-edit-cat-desc" placeholder="Descripción (opcional)" rows="2" style="resize:vertical;">' + escHtml(c.description || '') + '</textarea>' +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:.3rem;">' +
-              '<label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer;">' +
-                '<input type="checkbox" class="ac-edit-cat-visible"' + (c.visible ? ' checked' : '') + ' /> Visible en Moodle' +
-              '</label>' +
               '<button type="button" class="cta small-btn ac-edit-cat-save" data-id="' + kdbId + '" data-slug="' + escHtml(kdbSlug) + '">Guardar</button>' +
               '<button type="button" class="secondary small-btn ac-edit-cat-cancel" data-id="' + kdbId + '">Cancelar</button>' +
               '<span class="ac-edit-cat-status small muted"></span>' +
@@ -2323,14 +2320,13 @@ let currentAdminUserId = null;
         const editRow = tbody.querySelector('.ac-edit-cat-row[data-for-cat="' + btn.dataset.id + '"]');
         const label = editRow.querySelector('.ac-edit-cat-label').value.trim();
         const description = editRow.querySelector('.ac-edit-cat-desc').value.trim();
-        const visible = editRow.querySelector('.ac-edit-cat-visible').checked;
         const status = editRow.querySelector('.ac-edit-cat-status');
         if (!label) { status.textContent = 'El nombre es requerido.'; return; }
         status.textContent = 'Guardando…';
         try {
           const res = await apiFetch('/api/courses/categories/' + btn.dataset.id, {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug: btn.dataset.slug, label, description, visible, position: 0 }),
+            body: JSON.stringify({ slug: btn.dataset.slug, label, description, position: 0 }),
           });
           const data = await res.json().catch(function() { return {}; });
           if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }

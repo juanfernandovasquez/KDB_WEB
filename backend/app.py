@@ -1627,10 +1627,7 @@ def api_update_course_category(cat_id):
     if moodle_cat_id:
         try:
             from moodle_service import update_moodle_category
-            update_moodle_category(
-                moodle_cat_id, label, description=description,
-                visible=bool(visible) if visible is not None else None
-            )
+            update_moodle_category(moodle_cat_id, label, description=description)
         except Exception as m_exc:
             app.logger.warning("Moodle update_category failed: %s", m_exc)
     return jsonify(cat)
