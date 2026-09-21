@@ -2219,11 +2219,13 @@ let currentAdminUserId = null;
   }
 
   // ── Course category management ────────────────────────────────────────────
+  let _moodleCatDisplayCache = [];
 
   async function loadCourseCategories() {
     // Auto-sync: importa silenciosamente categorías de Moodle que no están en KDB
     try { await apiFetch('/api/admin/moodle/categories/sync', { method: 'POST' }); } catch (_) {}
 
+    // Local KDB cats (para el dropdown del formulario de curso)
     try {
       const res = await apiFetch('/api/courses/categories');
       if (res.ok) _courseCategoriesCache = await res.json();
@@ -2242,6 +2244,12 @@ let currentAdminUserId = null;
       }
     }
 
+    // Categorías de Moodle enriquecidas (para la tabla de gestión)
+    try {
+      const mRes = await apiFetch('/api/admin/moodle/categories');
+      if (mRes.ok) _moodleCatDisplayCache = await mRes.json();
+    } catch (_) { _moodleCatDisplayCache = []; }
+
     renderCourseCategoriesTable();
   }
 
@@ -2249,27 +2257,49 @@ let currentAdminUserId = null;
     const tbody = q('ac-categories-tbody');
     if (!tbody) return;
 
-    if (!_courseCategoriesCache.length) {
-      tbody.innerHTML = '<tr><td colspan="2" class="muted small">Sin categorías.</td></tr>';
+    const cats = _moodleCatDisplayCache.length ? _moodleCatDisplayCache : _courseCategoriesCache.map(function(c) {
+      return { moodle_category_id: c.moodle_category_id, name: c.label, description: '', coursecount: 0, visible: true, kdb_id: c.id, kdb_slug: c.slug, parent: 0 };
+    });
+
+    if (!cats.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="muted small" style="padding:1rem;">Sin categorías.</td></tr>';
       return;
     }
 
     let html = '';
-    _courseCategoriesCache.forEach(function(c) {
+    cats.forEach(function(c) {
+      const kdbId = c.kdb_id || '';
+      const kdbSlug = c.kdb_slug || '';
+      const visTag = c.visible
+        ? '<span class="status-tag tag-success">Visible</span>'
+        : '<span class="status-tag tag-pending">Oculta</span>';
+      const coursesBadge = '<span style="display:inline-flex;align-items:center;gap:.2rem;background:#f0f4ff;color:#3451b2;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600;">' + (c.coursecount || 0) + ' curso' + (c.coursecount === 1 ? '' : 's') + '</span>';
+      const descHtml = c.description ? '<div class="small muted" style="margin-top:.2rem;line-height:1.35;">' + escHtml(c.description) + '</div>' : '';
+
       html +=
-        '<tr data-cat-id="' + c.id + '">' +
-        '<td>' + escHtml(c.label) + '</td>' +
+        '<tr data-cat-id="' + kdbId + '">' +
+        '<td><span style="font-weight:600;">' + escHtml(c.name) + '</span>' + descHtml + '</td>' +
+        '<td style="text-align:center;">' + coursesBadge + '</td>' +
+        '<td>' + visTag + '</td>' +
         '<td style="display:flex;gap:.4rem;flex-wrap:wrap;">' +
-          '<button type="button" class="secondary small-btn ac-edit-cat-btn" data-id="' + c.id + '">Editar</button>' +
-          '<button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + c.id + '" data-label="' + escHtml(c.label) + '">Eliminar</button>' +
+          '<button type="button" class="secondary small-btn ac-edit-cat-btn" data-id="' + kdbId + '">Editar</button>' +
+          '<button type="button" class="secondary small-btn danger ac-del-cat-btn" data-id="' + kdbId + '" data-label="' + escHtml(c.name) + '">Eliminar</button>' +
         '</td></tr>' +
-        '<tr class="ac-edit-cat-row hidden" data-for-cat="' + c.id + '">' +
-        '<td colspan="2" style="padding:.6rem 0;">' +
-          '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">' +
-            '<input type="text" class="ac-edit-cat-label" placeholder="Nombre" value="' + escHtml(c.label) + '" style="width:220px;" />' +
-            '<button type="button" class="cta small-btn ac-edit-cat-save" data-id="' + c.id + '" data-slug="' + escHtml(c.slug) + '" data-position="' + c.position + '">Guardar</button>' +
-            '<button type="button" class="secondary small-btn ac-edit-cat-cancel" data-id="' + c.id + '">Cancelar</button>' +
-            '<span class="ac-edit-cat-status small muted"></span>' +
+        '<tr class="ac-edit-cat-row hidden" data-for-cat="' + kdbId + '">' +
+        '<td colspan="4" style="padding:.6rem 0;">' +
+          '<div style="display:flex;gap:.5rem;align-items:flex-start;flex-wrap:wrap;">' +
+            '<div style="display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:220px;">' +
+              '<input type="text" class="ac-edit-cat-label" placeholder="Nombre" value="' + escHtml(c.name) + '" />' +
+              '<textarea class="ac-edit-cat-desc" placeholder="Descripción (opcional)" rows="2" style="resize:vertical;">' + escHtml(c.description || '') + '</textarea>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:.3rem;">' +
+              '<label style="display:flex;align-items:center;gap:.4rem;font-size:.85rem;cursor:pointer;">' +
+                '<input type="checkbox" class="ac-edit-cat-visible"' + (c.visible ? ' checked' : '') + ' /> Visible en Moodle' +
+              '</label>' +
+              '<button type="button" class="cta small-btn ac-edit-cat-save" data-id="' + kdbId + '" data-slug="' + escHtml(kdbSlug) + '">Guardar</button>' +
+              '<button type="button" class="secondary small-btn ac-edit-cat-cancel" data-id="' + kdbId + '">Cancelar</button>' +
+              '<span class="ac-edit-cat-status small muted"></span>' +
+            '</div>' +
           '</div>' +
         '</td></tr>';
     });
@@ -2292,13 +2322,15 @@ let currentAdminUserId = null;
       btn.addEventListener('click', async function() {
         const editRow = tbody.querySelector('.ac-edit-cat-row[data-for-cat="' + btn.dataset.id + '"]');
         const label = editRow.querySelector('.ac-edit-cat-label').value.trim();
+        const description = editRow.querySelector('.ac-edit-cat-desc').value.trim();
+        const visible = editRow.querySelector('.ac-edit-cat-visible').checked;
         const status = editRow.querySelector('.ac-edit-cat-status');
         if (!label) { status.textContent = 'El nombre es requerido.'; return; }
         status.textContent = 'Guardando…';
         try {
           const res = await apiFetch('/api/courses/categories/' + btn.dataset.id, {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug: btn.dataset.slug, label, position: parseInt(btn.dataset.position) || 0 }),
+            body: JSON.stringify({ slug: btn.dataset.slug, label, description, visible, position: 0 }),
           });
           const data = await res.json().catch(function() { return {}; });
           if (!res.ok) { status.textContent = 'Error: ' + (data.error || res.status); return; }

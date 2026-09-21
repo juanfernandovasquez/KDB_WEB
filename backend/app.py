@@ -1616,6 +1616,8 @@ def api_update_course_category(cat_id):
     if not slug or not label:
         return jsonify(error="slug y label son requeridos"), 400
     position = int(data.get("position") or 0)
+    description = (data.get("description") or "").strip()
+    visible = data.get("visible")
     existing_cats = get_course_categories()
     existing = next((c for c in existing_cats if c["id"] == cat_id), None)
     moodle_cat_id = existing.get("moodle_category_id") if existing else None
@@ -1625,7 +1627,10 @@ def api_update_course_category(cat_id):
     if moodle_cat_id:
         try:
             from moodle_service import update_moodle_category
-            update_moodle_category(moodle_cat_id, label)
+            update_moodle_category(
+                moodle_cat_id, label, description=description,
+                visible=bool(visible) if visible is not None else None
+            )
         except Exception as m_exc:
             app.logger.warning("Moodle update_category failed: %s", m_exc)
     return jsonify(cat)
@@ -1818,11 +1823,16 @@ def api_admin_moodle_categories():
         result.append({
             "moodle_category_id": mc["id"],
             "name": mc.get("name", ""),
+            "description": mc.get("description", ""),
             "parent": mc.get("parent", 0),
+            "coursecount": mc.get("coursecount", 0),
+            "visible": bool(mc.get("visible", 1)),
+            "sortorder": mc.get("sortorder", 0),
             "linked": kdb_cat is not None,
             "kdb_id": kdb_cat["id"] if kdb_cat else None,
             "kdb_slug": kdb_cat["slug"] if kdb_cat else None,
         })
+    result.sort(key=lambda x: x["sortorder"])
     return jsonify(result)
 
 
