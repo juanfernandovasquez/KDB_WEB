@@ -1579,11 +1579,19 @@ def api_course_categories():
 @require_admin()
 def api_create_course_category():
     ensure_db()
+    import re as _re
     data = request.get_json(silent=True) or {}
-    slug = (data.get("slug") or "").strip().lower()
     label = (data.get("label") or "").strip()
-    if not slug or not label:
-        return jsonify(error="slug y label son requeridos"), 400
+    if not label:
+        return jsonify(error="label es requerido"), 400
+    slug = (data.get("slug") or "").strip().lower()
+    if not slug:
+        base_slug = _re.sub(r'[^a-z0-9]+', '-', label.lower()).strip('-') or "categoria"
+        existing_slugs = {c["slug"] for c in get_course_categories()}
+        slug, counter = base_slug, 0
+        while slug in existing_slugs:
+            counter += 1
+            slug = f"{base_slug}-{counter}"
     position = int(data.get("position") or 0)
     try:
         cat = create_course_category(slug, label, position)
@@ -1818,28 +1826,38 @@ def api_admin_moodle_categories():
     return jsonify(result)
 
 
-@app.route("/api/admin/moodle/categories/import", methods=["POST"])
+@app.route("/api/admin/moodle/categories/sync", methods=["POST"])
 @require_admin()
-def api_admin_moodle_import_category():
-    """Importa una categoría existente de Moodle a KDB (no la crea en Moodle)."""
+def api_admin_moodle_categories_sync():
+    """Auto-importa todas las categorías de Moodle que aún no tienen espejo local en KDB."""
     ensure_db()
-    data = request.get_json(silent=True) or {}
-    moodle_category_id = data.get("moodle_category_id")
-    name = (data.get("name") or "").strip()
-    if not moodle_category_id or not name:
-        return jsonify(error="moodle_category_id y name son requeridos"), 400
-    kdb_cats = get_course_categories()
-    if any(c.get("moodle_category_id") == moodle_category_id for c in kdb_cats):
-        return jsonify(error="Ya existe una categoría KDB vinculada a esta de Moodle"), 409
     import re as _re
-    base_slug = _re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-') or "categoria"
-    slug, counter = base_slug, 0
+    try:
+        from moodle_service import get_moodle_categories
+        moodle_cats = get_moodle_categories()
+    except Exception as exc:
+        return jsonify(error=str(exc)), 500
+    kdb_cats = get_course_categories()
+    linked_ids = {c["moodle_category_id"] for c in kdb_cats if c.get("moodle_category_id")}
     existing_slugs = {c["slug"] for c in kdb_cats}
-    while slug in existing_slugs:
-        counter += 1
-        slug = f"{base_slug}-{counter}"
-    cat = create_course_category(slug, name, len(kdb_cats), moodle_category_id=moodle_category_id)
-    return jsonify(cat), 201
+    imported = 0
+    for mc in moodle_cats:
+        mid = mc["id"]
+        if mid in linked_ids:
+            continue
+        name = mc.get("name", "").strip()
+        base_slug = _re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-') or "categoria"
+        slug, counter = base_slug, 0
+        while slug in existing_slugs:
+            counter += 1
+            slug = f"{base_slug}-{counter}"
+        try:
+            create_course_category(slug, name, len(kdb_cats), moodle_category_id=mid)
+            existing_slugs.add(slug)
+            imported += 1
+        except Exception as exc:
+            app.logger.warning("Auto-sync category '%s' failed: %s", name, exc)
+    return jsonify(imported=imported)
 
 
 # ─── Academia: Moodle course list & import ───────────────────────────────────

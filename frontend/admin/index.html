@@ -1860,27 +1860,19 @@
             <button type="button" class="collapse-btn" data-collapse-target="ac-categories-card-body">+</button>
           </div>
           <div class="collapsible-body collapsed" id="ac-categories-card-body">
-            <div class="grid-2" style="margin-bottom:0.75rem;">
-              <div>
-                <label>Etiqueta</label>
-                <input type="text" id="ac-new-cat-label" placeholder="Ej. Tributario" />
+            <div style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:1rem;flex-wrap:wrap;">
+              <div style="flex:1;min-width:180px;">
+                <label>Nombre de categoría</label>
+                <input type="text" id="ac-new-cat-label" placeholder="Ej. Derecho Tributario" />
               </div>
-              <div>
-                <label>Slug (clave interna)</label>
-                <input type="text" id="ac-new-cat-slug" placeholder="Ej. tributario" />
-              </div>
-            </div>
-            <div class="row" style="margin-bottom:1rem;">
-              <button type="button" class="cta small-btn" id="ac-add-cat-btn">+ Agregar categoría</button>
+              <button type="button" class="cta small-btn" id="ac-add-cat-btn" style="margin-bottom:2px;">+ Agregar categoría</button>
               <span class="status" id="ac-cat-status"></span>
             </div>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Etiqueta</th>
-                    <th>Slug</th>
-                    <th>Posición</th>
+                    <th>Nombre</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -2305,7 +2297,7 @@
     </div>
   </div>
   <script src="../js/config.js"></script>
-  <script type="module" src="./main.js?v=20260920d"></script>
+  <script type="module" src="./main.js?v=20260920e"></script>
   <script src="./katweb-admin.js?v=20260419"></script>
   <script>
     console.log("admin template loaded");
