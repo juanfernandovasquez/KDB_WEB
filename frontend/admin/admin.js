@@ -2698,7 +2698,7 @@ let currentAdminUserId = null;
           <td>S/ ${Number(s.total_paid || 0).toFixed(2)}</td>
           <td style="text-align:center;">${s.enrolled_count > 0 ? '<span class="badge-active">Sí</span>' : '<span class="badge-inactive">No</span>'}</td>
           <td>
-            <button type="button" class="secondary small-btn ac-student-detail-btn" data-email="${escHtml(s.student_email)}" data-name="${escHtml(s.student_name || '')}">Ver órdenes</button>
+            <button type="button" class="secondary small-btn ac-student-detail-btn" data-email="${escHtml(s.student_email)}" data-name="${escHtml(s.student_name || '')}">Ver detalle</button>
           </td>
         </tr>`).join('');
       tbody.querySelectorAll('.ac-student-detail-btn').forEach(btn => {
@@ -2712,10 +2712,14 @@ let currentAdminUserId = null;
   async function showStudentDetail(email, name) {
     const modal = q('ac-student-modal');
     const title = q('ac-student-modal-name');
+    const emailLabel = q('ac-student-modal-email');
     const tbody = q('ac-student-orders-body');
+    const etbody = q('ac-student-enrollments-body');
     if (!modal) return;
     title.textContent = name || email;
+    if (emailLabel) emailLabel.textContent = name ? email : '';
     tbody.innerHTML = '<tr><td colspan="9" class="muted small">Cargando…</td></tr>';
+    if (etbody) etbody.innerHTML = '<tr><td colspan="4" class="muted small">Cargando…</td></tr>';
     modal.classList.remove('hidden');
     try {
       const res = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/orders`);
@@ -2725,6 +2729,29 @@ let currentAdminUserId = null;
         const idx = _ordersCache.findIndex(c => c.id === o.id);
         if (idx >= 0) _ordersCache[idx] = o; else _ordersCache.push(o);
       });
+
+      // ── Cursos inscritos (deduplicado por course_id, más reciente primero) ──
+      if (etbody) {
+        const seen = new Set();
+        const enrolled = orders.filter(o => {
+          if (!o.moodle_enrolled) return false;
+          const key = o.course_id || o.course_title;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        if (!enrolled.length) {
+          etbody.innerHTML = '<tr><td colspan="4" class="muted small">Sin cursos inscritos en Moodle.</td></tr>';
+        } else {
+          etbody.innerHTML = enrolled.map(o => `<tr>
+            <td><strong>${escHtml(o.course_title || '—')}</strong></td>
+            <td><small>${escHtml((o.moodle_enrolled_at || o.created_at || '').slice(0, 10))}</small></td>
+            <td><span class="badge-active">Matriculado</span></td>
+            <td><small class="muted">ORD-${String(o.id).padStart(4, '0')}</small></td>
+          </tr>`).join('');
+        }
+      }
+
       if (!orders.length) {
         tbody.innerHTML = '<tr><td colspan="9" class="muted small">Sin órdenes.</td></tr>';
         return;
