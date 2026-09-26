@@ -2087,6 +2087,50 @@ def api_admin_student_orders(email):
     return jsonify(fetch_student_orders(email))
 
 
+@app.route("/api/admin/students/<path:email>/enroll", methods=["POST"])
+@require_admin()
+def api_admin_student_enroll(email):
+    """Matricula manualmente a un alumno en un curso desde el panel admin."""
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    course_id = data.get("course_id")
+    if not course_id:
+        return jsonify(error="course_id requerido"), 400
+
+    course = fetch_course_by_id(int(course_id))
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+
+    moodle_course_id = course.get("moodle_course_id")
+    if not moodle_course_id:
+        return jsonify(error="El curso no tiene moodle_course_id configurado"), 400
+
+    existing = fetch_student_orders(email)
+    already = any(
+        o.get("course_id") == int(course_id) and o.get("moodle_enrolled")
+        for o in existing
+    )
+    if already:
+        return jsonify(error="El alumno ya está inscrito en este curso"), 409
+
+    student_name = data.get("student_name") or (existing[0].get("student_name", "") if existing else "")
+
+    order_id = create_order({
+        "course_id": int(course_id),
+        "course_title": course.get("title", ""),
+        "student_name": student_name,
+        "student_email": email,
+        "amount": 0,
+        "notes": "Matrícula manual desde panel admin",
+    })
+    update_order_status(order_id, "paid")
+
+    import threading
+    threading.Thread(target=_provision_moodle_and_notify, args=(order_id,), daemon=True).start()
+
+    return jsonify(message="Matriculando en Moodle...", order_id=order_id), 202
+
+
 # ─── Academia: Voucher upload presign (público) ───────────────────────────────
 
 @app.route("/api/checkout/voucher-presign", methods=["POST"])

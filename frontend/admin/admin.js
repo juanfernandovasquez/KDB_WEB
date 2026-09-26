@@ -2741,14 +2741,73 @@ let currentAdminUserId = null;
           return true;
         });
         if (!enrolled.length) {
-          etbody.innerHTML = '<tr><td colspan="4" class="muted small">Sin cursos inscritos en Moodle.</td></tr>';
+          etbody.innerHTML = '<tr><td colspan="5" class="muted small">Sin cursos inscritos en Moodle.</td></tr>';
         } else {
           etbody.innerHTML = enrolled.map(o => `<tr>
             <td><strong>${escHtml(o.course_title || '—')}</strong></td>
             <td><small>${escHtml((o.moodle_enrolled_at || o.created_at || '').slice(0, 10))}</small></td>
             <td><span class="badge-active">Matriculado</span></td>
             <td><small class="muted">ORD-${String(o.id).padStart(4, '0')}</small></td>
+            <td><button type="button" class="danger small-btn ac-unenroll-btn" data-order-id="${o.id}" data-course="${escHtml(o.course_title || '')}">Dar de baja</button></td>
           </tr>`).join('');
+          etbody.querySelectorAll('.ac-unenroll-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              if (!confirm(`¿Dar de baja a ${name || email} del curso "${btn.dataset.course}"?\n\nEsto lo desmatriculará de Moodle.`)) return;
+              btn.disabled = true; btn.textContent = '…';
+              const r = await apiFetch(`/api/admin/orders/${btn.dataset.orderId}/unenroll`, { method: 'POST' });
+              if (r.ok) { await showStudentDetail(email, name); }
+              else { const d = await r.json().catch(() => ({})); alert(d.error || 'Error al dar de baja.'); btn.disabled = false; btn.textContent = 'Dar de baja'; }
+            });
+          });
+        }
+      }
+
+      // ── Formulario inscribir en curso ──
+      const enrollToggle = q('ac-enroll-toggle');
+      const enrollForm = q('ac-enroll-form');
+      const enrollSelect = q('ac-enroll-course-select');
+      const enrollSubmit = q('ac-enroll-submit');
+      const enrollStatus = q('ac-enroll-status');
+      if (enrollToggle && enrollForm) {
+        enrollForm.style.display = 'none';
+        enrollToggle.onclick = () => {
+          const open = enrollForm.style.display !== 'none' && enrollForm.style.display !== '';
+          enrollForm.style.display = open ? 'none' : 'flex';
+        };
+        // Populate courses select
+        if (enrollSelect && enrollSelect.options.length <= 1) {
+          try {
+            const cr = await apiFetch('/api/admin/courses');
+            const courses = await cr.json().catch(() => []);
+            courses.filter(c => c.moodle_course_id).forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c.id;
+              opt.textContent = c.title;
+              enrollSelect.appendChild(opt);
+            });
+          } catch {}
+        }
+        if (enrollSubmit) {
+          enrollSubmit.onclick = async () => {
+            const courseId = enrollSelect?.value;
+            if (!courseId) { if (enrollStatus) enrollStatus.textContent = 'Selecciona un curso.'; return; }
+            enrollSubmit.disabled = true;
+            if (enrollStatus) enrollStatus.textContent = 'Matriculando…';
+            const r = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/enroll`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ course_id: parseInt(courseId) }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (r.ok) {
+              if (enrollStatus) enrollStatus.textContent = '¡Matriculado! Actualizando…';
+              enrollForm.style.display = 'none';
+              setTimeout(() => showStudentDetail(email, name), 2000);
+            } else {
+              if (enrollStatus) enrollStatus.textContent = d.error || 'Error al matricular.';
+              enrollSubmit.disabled = false;
+            }
+          };
         }
       }
 
