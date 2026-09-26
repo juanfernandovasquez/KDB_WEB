@@ -2615,7 +2615,7 @@ let currentAdminUserId = null;
       _ordersCache = Array.isArray(orders) ? orders : [];
       ordCount.textContent = _ordersCache.length;
       if (!_ordersCache.length) {
-        ordTbody.innerHTML = '<tr><td colspan="7" class="muted small">Sin órdenes aún.</td></tr>';
+        ordTbody.innerHTML = '<tr><td colspan="8" class="muted small">Sin órdenes aún.</td></tr>';
       } else {
         ordTbody.innerHTML = _ordersCache.map(o => {
           const d = new Date(o.created_at + 'Z').toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'2-digit' });
@@ -2642,12 +2642,24 @@ let currentAdminUserId = null;
             <td>${voucherCell}</td>
             <td>${(o.comprobante_type === 'factura' ? 'Factura' : 'Boleta')}<br>${compNumBadge}</td>
             <td>${paidBadge}<br>${moodleBadge}</td>
-            <td><button class="secondary small-btn ac-ord-manage" data-id="${o.id}">⚙ Gestionar</button></td>
+            <td style="display:flex;gap:.35rem;align-items:center;">
+              <button class="secondary small-btn ac-ord-manage" data-id="${o.id}">⚙ Gestionar</button>
+              <button class="danger small-btn ac-ord-delete" data-id="${o.id}" data-ref="${escHtml(ordRef)}" title="Eliminar orden">✕</button>
+            </td>
           </tr>`;
         }).join('');
 
         ordTbody.querySelectorAll('.ac-ord-manage').forEach(btn => {
           btn.addEventListener('click', () => openManageModal(Number(btn.dataset.id)));
+        });
+
+        ordTbody.querySelectorAll('.ac-ord-delete').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm(`¿Eliminar la orden ${btn.dataset.ref}?\n\nEsta acción no se puede deshacer.`)) return;
+            const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, { method: 'DELETE' });
+            if (res.ok) { await loadAcademiaAdmin(); }
+            else { const d = await res.json().catch(() => ({})); alert(d.error || 'Error al eliminar.'); }
+          });
         });
       }
     } catch {
