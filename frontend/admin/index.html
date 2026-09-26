@@ -2121,7 +2121,10 @@
         <div class="card" id="ac-students-card">
           <div class="card-head between">
             <h3>Alumnos (<span id="ac-students-count">0</span>)</h3>
-            <button type="button" class="collapse-btn" data-collapse-target="ac-students-wrap">+</button>
+            <div style="display:flex;gap:.5rem;align-items:center;">
+              <button type="button" class="cta small-btn" id="ac-new-student-btn">+ Nuevo alumno</button>
+              <button type="button" class="collapse-btn" data-collapse-target="ac-students-wrap">+</button>
+            </div>
           </div>
           <div class="collapsible-body collapsed" id="ac-students-wrap">
             <div class="table-responsive">
@@ -2140,6 +2143,38 @@
                 <tbody id="ac-students-body"></tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- Nuevo alumno modal -->
+        <div class="modal-overlay hidden" id="ac-new-student-modal" role="dialog" aria-modal="true">
+          <div class="modal-box" style="max-width:480px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
+              <h3 style="margin:0;font-size:1.05rem;">Nuevo alumno</h3>
+              <button type="button" class="modal-close-x" id="ac-new-student-close" aria-label="Cerrar">✕</button>
+            </div>
+            <form id="ac-new-student-form" autocomplete="off">
+              <div style="display:flex;flex-direction:column;gap:.85rem;">
+                <div>
+                  <label class="form-label" style="display:block;margin-bottom:.3rem;font-size:.82rem;">Nombre completo <span style="color:red">*</span></label>
+                  <input type="text" id="ns-name" placeholder="Ej. María García" required style="width:100%;box-sizing:border-box;" autocomplete="off">
+                </div>
+                <div>
+                  <label class="form-label" style="display:block;margin-bottom:.3rem;font-size:.82rem;">Email <span style="color:red">*</span></label>
+                  <input type="email" id="ns-email" placeholder="alumno@email.com" required style="width:100%;box-sizing:border-box;" autocomplete="off">
+                </div>
+                <div>
+                  <label class="form-label" style="display:block;margin-bottom:.3rem;font-size:.82rem;">Curso a matricular <span style="color:red">*</span></label>
+                  <select id="ns-course" required style="width:100%;box-sizing:border-box;padding:.5rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.9rem;">
+                    <option value="">— Seleccionar curso —</option>
+                  </select>
+                </div>
+                <div style="display:flex;gap:.5rem;align-items:center;padding-top:.25rem;">
+                  <button type="submit" class="cta" id="ns-submit">Crear y matricular</button>
+                  <span class="small muted" id="ns-status"></span>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
 

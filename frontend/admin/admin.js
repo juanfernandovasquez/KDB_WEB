@@ -5685,6 +5685,58 @@ let currentAdminUserId = null;
     bind("contact-modal-backdrop", closeContactModal);
     bind("ac-student-modal-close", () => q("ac-student-modal")?.classList.add("hidden"));
     q("ac-student-modal")?.addEventListener("click", e => { if (e.target === q("ac-student-modal")) q("ac-student-modal").classList.add("hidden"); });
+
+    // ── Nuevo alumno modal ────────────────────────────────────────────
+    bind("ac-new-student-btn", async () => {
+      const modal = q("ac-new-student-modal");
+      if (!modal) return;
+      // Populate course select if empty
+      const sel = q("ns-course");
+      if (sel && sel.options.length <= 1) {
+        try {
+          const cr = await apiFetch('/api/admin/courses');
+          const courses = await cr.json().catch(() => []);
+          courses.filter(c => c.moodle_course_id).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.title;
+            sel.appendChild(opt);
+          });
+        } catch {}
+      }
+      // Reset form
+      q("ac-new-student-form")?.reset();
+      if (q("ns-status")) q("ns-status").textContent = '';
+      if (q("ns-submit")) q("ns-submit").disabled = false;
+      modal.classList.remove("hidden");
+    });
+    bind("ac-new-student-close", () => q("ac-new-student-modal")?.classList.add("hidden"));
+    q("ac-new-student-modal")?.addEventListener("click", e => { if (e.target === q("ac-new-student-modal")) q("ac-new-student-modal").classList.add("hidden"); });
+    q("ac-new-student-form")?.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const name = (document.getElementById("ns-name")?.value || "").trim();
+      const email = (document.getElementById("ns-email")?.value || "").trim();
+      const courseId = document.getElementById("ns-course")?.value;
+      if (!name || !email || !courseId) { if (q("ns-status")) q("ns-status").textContent = "Completa todos los campos."; return; }
+      const btn = q("ns-submit");
+      const status = q("ns-status");
+      btn.disabled = true;
+      status.textContent = "Matriculando…";
+      const r = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/enroll`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ course_id: parseInt(courseId), student_name: name }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        status.textContent = "¡Listo! El alumno recibirá sus credenciales por email.";
+        await loadAcademiaAdmin();
+        setTimeout(() => q("ac-new-student-modal")?.classList.add("hidden"), 2500);
+      } else {
+        status.textContent = d.error || "Error al matricular.";
+        btn.disabled = false;
+      }
+    });
     bind("media-modal-close", closeMediaModal);
     bind("media-modal-backdrop", closeMediaModal);
     bind("media-refresh", () => loadMediaLibrary());
