@@ -2792,19 +2792,22 @@ let currentAdminUserId = null;
             const courseId = enrollSelect?.value;
             if (!courseId) { if (enrollStatus) enrollStatus.textContent = 'Selecciona un curso.'; return; }
             enrollSubmit.disabled = true;
-            if (enrollStatus) enrollStatus.textContent = 'Matriculando…';
-            const r = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/enroll`, {
+            if (enrollStatus) enrollStatus.textContent = 'Creando orden…';
+            const r = await apiFetch('/api/admin/orders', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ course_id: parseInt(courseId) }),
+              body: JSON.stringify({ course_id: parseInt(courseId), student_name: name, student_email: email }),
             });
-            const d = await r.json().catch(() => ({}));
-            if (r.ok) {
-              if (enrollStatus) enrollStatus.textContent = '¡Matriculado! Actualizando…';
+            const order = await r.json().catch(() => ({}));
+            if (r.ok && order.id) {
               enrollForm.style.display = 'none';
-              setTimeout(() => showStudentDetail(email, name), 2000);
+              modal.classList.add('hidden');
+              const idx = _ordersCache.findIndex(c => c.id === order.id);
+              if (idx >= 0) _ordersCache[idx] = order; else _ordersCache.push(order);
+              await loadAcademiaAdmin();
+              openManageModal(order.id);
             } else {
-              if (enrollStatus) enrollStatus.textContent = d.error || 'Error al matricular.';
+              if (enrollStatus) enrollStatus.textContent = order.error || 'Error al crear la orden.';
               enrollSubmit.disabled = false;
             }
           };
@@ -5717,23 +5720,36 @@ let currentAdminUserId = null;
       const name = (document.getElementById("ns-name")?.value || "").trim();
       const email = (document.getElementById("ns-email")?.value || "").trim();
       const courseId = document.getElementById("ns-course")?.value;
-      if (!name || !email || !courseId) { if (q("ns-status")) q("ns-status").textContent = "Completa todos los campos."; return; }
+      if (!name || !email || !courseId) { if (q("ns-status")) q("ns-status").textContent = "Completa los campos obligatorios."; return; }
       const btn = q("ns-submit");
       const status = q("ns-status");
       btn.disabled = true;
-      status.textContent = "Matriculando…";
-      const r = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/enroll`, {
+      status.textContent = "Creando orden…";
+      const r = await apiFetch("/api/admin/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ course_id: parseInt(courseId), student_name: name }),
+        body: JSON.stringify({
+          course_id: parseInt(courseId),
+          student_name: name,
+          student_email: email,
+          amount: parseFloat(document.getElementById("ns-amount")?.value || "0") || 0,
+          payment_method: document.getElementById("ns-payment-method")?.value || "transferencia",
+          comprobante_type: document.getElementById("ns-comp-type")?.value || "boleta",
+          taxpayer_id: (document.getElementById("ns-taxpayer-id")?.value || "").trim() || null,
+          taxpayer_name: (document.getElementById("ns-taxpayer-name")?.value || "").trim() || null,
+          notes: (document.getElementById("ns-notes")?.value || "").trim() || null,
+        }),
       });
-      const d = await r.json().catch(() => ({}));
-      if (r.ok) {
-        status.textContent = "¡Listo! El alumno recibirá sus credenciales por email.";
+      const order = await r.json().catch(() => ({}));
+      if (r.ok && order.id) {
+        q("ac-new-student-modal")?.classList.add("hidden");
+        // Merge into cache and open manage modal
+        const idx = _ordersCache.findIndex(c => c.id === order.id);
+        if (idx >= 0) _ordersCache[idx] = order; else _ordersCache.push(order);
         await loadAcademiaAdmin();
-        setTimeout(() => q("ac-new-student-modal")?.classList.add("hidden"), 2500);
+        openManageModal(order.id);
       } else {
-        status.textContent = d.error || "Error al matricular.";
+        status.textContent = order.error || "Error al crear la orden.";
         btn.disabled = false;
       }
     });

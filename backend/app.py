@@ -2090,7 +2090,7 @@ def api_admin_student_orders(email):
 @app.route("/api/admin/students/<path:email>/enroll", methods=["POST"])
 @require_admin()
 def api_admin_student_enroll(email):
-    """Matricula manualmente a un alumno en un curso desde el panel admin."""
+    """Crea una orden pendiente para un alumno en un curso (sin auto-provisionar Moodle)."""
     ensure_db()
     data = request.get_json(silent=True) or {}
     course_id = data.get("course_id")
@@ -2101,18 +2101,7 @@ def api_admin_student_enroll(email):
     if not course:
         return jsonify(error="Curso no encontrado"), 404
 
-    moodle_course_id = course.get("moodle_course_id")
-    if not moodle_course_id:
-        return jsonify(error="El curso no tiene moodle_course_id configurado"), 400
-
     existing = fetch_student_orders(email)
-    already = any(
-        o.get("course_id") == int(course_id) and o.get("moodle_enrolled")
-        for o in existing
-    )
-    if already:
-        return jsonify(error="El alumno ya está inscrito en este curso"), 409
-
     student_name = data.get("student_name") or (existing[0].get("student_name", "") if existing else "")
 
     order_id = create_order({
@@ -2120,15 +2109,14 @@ def api_admin_student_enroll(email):
         "course_title": course.get("title", ""),
         "student_name": student_name,
         "student_email": email,
-        "amount": 0,
-        "notes": "Matrícula manual desde panel admin",
+        "amount": data.get("amount", 0),
+        "comprobante_type": data.get("comprobante_type", "boleta"),
+        "taxpayer_id": data.get("taxpayer_id"),
+        "taxpayer_name": data.get("taxpayer_name"),
+        "payment_method": data.get("payment_method", "transferencia"),
+        "notes": data.get("notes") or "Orden creada manualmente desde panel admin",
     })
-    update_order_status(order_id, "paid")
-
-    import threading
-    threading.Thread(target=_provision_moodle_and_notify, args=(order_id,), daemon=True).start()
-
-    return jsonify(message="Matriculando en Moodle...", order_id=order_id), 202
+    return jsonify(order_id=order_id), 201
 
 
 # ─── Academia: Voucher upload presign (público) ───────────────────────────────
@@ -2600,6 +2588,38 @@ def api_admin_orders():
     status = request.args.get("status") or None
     orders = fetch_orders(status=status)
     return jsonify(orders)
+
+
+@app.route("/api/admin/orders", methods=["POST"])
+@require_admin()
+def api_admin_create_order():
+    """Crea una orden manualmente desde el panel admin (sin pago previo ni Moodle)."""
+    ensure_db()
+    data = request.get_json(silent=True) or {}
+    course_id = data.get("course_id")
+    student_email = (data.get("student_email") or "").strip()
+    student_name = (data.get("student_name") or "").strip()
+    if not course_id or not student_email or not student_name:
+        return jsonify(error="course_id, student_email y student_name son requeridos"), 400
+
+    course = fetch_course_by_id(int(course_id))
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+
+    order_id = create_order({
+        "course_id": int(course_id),
+        "course_title": course.get("title", ""),
+        "student_name": student_name,
+        "student_email": student_email,
+        "amount": data.get("amount", 0),
+        "comprobante_type": data.get("comprobante_type", "boleta"),
+        "taxpayer_id": data.get("taxpayer_id") or None,
+        "taxpayer_name": data.get("taxpayer_name") or None,
+        "payment_method": data.get("payment_method", "transferencia"),
+        "notes": data.get("notes") or "Orden creada manualmente desde panel admin",
+    })
+    order = fetch_order_by_id(order_id)
+    return jsonify(order), 201
 
 
 @app.route("/api/admin/orders/<int:order_id>", methods=["PUT"])

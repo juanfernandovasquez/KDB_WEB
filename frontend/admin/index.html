@@ -2148,29 +2148,80 @@
 
         <!-- Nuevo alumno modal -->
         <div class="modal-overlay hidden" id="ac-new-student-modal" role="dialog" aria-modal="true">
-          <div class="modal-box" style="max-width:480px;">
+          <div class="modal-box" style="max-width:560px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
-              <h3 style="margin:0;font-size:1.05rem;">Nuevo alumno</h3>
+              <div>
+                <h3 style="margin:0;font-size:1.05rem;">Nueva orden manual</h3>
+                <p class="small muted" style="margin:.15rem 0 0;">El alumno y la orden quedan pendientes. Desde la gestión puedes confirmar pago y enviar acceso a Moodle.</p>
+              </div>
               <button type="button" class="modal-close-x" id="ac-new-student-close" aria-label="Cerrar">✕</button>
             </div>
             <form id="ac-new-student-form" autocomplete="off">
-              <div style="display:flex;flex-direction:column;gap:.85rem;">
-                <div>
-                  <label class="form-label" style="display:block;margin-bottom:.3rem;font-size:.82rem;">Nombre completo <span style="color:red">*</span></label>
-                  <input type="text" id="ns-name" placeholder="Ej. María García" required style="width:100%;box-sizing:border-box;" autocomplete="off">
+              <div style="display:flex;flex-direction:column;gap:.8rem;">
+
+                <p class="small" style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0;">Datos del alumno</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+                  <div>
+                    <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Nombre completo <span style="color:red">*</span></label>
+                    <input type="text" id="ns-name" placeholder="Ej. María García" required style="width:100%;box-sizing:border-box;" autocomplete="off">
+                  </div>
+                  <div>
+                    <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Email <span style="color:red">*</span></label>
+                    <input type="email" id="ns-email" placeholder="alumno@email.com" required style="width:100%;box-sizing:border-box;" autocomplete="off">
+                  </div>
                 </div>
+
+                <p class="small" style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:.2rem 0 0;">Curso y pago</p>
                 <div>
-                  <label class="form-label" style="display:block;margin-bottom:.3rem;font-size:.82rem;">Email <span style="color:red">*</span></label>
-                  <input type="email" id="ns-email" placeholder="alumno@email.com" required style="width:100%;box-sizing:border-box;" autocomplete="off">
-                </div>
-                <div>
-                  <label class="form-label" style="display:block;margin-bottom:.3rem;font-size:.82rem;">Curso a matricular <span style="color:red">*</span></label>
-                  <select id="ns-course" required style="width:100%;box-sizing:border-box;padding:.5rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.9rem;">
+                  <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Curso <span style="color:red">*</span></label>
+                  <select id="ns-course" required style="width:100%;box-sizing:border-box;padding:.45rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.88rem;">
                     <option value="">— Seleccionar curso —</option>
                   </select>
                 </div>
-                <div style="display:flex;gap:.5rem;align-items:center;padding-top:.25rem;">
-                  <button type="submit" class="cta" id="ns-submit">Crear y matricular</button>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+                  <div>
+                    <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Monto (S/)</label>
+                    <input type="number" id="ns-amount" placeholder="0.00" min="0" step="0.01" style="width:100%;box-sizing:border-box;" autocomplete="off">
+                  </div>
+                  <div>
+                    <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Método de pago</label>
+                    <select id="ns-payment-method" style="width:100%;box-sizing:border-box;padding:.45rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.88rem;">
+                      <option value="transferencia">Transferencia</option>
+                      <option value="yape">Yape</option>
+                      <option value="plin">Plin</option>
+                      <option value="efectivo">Efectivo</option>
+                      <option value="tarjeta">Tarjeta</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+
+                <p class="small" style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:.2rem 0 0;">Comprobante</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+                  <div>
+                    <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Tipo</label>
+                    <select id="ns-comp-type" style="width:100%;box-sizing:border-box;padding:.45rem .65rem;border:1px solid var(--border);border-radius:6px;font-size:.88rem;">
+                      <option value="boleta">Boleta</option>
+                      <option value="factura">Factura</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">RUC / DNI del contribuyente</label>
+                    <input type="text" id="ns-taxpayer-id" placeholder="20123456789" style="width:100%;box-sizing:border-box;" autocomplete="off">
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Razón social / Nombre del contribuyente</label>
+                  <input type="text" id="ns-taxpayer-name" placeholder="Empresa S.A.C. o nombre completo" style="width:100%;box-sizing:border-box;" autocomplete="off">
+                </div>
+
+                <div>
+                  <label class="form-label" style="display:block;margin-bottom:.25rem;font-size:.8rem;">Notas internas</label>
+                  <textarea id="ns-notes" rows="2" placeholder="Ej: Inscripción por referido, pago en cuotas..." style="width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+                </div>
+
+                <div style="display:flex;gap:.5rem;align-items:center;padding-top:.1rem;">
+                  <button type="submit" class="cta" id="ns-submit">Crear orden</button>
                   <span class="small muted" id="ns-status"></span>
                 </div>
               </div>
