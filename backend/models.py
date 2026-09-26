@@ -1078,6 +1078,23 @@ def fetch_course_by_id(course_id):
     return course
 
 
+def _resolve_category(conn, payload):
+    """Derives (category_slug, category_id) from payload, resolving whichever is missing."""
+    cat_id = payload.get("category_id")
+    cat_slug = payload.get("category")
+
+    if cat_id:
+        cat_id = int(cat_id)
+        if not cat_slug:
+            row = conn.execute("SELECT slug FROM course_categories WHERE id = ?", (cat_id,)).fetchone()
+            cat_slug = row["slug"] if row else None
+    elif cat_slug:
+        row = conn.execute("SELECT id FROM course_categories WHERE slug = ?", (cat_slug,)).fetchone()
+        cat_id = row["id"] if row else None
+
+    return cat_slug, cat_id
+
+
 def save_course(payload, course_id=None):
     now = datetime.utcnow().isoformat()
 
@@ -1090,12 +1107,13 @@ def save_course(payload, course_id=None):
         return json.dumps([])
 
     conn = get_conn()
+    cat_slug, cat_id = _resolve_category(conn, payload)
     with conn:
         if course_id:
             conn.execute(
                 """
                 UPDATE courses SET
-                  slug=?, title=?, subtitle=?, description=?, category=?,
+                  slug=?, title=?, subtitle=?, description=?, category=?, category_id=?,
                   price=?, original_price=?, image_url=?, duration=?,
                   modules_count=?, lessons_count=?, level=?, is_published=?,
                   position=?, moodle_course_id=?, moodle_visible=?,
@@ -1108,7 +1126,8 @@ def save_course(payload, course_id=None):
                     payload.get("title"),
                     payload.get("subtitle"),
                     payload.get("description"),
-                    payload.get("category"),
+                    cat_slug,
+                    cat_id,
                     payload.get("price", 0),
                     payload.get("original_price"),
                     payload.get("image_url"),
@@ -1133,20 +1152,21 @@ def save_course(payload, course_id=None):
         else:
             cur = conn.execute(
                 """
-                INSERT INTO courses (slug, title, subtitle, description, category,
+                INSERT INTO courses (slug, title, subtitle, description, category, category_id,
                   price, original_price, image_url, duration,
                   modules_count, lessons_count, level, is_published,
                   position, moodle_course_id, moodle_visible,
                   what_you_learn, includes_list, audience, instructors,
                   video_url, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload.get("slug"),
                     payload.get("title"),
                     payload.get("subtitle"),
                     payload.get("description"),
-                    payload.get("category"),
+                    cat_slug,
+                    cat_id,
                     payload.get("price", 0),
                     payload.get("original_price"),
                     payload.get("image_url"),
@@ -1197,6 +1217,13 @@ def delete_course(course_id):
     conn = get_conn()
     with conn:
         conn.execute("DELETE FROM courses WHERE id = ?", (course_id,))
+    conn.close()
+
+
+def delete_order(order_id):
+    conn = get_conn()
+    with conn:
+        conn.execute("DELETE FROM orders WHERE id = ?", (order_id,))
     conn.close()
 
 
@@ -1320,7 +1347,7 @@ def admin_update_order(order_id, data):
         "status", "gateway_ref", "notes",
         "comprobante_number", "comprobante_issued_at",
         "moodle_enrolled", "moodle_enrolled_at", "moodle_user_email", "moodle_user_id",
-        "payment_method", "operation_number", "voucher_url", "comprobante_url",
+        "payment_method", "operation_number", "voucher_url", "comprobante_url", "xml_url",
     }
     sets = []
     params = []

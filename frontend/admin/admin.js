@@ -2235,7 +2235,7 @@ let currentAdminUserId = null;
     if (sel) {
       const current = sel.value;
       sel.innerHTML = _courseCategoriesCache.map(function(c) {
-        return '<option value="' + escHtml(c.slug) + '">' + escHtml(c.label) + '</option>';
+        return '<option value="' + c.id + '">' + escHtml(c.label) + '</option>';
       }).join('');
       if (current && [...sel.options].some(function(o) { return o.value === current; })) {
         sel.value = current;
@@ -2397,7 +2397,7 @@ let currentAdminUserId = null;
     q('ac-description').value = course?.description || '';
     const _catSel = q('ac-category');
     if (_catSel) {
-      const _catVal = course?.category || '';
+      const _catVal = course?.category_id ? String(course.category_id) : '';
       _catSel.value = _catVal;
       if (_catVal && _catSel.value !== _catVal && _catSel.options.length) _catSel.selectedIndex = 0;
     }
@@ -2473,7 +2473,7 @@ let currentAdminUserId = null;
       slug,
       subtitle: q('ac-subtitle').value.trim(),
       description: q('ac-description').value.trim(),
-      category: q('ac-category').value,
+      category_id: parseInt(q('ac-category').value) || null,
       price: parseFloat(q('ac-price').value) || 0,
       original_price: parseFloat(q('ac-original-price').value) || null,
       image_url: q('ac-image-url').value.trim() || null,
@@ -2559,7 +2559,10 @@ let currentAdminUserId = null;
         tbody.innerHTML = '<tr><td colspan="5" class="muted small">Sin cursos. Haz clic en "+ Nuevo curso" para crear el primero.</td></tr>';
       } else {
         tbody.innerHTML = courses.map(c => {
-          const catLabel = _courseCategoriesCache.find(cat => cat.slug === c.category)?.label || c.category || '—';
+          const catLabel = (c.category_id
+            ? _courseCategoriesCache.find(cat => cat.id === c.category_id)?.label
+            : _courseCategoriesCache.find(cat => cat.slug === c.category)?.label)
+            || c.category || '—';
           const moodleTag = c.moodle_course_id
             ? `<a href="https://cursos.katarzyna.pe/course/view.php?id=${c.moodle_course_id}" target="_blank" class="status-tag tag-success" style="margin-left:.35rem;font-size:.72rem;text-decoration:none;">Moodle #${c.moodle_course_id} ↗</a>`
             : `<span class="status-tag tag-pending" style="margin-left:.35rem;font-size:.72rem;">Sin vincular</span>`;
@@ -2700,7 +2703,7 @@ let currentAdminUserId = null;
     const tbody = q('ac-student-orders-body');
     if (!modal) return;
     title.textContent = name || email;
-    tbody.innerHTML = '<tr><td colspan="8" class="muted small">Cargando…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="muted small">Cargando…</td></tr>';
     modal.classList.remove('hidden');
     try {
       const res = await apiFetch(`/api/admin/students/${encodeURIComponent(email)}/orders`);
@@ -2711,7 +2714,7 @@ let currentAdminUserId = null;
         if (idx >= 0) _ordersCache[idx] = o; else _ordersCache.push(o);
       });
       if (!orders.length) {
-        tbody.innerHTML = '<tr><td colspan="8" class="muted small">Sin órdenes.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="muted small">Sin órdenes.</td></tr>';
         return;
       }
       const compLabel = t => t === 'factura' ? 'Factura' : 'Boleta';
@@ -2733,6 +2736,7 @@ let currentAdminUserId = null;
           <td>${o.moodle_enrolled ? '<span class="badge-active">Matriculado</span>' : '<span class="badge-inactive">No</span>'}</td>
           <td>${o.notes ? `<span class="small muted" title="${escHtml(o.notes)}">📝</span>` : ''}</td>
           <td><button type="button" class="secondary small-btn ac-stud-ord-manage" data-id="${o.id}">⚙ Gestionar</button></td>
+          <td><button type="button" class="danger small-btn ac-stud-ord-delete" data-id="${o.id}" title="Eliminar orden">✕</button></td>
         </tr>`;
       }).join('');
       tbody.querySelectorAll('.ac-stud-ord-manage').forEach(btn => {
@@ -2741,8 +2745,16 @@ let currentAdminUserId = null;
           openManageModal(Number(btn.dataset.id));
         });
       });
+      tbody.querySelectorAll('.ac-stud-ord-delete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`¿Eliminar la orden ORD-${String(btn.dataset.id).padStart(4,'0')}?\n\nEsta acción no se puede deshacer.`)) return;
+          const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, { method: 'DELETE' });
+          if (res.ok) { await showStudentDetail(email, name); await loadAcademiaAdmin(); }
+          else { const d = await res.json().catch(() => ({})); alert(d.error || 'Error al eliminar.'); }
+        });
+      });
     } catch {
-      tbody.innerHTML = '<tr><td colspan="8" class="muted small">Error al cargar.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="muted small">Error al cargar.</td></tr>';
     }
   }
 
@@ -2827,6 +2839,24 @@ let currentAdminUserId = null;
     q('mgmt-req-voucher').textContent = '📩 Solicitar al alumno';
     q('mgmt-req-voucher').disabled = false;
     q('mgmt-req-voucher').style.display = '';
+
+    // XML SUNAT section
+    const xmlCur = q('mgmt-xml-current');
+    if (xmlCur) {
+      xmlCur.innerHTML = o.xml_url
+        ? `<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;"><a href="${escHtml(o.xml_url)}" target="_blank" class="voucher-link small">📄 Ver XML cargado</a><button type="button" class="link-btn danger small" id="mgmt-xml-delete">✕ Quitar</button></div>`
+        : '<span class="small muted">Sin XML cargado</span>';
+      const xmlDel = document.getElementById('mgmt-xml-delete');
+      if (xmlDel) xmlDel.addEventListener('click', async () => {
+        const res = await mgmtApiCall(`/api/admin/orders/${_managedOrderId}`, { xml_url: null });
+        if (res.ok) { q('mgmt-xml-status').textContent = '✓ XML eliminado.'; await mgmtRefresh(); }
+        else q('mgmt-xml-status').textContent = 'Error al eliminar.';
+      });
+    }
+    const sendXmlBtn = q('mgmt-send-xml-pdf');
+    if (sendXmlBtn) sendXmlBtn.style.display = o.xml_url ? '' : 'none';
+    if (q('mgmt-xml-file')) q('mgmt-xml-file').value = '';
+    if (q('mgmt-xml-status')) q('mgmt-xml-status').textContent = '';
 
     // Comprobante section
     q('mgmt-comp-type').textContent = o.comprobante_type === 'factura' ? 'Factura' : 'Boleta';
@@ -2917,6 +2947,28 @@ let currentAdminUserId = null;
         return;
       }
       statusEl.textContent = '✓ Documento guardado.';
+      setTimeout(() => mgmtRefresh(), 1000);
+    } catch (err) {
+      statusEl.textContent = `Error: ${err.message}`;
+    }
+  }
+
+  async function uploadMgmtXml(file) {
+    const id = _managedOrderId;
+    const statusEl = q('mgmt-xml-status');
+    if (file.size > 5 * 1024 * 1024) { statusEl.textContent = 'Archivo demasiado grande (máx 5 MB).'; return; }
+    if (!file.name.toLowerCase().endsWith('.xml')) { statusEl.textContent = 'Solo se permiten archivos .xml'; return; }
+    statusEl.textContent = 'Subiendo XML…';
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await apiFetch(`/api/admin/orders/${id}/xml-upload`, { method: 'POST', body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        statusEl.textContent = `Error: ${err.error || res.status}`;
+        return;
+      }
+      statusEl.textContent = '✓ XML guardado.';
       setTimeout(() => mgmtRefresh(), 1000);
     } catch (err) {
       statusEl.textContent = `Error: ${err.message}`;
@@ -3033,6 +3085,48 @@ let currentAdminUserId = null;
         fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadMgmtComprobante(fileInput.files[0]); });
       }
     }
+
+    // XML SUNAT upload
+    {
+      const dropzone = q('mgmt-xml-dropzone');
+      const fileInput = q('mgmt-xml-file');
+      const browse = q('mgmt-xml-browse');
+      if (dropzone && fileInput) {
+        browse?.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', e => {
+          e.preventDefault(); dropzone.classList.remove('dragover');
+          const f = e.dataTransfer.files[0]; if (f) uploadMgmtXml(f);
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadMgmtXml(fileInput.files[0]); });
+      }
+    }
+
+    // Enviar XML + PDF al alumno
+    bindOnce('mgmt-send-xml-pdf', async () => {
+      const id = _managedOrderId;
+      const o = _ordersCache.find(x => x.id === id);
+      const statusEl = q('mgmt-xml-status');
+      const btn = q('mgmt-send-xml-pdf');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      statusEl.textContent = '';
+      try {
+        const res = await apiFetch(`/api/admin/orders/${id}/send-xml-pdf`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          statusEl.textContent = `✓ ${data.message || 'Enviado correctamente.'}`;
+          btn.textContent = '✓ Enviado';
+        } else {
+          statusEl.textContent = `Error: ${data.error || res.status}`;
+          btn.disabled = false; btn.textContent = '📧 Enviar XML + PDF al alumno';
+        }
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+        btn.disabled = false; btn.textContent = '📧 Enviar XML + PDF al alumno';
+      }
+    });
 
     // Request voucher email
     bindOnce('mgmt-req-voucher', async () => {
@@ -5301,6 +5395,8 @@ let currentAdminUserId = null;
           const img = document.getElementById(id);
           if (img) { img.src = url; img.style.display = ''; }
         });
+        const titleEl = document.getElementById('admin-header-title');
+        if (titleEl) titleEl.style.display = 'none';
       })
       .catch(() => {});
   }

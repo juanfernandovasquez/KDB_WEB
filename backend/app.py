@@ -75,6 +75,7 @@ from models import (
     create_order,
     update_order_status,
     admin_update_order,
+    delete_order,
     fetch_orders,
     fetch_order_by_id,
     fetch_students,
@@ -1696,11 +1697,16 @@ def _push_course_to_moodle(course_data):
         return
     try:
         from moodle_service import update_moodle_course_metadata
-        category_slug = course_data.get("category")
         moodle_cat_id = None
-        if category_slug:
+        cat_id = course_data.get("category_id")
+        category_slug = course_data.get("category")
+        if cat_id or category_slug:
             cats = get_course_categories()
-            cat = next((c for c in cats if c["slug"] == category_slug), None)
+            cat = (
+                next((c for c in cats if c["id"] == cat_id), None)
+                if cat_id
+                else next((c for c in cats if c["slug"] == category_slug), None)
+            )
             if cat:
                 moodle_cat_id = cat.get("moodle_category_id")
         update_moodle_course_metadata(
@@ -2695,6 +2701,265 @@ def api_admin_request_voucher(order_id):
         return jsonify(message=f"Correo enviado a {student_email}"), 200
     except Exception as exc:
         app.logger.error("request_voucher: error sending email order %s: %s", order_id, exc)
+        return jsonify(error=f"Error al enviar correo: {exc}"), 500
+
+
+@app.route("/api/admin/orders/<int:order_id>", methods=["DELETE"])
+@require_admin()
+def api_admin_delete_order(order_id):
+    ensure_db()
+    existing = fetch_order_by_id(order_id)
+    if not existing:
+        return jsonify(error="Orden no encontrada"), 404
+    delete_order(order_id)
+    return jsonify(message="Orden eliminada"), 200
+
+
+_ALLOWED_XML_TYPES = {"application/xml", "text/xml"}
+
+
+@app.route("/api/admin/orders/<int:order_id>/xml-upload", methods=["POST"])
+@require_admin()
+def api_admin_xml_upload(order_id):
+    """Admin sube el XML SUNAT del comprobante electrónico."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    f = request.files.get("file")
+    if not f:
+        return jsonify(error="No se recibió archivo"), 400
+    ct = f.content_type or ""
+    filename = (f.filename or "comprobante.xml").lower()
+    if ct not in _ALLOWED_XML_TYPES and not filename.endswith(".xml"):
+        return jsonify(error="Solo se permiten archivos XML"), 400
+    f.stream.seek(0, 2)
+    size = f.stream.tell()
+    f.stream.seek(0)
+    if size > 5 * 1024 * 1024:
+        return jsonify(error="Archivo demasiado grande (máx 5 MB)"), 400
+    try:
+        result = upload_file_object(
+            f.stream, f.filename or "comprobante.xml",
+            content_type="application/xml",
+            prefix_override="comprobantes-xml/",
+        )
+        admin_update_order(order_id, {"xml_url": result["url"]})
+        return jsonify(xml_url=result["url"])
+    except Exception as exc:
+        app.logger.exception("Error uploading XML comprobante order %s", order_id)
+        return jsonify(error=str(exc)), 500
+
+
+def _parse_sunat_xml(xml_bytes):
+    """Extrae campos clave de un XML de comprobante electrónico SUNAT (UBL 2.1)."""
+    import xml.etree.ElementTree as ET
+
+    ns = {
+        "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+        "cac": "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
+    }
+
+    def ft(root, path):
+        el = root.find(path, ns)
+        return el.text.strip() if el is not None and el.text else ""
+
+    try:
+        root = ET.fromstring(xml_bytes)
+    except ET.ParseError:
+        return {}
+
+    tipo_code = ft(root, ".//cbc:InvoiceTypeCode")
+    tipo = "boleta" if tipo_code == "03" else "factura"
+
+    emisor_nombre = ft(root, ".//cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name")
+    if not emisor_nombre:
+        emisor_nombre = ft(root, ".//cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName")
+    emisor_ruc = ft(root, ".//cac:AccountingSupplierParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID")
+    emisor_dir = ft(root, ".//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName")
+
+    cliente_nombre = ft(root, ".//cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name")
+    if not cliente_nombre:
+        cliente_nombre = ft(root, ".//cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName")
+    cliente_id = ft(root, ".//cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID")
+    if not cliente_id:
+        cliente_id = ft(root, ".//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID")
+
+    total = ft(root, ".//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount")
+    if not total:
+        total = ft(root, ".//cac:LegalMonetaryTotal/cbc:PayableAmount")
+    igv = ft(root, ".//cac:TaxTotal/cbc:TaxAmount")
+
+    return {
+        "tipo": tipo,
+        "numero": ft(root, "cbc:ID"),
+        "fecha": ft(root, "cbc:IssueDate"),
+        "emisor_nombre": emisor_nombre,
+        "emisor_ruc": emisor_ruc,
+        "emisor_direccion": emisor_dir,
+        "cliente_nombre": cliente_nombre,
+        "cliente_id": cliente_id,
+        "total": total,
+        "igv": igv,
+    }
+
+
+def _generate_sunat_pdf(fields, order_ref="", course_title=""):
+    """Genera una representación impresa simple (PDF) desde los campos del XML SUNAT."""
+    from fpdf import FPDF
+
+    tipo_label = "BOLETA DE VENTA ELECTRÓNICA" if fields.get("tipo") == "boleta" else "FACTURA ELECTRÓNICA"
+
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_margins(20, 15, 20)
+
+    # Cabecera
+    pdf.set_font("Helvetica", "B", 13)
+    pdf.cell(0, 9, "REPRESENTACIÓN IMPRESA DE COMPROBANTE ELECTRÓNICO", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, tipo_label, align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(3)
+
+    # Emisor
+    if fields.get("emisor_nombre"):
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.cell(0, 7, fields["emisor_nombre"], new_x="LMARGIN", new_y="NEXT")
+    if fields.get("emisor_ruc"):
+        pdf.set_font("Helvetica", size=10)
+        pdf.cell(0, 6, f"RUC: {fields['emisor_ruc']}", new_x="LMARGIN", new_y="NEXT")
+    if fields.get("emisor_direccion"):
+        pdf.set_font("Helvetica", size=9)
+        pdf.cell(0, 5, fields["emisor_direccion"], new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(3)
+
+    # Número y fecha
+    pdf.set_fill_color(235, 240, 250)
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 10, f"N°: {fields.get('numero', '—')}", align="C", fill=True, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("Helvetica", size=10)
+    pdf.cell(0, 7, f"Fecha de emisión: {fields.get('fecha', '—')}", align="C", new_x="LMARGIN", new_y="NEXT")
+    if order_ref:
+        pdf.cell(0, 6, f"Referencia KDB: {order_ref}", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(4)
+
+    # Receptor
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(0, 7, "DATOS DEL ADQUIRENTE / USUARIO:", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("Helvetica", size=10)
+    if fields.get("cliente_nombre"):
+        pdf.cell(50, 6, "Nombre / Razón Social:")
+        pdf.cell(0, 6, fields["cliente_nombre"], new_x="LMARGIN", new_y="NEXT")
+    if fields.get("cliente_id"):
+        pdf.cell(50, 6, "DNI / RUC:")
+        pdf.cell(0, 6, fields["cliente_id"], new_x="LMARGIN", new_y="NEXT")
+    if course_title:
+        pdf.cell(50, 6, "Curso:")
+        pdf.cell(0, 6, course_title, new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(4)
+
+    # Totales
+    pdf.set_fill_color(235, 240, 250)
+    pdf.set_font("Helvetica", "B", 11)
+    if fields.get("igv"):
+        pdf.cell(0, 7, f"IGV (18%): S/ {fields['igv']}", align="R", new_x="LMARGIN", new_y="NEXT")
+    total_str = fields.get("total", "0.00")
+    pdf.cell(0, 10, f"IMPORTE TOTAL: S/ {total_str}", align="R", fill=True, new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(6)
+
+    # Pie
+    pdf.set_font("Helvetica", "I", 8)
+    pdf.cell(0, 5, "Representación impresa de un comprobante de pago electrónico.", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 5, "Verifique su autenticidad en: https://ww1.sunat.gob.pe/ol-ti-itcpe/ComprobantePago/validaCpe", align="C", new_x="LMARGIN", new_y="NEXT")
+
+    return bytes(pdf.output())
+
+
+@app.route("/api/admin/orders/<int:order_id>/send-xml-pdf", methods=["POST"])
+@require_admin()
+def api_admin_send_xml_pdf(order_id):
+    """Descarga el XML SUNAT desde S3, genera un PDF simple y envía ambos al alumno."""
+    ensure_db()
+    order = fetch_order_by_id(order_id)
+    if not order:
+        return jsonify(error="Orden no encontrada"), 404
+    xml_url = order.get("xml_url")
+    if not xml_url:
+        return jsonify(error="Esta orden no tiene un XML de comprobante cargado"), 400
+
+    cfg = _mail_config()
+    if not cfg["enabled"]:
+        return jsonify(error="El envío de correos no está habilitado en este servidor"), 400
+
+    # Fetch XML content
+    import requests as _req
+    try:
+        r = _req.get(xml_url, timeout=15)
+        r.raise_for_status()
+        xml_bytes = r.content
+    except Exception as exc:
+        return jsonify(error=f"No se pudo descargar el XML: {exc}"), 500
+
+    fields = _parse_sunat_xml(xml_bytes)
+    order_ref = f"ORD-{order_id:04d}"
+    course_title = order.get("course_title") or order.get("course_slug") or ""
+
+    try:
+        pdf_bytes = _generate_sunat_pdf(fields, order_ref=order_ref, course_title=course_title)
+    except Exception as exc:
+        app.logger.error("send-xml-pdf: PDF generation failed order %s: %s", order_id, exc)
+        return jsonify(error=f"Error al generar el PDF: {exc}"), 500
+
+    numero = fields.get("numero") or order_ref
+    xml_filename = f"comprobante-{numero.replace('/', '-')}.xml"
+    pdf_filename = f"comprobante-{numero.replace('/', '-')}.pdf"
+
+    student_email = order.get("student_email", "")
+    student_name = order.get("student_name", "")
+
+    msg = EmailMessage()
+    msg["Subject"] = f"Tu comprobante de pago — {order_ref}"
+    msg["From"] = cfg["academia_from"]
+    msg["To"] = student_email
+    msg.set_content("\n".join([
+        f"Hola {student_name},",
+        "",
+        f"Adjuntamos tu comprobante de pago para la orden {order_ref}.",
+        f"Curso: {course_title}",
+        "",
+        "Se incluyen dos archivos:",
+        f"  • {xml_filename}  — comprobante electrónico (XML SUNAT)",
+        f"  • {pdf_filename}  — representación impresa (PDF)",
+        "",
+        "Para verificar la autenticidad de tu comprobante visita:",
+        "https://ww1.sunat.gob.pe/ol-ti-itcpe/ComprobantePago/validaCpe",
+        "",
+        "Consultas: akatdemy@katarzyna.pe",
+        "",
+        "Equipo Katarzyna Academia",
+        "https://katarzyna.pe",
+    ]))
+    msg.add_attachment(xml_bytes, maintype="application", subtype="xml", filename=xml_filename)
+    msg.add_attachment(pdf_bytes, maintype="application", subtype="pdf", filename=pdf_filename)
+
+    try:
+        if cfg["use_ssl"]:
+            with smtplib.SMTP_SSL(cfg["host"], cfg["port"], context=ssl.create_default_context(), timeout=15) as server:
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as server:
+                if cfg["use_tls"]:
+                    server.starttls(context=ssl.create_default_context())
+                if cfg["user"] and cfg["password"]:
+                    server.login(cfg["user"], cfg["password"])
+                server.send_message(msg)
+        app.logger.info("send-xml-pdf: enviado a %s orden %s", student_email, order_id)
+        return jsonify(message=f"Comprobante enviado a {student_email}"), 200
+    except Exception as exc:
+        app.logger.error("send-xml-pdf: email error order %s: %s", order_id, exc)
         return jsonify(error=f"Error al enviar correo: {exc}"), 500
 
 

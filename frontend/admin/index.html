@@ -12,8 +12,8 @@
       <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menu">
         <span></span><span></span><span></span>
       </button>
-      <img id="admin-header-logo" src="" alt="Katarzyna" class="header-logo header-logo-mobile" style="display:none" />
-      <span class="header-title">Panel Admin</span>
+      <img id="admin-header-logo" src="" alt="Katarzyna" class="header-logo" style="display:none" />
+      <span class="header-title" id="admin-header-title">Panel Admin</span>
     </div>
     <div class="admin-user">
       <span id="admin-user-label"></span>
@@ -2064,12 +2064,12 @@
         <div class="card" id="ac-table-card">
           <div class="card-head between">
             <h3>Cursos (<span id="ac-count">0</span>)</h3>
-            <div class="row" style="gap:.5rem;align-items:center;">
-              <button type="button" class="cta small-btn" id="ac-new-btn">+ Nuevo curso</button>
-              <button type="button" class="collapse-btn" data-collapse-target="ac-table-wrap">+</button>
-            </div>
+            <button type="button" class="collapse-btn" data-collapse-target="ac-table-wrap">+</button>
           </div>
           <div class="collapsible-body collapsed" id="ac-table-wrap">
+            <div style="margin-bottom:.75rem;">
+              <button type="button" class="cta small-btn" id="ac-new-btn">+ Nuevo curso</button>
+            </div>
             <div class="table-responsive">
               <table class="subs-table">
                 <thead>
@@ -2169,6 +2169,7 @@
                       <th>Moodle</th>
                       <th>Notas</th>
                       <th></th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="ac-student-orders-body"></tbody>
@@ -2233,6 +2234,19 @@
                 </div>
                 <button type="button" class="secondary mgmt-btn-full" id="mgmt-req-voucher" style="margin-top:.5rem;">📩 Solicitar al alumno</button>
                 <p class="small mgmt-status" id="mgmt-voucher-status"></p>
+
+                <!-- XML SUNAT -->
+                <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--border-light);">
+                  <p style="margin:0 0 .4rem;font-size:.8rem;font-weight:600;color:var(--text);">XML SUNAT (comprobante electrónico)</p>
+                  <div id="mgmt-xml-current" style="margin-bottom:.5rem;"></div>
+                  <div id="mgmt-xml-dropzone" class="mgmt-dropzone">
+                    <input type="file" id="mgmt-xml-file" accept="application/xml,text/xml,.xml" style="display:none" />
+                    <p style="margin:0;font-size:.8rem;">Arrastra o <button type="button" class="link-btn" id="mgmt-xml-browse">selecciona</button></p>
+                    <p class="small muted" style="margin:.2rem 0 0;">XML · Máx. 5 MB</p>
+                  </div>
+                  <button type="button" class="cta mgmt-btn-full" id="mgmt-send-xml-pdf" style="margin-top:.5rem;display:none;">📧 Enviar XML + PDF al alumno</button>
+                  <p class="small mgmt-status" id="mgmt-xml-status"></p>
+                </div>
               </div>
 
               <!-- Comprobante -->

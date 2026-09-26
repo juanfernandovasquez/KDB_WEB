@@ -1033,6 +1033,7 @@ def init_db():
             ("moodle_user_id",       "INTEGER"),
             ("operation_number",     "TEXT"),
             ("comprobante_url",      "TEXT"),
+            ("xml_url",              "TEXT"),
         ]:
             try:
                 conn.execute(f"ALTER TABLE orders ADD COLUMN {col_def[0]} {col_def[1]}")
@@ -1074,6 +1075,23 @@ def init_db():
                 conn.execute(f"ALTER TABLE courses ADD COLUMN {col_def[0]} {col_def[1]}")
             except Exception:
                 pass  # column already exists
+
+        # ── FK: category_id en courses ────────────────────────────────────────
+        _mig_catid = "courses_category_id_fk_v1"
+        if not conn.execute("SELECT 1 FROM db_migrations WHERE name = ?", (_mig_catid,)).fetchone():
+            try:
+                conn.execute("ALTER TABLE courses ADD COLUMN category_id INTEGER")
+            except Exception:
+                pass
+            conn.execute("""
+                UPDATE courses SET category_id = (
+                    SELECT cc.id FROM course_categories cc WHERE cc.slug = courses.category
+                ) WHERE category_id IS NULL AND category IS NOT NULL
+            """)
+            conn.execute(
+                "INSERT INTO db_migrations (name, applied_at) VALUES (?, ?)",
+                (_mig_catid, datetime.utcnow().isoformat()),
+            )
 
         # ── Course categories ─────────────────────────────────────────────────────────
         conn.execute(
