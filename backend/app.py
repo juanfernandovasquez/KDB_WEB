@@ -2772,10 +2772,42 @@ def api_admin_request_voucher(order_id):
 @require_admin()
 def api_admin_delete_order(order_id):
     ensure_db()
-    existing = fetch_order_by_id(order_id)
-    if not existing:
+    order = fetch_order_by_id(order_id)
+    if not order:
         return jsonify(error="Orden no encontrada"), 404
+
+    moodle_warning = None
+    if order.get("moodle_enrolled"):
+        moodle_course_id = order.get("moodle_course_id")
+        moodle_user_id = order.get("moodle_user_id")
+        if not moodle_user_id:
+            moodle_email = order.get("moodle_user_email") or order.get("student_email")
+            try:
+                from moodle_service import _call as moodle_call
+                result = moodle_call(
+                    "core_user_get_users",
+                    **{"criteria[0][key]": "email", "criteria[0][value]": moodle_email},
+                )
+                users = result.get("users", [])
+                if users:
+                    moodle_user_id = users[0]["id"]
+            except Exception as exc:
+                app.logger.error("delete_order: moodle lookup error %s: %s", order_id, exc)
+
+        if moodle_user_id and moodle_course_id:
+            try:
+                from moodle_service import unenroll_user_from_course
+                unenroll_user_from_course(moodle_user_id, moodle_course_id)
+                app.logger.info("delete_order: unenrolled user %s from course %s", moodle_user_id, moodle_course_id)
+            except Exception as exc:
+                app.logger.error("delete_order: unenroll error %s: %s", order_id, exc)
+                moodle_warning = f"Orden eliminada pero no se pudo desmatricular de Moodle: {exc}"
+        else:
+            moodle_warning = "Orden eliminada. No se pudo desmatricular de Moodle (faltan datos)."
+
     delete_order(order_id)
+    if moodle_warning:
+        return jsonify(message="Orden eliminada", warning=moodle_warning), 200
     return jsonify(message="Orden eliminada"), 200
 
 

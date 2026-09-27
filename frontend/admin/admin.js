@@ -2644,7 +2644,7 @@ let currentAdminUserId = null;
             <td>${paidBadge}<br>${moodleBadge}</td>
             <td style="display:flex;gap:.35rem;align-items:center;">
               <button class="secondary small-btn ac-ord-manage" data-id="${o.id}">⚙ Gestionar</button>
-              <button class="danger small-btn ac-ord-delete" data-id="${o.id}" data-ref="${escHtml(ordRef)}" title="Eliminar orden">✕</button>
+              <button class="danger small-btn ac-ord-delete" data-id="${o.id}" data-ref="${escHtml(ordRef)}" data-enrolled="${o.moodle_enrolled ? '1' : '0'}" title="Eliminar orden">✕</button>
             </td>
           </tr>`;
         }).join('');
@@ -2655,10 +2655,17 @@ let currentAdminUserId = null;
 
         ordTbody.querySelectorAll('.ac-ord-delete').forEach(btn => {
           btn.addEventListener('click', async () => {
-            if (!confirm(`¿Eliminar la orden ${btn.dataset.ref}?\n\nEsta acción no se puede deshacer.`)) return;
+            const enrolled = btn.dataset.enrolled === '1';
+            const msg = enrolled
+              ? `¿Eliminar la orden ${btn.dataset.ref}?\n\n⚠️ Este alumno está matriculado en Moodle. Al confirmar también será dado de baja del curso.\n\nEsta acción no se puede deshacer.`
+              : `¿Eliminar la orden ${btn.dataset.ref}?\n\nEsta acción no se puede deshacer.`;
+            if (!confirm(msg)) return;
             const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, { method: 'DELETE' });
-            if (res.ok) { await loadAcademiaAdmin(); }
-            else { const d = await res.json().catch(() => ({})); alert(d.error || 'Error al eliminar.'); }
+            const d = await res.json().catch(() => ({}));
+            if (res.ok) {
+              if (d.warning) alert(`⚠️ ${d.warning}`);
+              await loadAcademiaAdmin();
+            } else { alert(d.error || 'Error al eliminar.'); }
           });
         });
       }
@@ -2837,7 +2844,7 @@ let currentAdminUserId = null;
           <td>${o.moodle_enrolled ? '<span class="badge-active">Matriculado</span>' : '<span class="badge-inactive">No</span>'}</td>
           <td>${o.notes ? `<span class="small muted" title="${escHtml(o.notes)}">📝</span>` : ''}</td>
           <td><button type="button" class="secondary small-btn ac-stud-ord-manage" data-id="${o.id}">⚙ Gestionar</button></td>
-          <td><button type="button" class="danger small-btn ac-stud-ord-delete" data-id="${o.id}" title="Eliminar orden">✕</button></td>
+          <td><button type="button" class="danger small-btn ac-stud-ord-delete" data-id="${o.id}" data-enrolled="${o.moodle_enrolled ? '1' : '0'}" title="Eliminar orden">✕</button></td>
         </tr>`;
       }).join('');
       tbody.querySelectorAll('.ac-stud-ord-manage').forEach(btn => {
@@ -2848,10 +2855,18 @@ let currentAdminUserId = null;
       });
       tbody.querySelectorAll('.ac-stud-ord-delete').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm(`¿Eliminar la orden ORD-${String(btn.dataset.id).padStart(4,'0')}?\n\nEsta acción no se puede deshacer.`)) return;
+          const enrolled = btn.dataset.enrolled === '1';
+          const ordRef = `ORD-${String(btn.dataset.id).padStart(4, '0')}`;
+          const msg = enrolled
+            ? `¿Eliminar la orden ${ordRef}?\n\n⚠️ Este alumno está matriculado en Moodle. Al confirmar también será dado de baja del curso.\n\nEsta acción no se puede deshacer.`
+            : `¿Eliminar la orden ${ordRef}?\n\nEsta acción no se puede deshacer.`;
+          if (!confirm(msg)) return;
           const res = await apiFetch(`/api/admin/orders/${btn.dataset.id}`, { method: 'DELETE' });
-          if (res.ok) { await showStudentDetail(email, name); await loadAcademiaAdmin(); }
-          else { const d = await res.json().catch(() => ({})); alert(d.error || 'Error al eliminar.'); }
+          const d = await res.json().catch(() => ({}));
+          if (res.ok) {
+            if (d.warning) alert(`⚠️ ${d.warning}`);
+            await showStudentDetail(email, name); await loadAcademiaAdmin();
+          } else { alert(d.error || 'Error al eliminar.'); }
         });
       });
     } catch {
