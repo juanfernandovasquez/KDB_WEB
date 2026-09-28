@@ -211,6 +211,25 @@ def delete_moodle_category(moodle_cat_id):
     logger.info("Moodle: categoría %s eliminada", moodle_cat_id)
 
 
+def create_moodle_course(title, description="", shortname=None, moodle_category_id=1, visible=True):
+    """Crea un curso nuevo en Moodle y retorna su ID."""
+    sn = (shortname or title[:50]).strip()
+    params = {
+        "courses[0][fullname]": title,
+        "courses[0][shortname]": sn,
+        "courses[0][categoryid]": moodle_category_id or 1,
+        "courses[0][summary]": description or "",
+        "courses[0][visible]": 1 if visible else 0,
+        "courses[0][format]": "topics",
+    }
+    result = _call("core_course_create_courses", **params)
+    if not result or not result[0].get("id"):
+        raise RuntimeError("Moodle no retornó el ID del curso creado")
+    course_id = result[0]["id"]
+    logger.info("Moodle: curso creado id=%s shortname=%s", course_id, sn)
+    return course_id
+
+
 def update_moodle_course_metadata(moodle_course_id, title, description, moodle_category_id=None):
     """Empuja título, descripción y categoría a Moodle. No toca la visibilidad."""
     params = {

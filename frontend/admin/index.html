@@ -1939,9 +1939,9 @@
                   <option value="0">No — borrador (solo visible en el admin)</option>
                 </select>
               </div>
-              <div>
-                <label>Slug (URL) *</label>
-                <input type="text" id="ac-slug" placeholder="fiscalizacion-tributaria-sunat" />
+              <div id="ac-slug-wrap" style="display:none;">
+                <label>Slug (URL) <span class="small muted">(generado automáticamente)</span></label>
+                <input type="text" id="ac-slug" readonly style="background:var(--bg-soft,#f4f6fb);color:var(--muted);cursor:default;" />
               </div>
               <div>
                 <label>Precio (S/)</label>

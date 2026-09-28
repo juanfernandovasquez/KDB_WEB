@@ -2393,6 +2393,9 @@ let currentAdminUserId = null;
     q('ac-form-title').textContent = acEditId ? 'Editar curso' : 'Nuevo curso';
     q('ac-title').value = course?.title || '';
     q('ac-slug').value = course?.slug || '';
+    // Slug: solo visible en edición (en creación se genera automáticamente)
+    const slugWrap = q('ac-slug-wrap');
+    if (slugWrap) slugWrap.style.display = acEditId ? '' : 'none';
     q('ac-subtitle').value = course?.subtitle || '';
     q('ac-description').value = course?.description || '';
     const _catSel = q('ac-category');
@@ -2463,8 +2466,8 @@ let currentAdminUserId = null;
     const status = q('ac-save-status');
     const title = q('ac-title').value.trim();
     const slug = q('ac-slug').value.trim();
-    if (!title || !slug) {
-      status.textContent = 'Título y slug son requeridos.';
+    if (!title) {
+      status.textContent = 'El título es requerido.';
       return;
     }
     const modules = acGetModules();
@@ -2504,7 +2507,14 @@ let currentAdminUserId = null;
         status.textContent = `Error: ${data.error || res.status}`;
         return;
       }
-      status.textContent = payload.moodle_course_id ? '✓ Guardado y sincronizado con Moodle' : '✓ Guardado';
+      const moodleId = data.moodle_course_id || payload.moodle_course_id;
+      status.textContent = moodleId ? '✓ Guardado y sincronizado con Moodle' : '✓ Guardado';
+      // Show slug assigned by server on creation
+      if (!acEditId && data.slug) {
+        q('ac-slug').value = data.slug;
+        const slugWrap = q('ac-slug-wrap');
+        if (slugWrap) { slugWrap.style.display = ''; }
+      }
       setTimeout(() => { acCloseForm(); loadAcademiaAdmin(); }, 1200);
     } catch (err) {
       status.textContent = `Error: ${err.message || 'No se pudo guardar'}`;

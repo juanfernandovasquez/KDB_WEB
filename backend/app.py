@@ -1729,17 +1729,71 @@ def api_admin_courses():
     return jsonify(courses)
 
 
+def _unique_course_slug(base_slug):
+    """Genera un slug que no exista ya en la tabla de cursos."""
+    import re as _re2
+    existing = {c["slug"] for c in fetch_courses(published_only=False)}
+    slug = base_slug
+    if slug not in existing:
+        return slug
+    # Strip trailing -N and retry with counter
+    base = _re2.sub(r"-\d+$", "", slug)
+    i = 2
+    while True:
+        candidate = f"{base}-{i}"
+        if candidate not in existing:
+            return candidate
+        i += 1
+
+
+def _slugify(text):
+    import re as _re2, unicodedata
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    text = text.lower().strip()
+    text = _re2.sub(r"[^\w\s-]", "", text)
+    text = _re2.sub(r"[\s_]+", "-", text)
+    text = _re2.sub(r"-+", "-", text).strip("-")
+    return text or "curso"
+
+
 @app.route("/api/admin/courses", methods=["POST"])
 @require_admin()
 def api_admin_create_course():
     ensure_db()
     data = request.get_json(silent=True) or {}
-    if not data.get("title") or not data.get("slug"):
-        return jsonify(error="title y slug son requeridos"), 400
+    if not data.get("title"):
+        return jsonify(error="title es requerido"), 400
+    # Auto-generate and deduplicate slug
+    base = _slugify(data.get("slug") or data["title"])
+    data["slug"] = _unique_course_slug(base)
     try:
         cid = save_course(data)
-        _push_course_to_moodle(data)
-        return jsonify(id=cid, message="Curso creado"), 201
+        # Create in Moodle if not already linked
+        if not data.get("moodle_course_id"):
+            try:
+                from moodle_service import create_moodle_course
+                moodle_cat_id = None
+                cat_id = data.get("category_id")
+                if cat_id:
+                    cats = get_course_categories()
+                    cat = next((c for c in cats if c["id"] == cat_id), None)
+                    if cat:
+                        moodle_cat_id = cat.get("moodle_category_id")
+                new_moodle_id = create_moodle_course(
+                    title=data["title"],
+                    description=data.get("description", ""),
+                    shortname=data["slug"],
+                    moodle_category_id=moodle_cat_id,
+                    visible=data.get("is_published", False),
+                )
+                save_course({"moodle_course_id": new_moodle_id}, course_id=cid)
+                data["moodle_course_id"] = new_moodle_id
+            except Exception as exc:
+                app.logger.warning("Moodle create course failed: %s", exc)
+        else:
+            _push_course_to_moodle(data)
+        course = fetch_course_by_id(cid)
+        return jsonify(course), 201
     except Exception as exc:
         return jsonify(error=str(exc)), 400
 
