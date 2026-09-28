@@ -2409,6 +2409,11 @@ let currentAdminUserId = null;
     q('ac-duration').value = course?.duration || '';
     q('ac-level').value = course?.level || 'Todos los niveles';
     q('ac-moodle-course-id').value = course?.moodle_course_id || '';
+    const createMoodleBtn = q('ac-create-in-moodle');
+    if (createMoodleBtn) {
+      createMoodleBtn.style.display = (acEditId && !course?.moodle_course_id) ? '' : 'none';
+      if (q('ac-create-moodle-status')) q('ac-create-moodle-status').textContent = '';
+    }
     q('ac-published').value = course?.is_published ? '1' : '0';
     setImgPicker('ac-image-url', course?.image_url || '');
     q('ac-video-url').value = course?.video_url || '';
@@ -3116,6 +3121,25 @@ let currentAdminUserId = null;
     bindOnce('ac-form-cancel', acCloseForm);
     bindOnce('ac-form-cancel2', acCloseForm);
     bindOnce('ac-save-btn', acSaveCourse);
+    bindOnce('ac-create-in-moodle', async () => {
+      const courseId = q('ac-id')?.value;
+      if (!courseId) return;
+      const btn = q('ac-create-in-moodle');
+      const status = q('ac-create-moodle-status');
+      btn.disabled = true;
+      if (status) status.textContent = 'Creando en Moodle…';
+      const res = await apiFetch(`/api/admin/courses/${courseId}/moodle`, { method: 'POST' });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok) {
+        q('ac-moodle-course-id').value = d.moodle_course_id;
+        btn.style.display = 'none';
+        if (status) status.textContent = `✓ Creado en Moodle (ID: ${d.moodle_course_id})`;
+        loadAcademiaAdmin();
+      } else {
+        if (status) status.textContent = `Error: ${d.error || 'No se pudo crear'}`;
+        btn.disabled = false;
+      }
+    });
 
 
     // Dynamic list "+" buttons for course fields

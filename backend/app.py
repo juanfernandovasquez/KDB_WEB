@@ -1832,6 +1832,38 @@ def api_admin_update_course(course_id):
         return jsonify(error=str(exc)), 400
 
 
+@app.route("/api/admin/courses/<int:course_id>/moodle", methods=["POST"])
+@require_admin()
+def api_admin_course_create_in_moodle(course_id):
+    """Crea en Moodle un curso KDB que aún no tiene moodle_course_id."""
+    ensure_db()
+    course = fetch_course_by_id(course_id)
+    if not course:
+        return jsonify(error="Curso no encontrado"), 404
+    if course.get("moodle_course_id"):
+        return jsonify(error="El curso ya está vinculado a Moodle", moodle_course_id=course["moodle_course_id"]), 409
+    try:
+        from moodle_service import create_moodle_course
+        moodle_cat_id = None
+        cat_id = course.get("category_id")
+        if cat_id:
+            cats = get_course_categories()
+            cat = next((c for c in cats if c["id"] == cat_id), None)
+            if cat:
+                moodle_cat_id = cat.get("moodle_category_id")
+        new_moodle_id = create_moodle_course(
+            title=course["title"],
+            description=course.get("description", ""),
+            shortname=course["slug"],
+            moodle_category_id=moodle_cat_id,
+            visible=course.get("is_published", False),
+        )
+        save_course({"moodle_course_id": new_moodle_id}, course_id=course_id)
+        return jsonify(moodle_course_id=new_moodle_id, message="Curso creado en Moodle"), 201
+    except Exception as exc:
+        return jsonify(error=str(exc)), 500
+
+
 @app.route("/api/admin/courses/<int:course_id>/moodle", methods=["GET"])
 @require_admin()
 def api_admin_course_moodle_data(course_id):
