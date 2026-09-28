@@ -2558,8 +2558,8 @@ let currentAdminUserId = null;
   }
 
   async function loadAcademiaAdmin() {
-    // Auto-sync Moodle courses silently (creates stubs for unlinked Moodle courses)
-    apiFetch('/api/admin/moodle/courses/sync', { method: 'POST' }).catch(() => {});
+    // Auto-sync primero para que moodle_visible esté actualizado antes de renderizar
+    try { await apiFetch('/api/admin/moodle/courses/sync', { method: 'POST' }); } catch (_) {}
 
     // Load courses
     const tbody = q('ac-table-body');
