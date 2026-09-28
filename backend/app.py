@@ -71,6 +71,7 @@ from models import (
     fetch_course_by_slug,
     fetch_course_by_id,
     save_course,
+    set_course_moodle_id,
     delete_course,
     create_order,
     update_order_status,
@@ -1786,7 +1787,7 @@ def api_admin_create_course():
                     moodle_category_id=moodle_cat_id,
                     visible=data.get("is_published", False),
                 )
-                save_course({"moodle_course_id": new_moodle_id}, course_id=cid)
+                set_course_moodle_id(cid, new_moodle_id)
                 data["moodle_course_id"] = new_moodle_id
             except Exception as exc:
                 app.logger.warning("Moodle create course failed: %s", exc)
@@ -1858,7 +1859,7 @@ def api_admin_course_create_in_moodle(course_id):
             moodle_category_id=moodle_cat_id,
             visible=course.get("is_published", False),
         )
-        save_course({"moodle_course_id": new_moodle_id}, course_id=course_id)
+        set_course_moodle_id(course_id, new_moodle_id)
         return jsonify(moodle_course_id=new_moodle_id, message="Curso creado en Moodle"), 201
     except Exception as exc:
         return jsonify(error=str(exc)), 500

@@ -1213,6 +1213,17 @@ def save_course(payload, course_id=None):
     return cid
 
 
+def set_course_moodle_id(course_id, moodle_course_id):
+    """Actualiza solo el moodle_course_id de un curso."""
+    conn = get_conn()
+    with conn:
+        conn.execute(
+            "UPDATE courses SET moodle_course_id=?, updated_at=? WHERE id=?",
+            (moodle_course_id, datetime.utcnow().isoformat(), course_id),
+        )
+    conn.close()
+
+
 def delete_course(course_id):
     conn = get_conn()
     with conn:
