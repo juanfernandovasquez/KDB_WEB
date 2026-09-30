@@ -134,83 +134,13 @@
           <section class="form-section">
             <h2 class="form-section-title">Método de pago</h2>
 
-            <!-- Tabs -->
-            <div class="pay-tabs" role="tablist">
-              <button type="button" class="pay-tab active" data-tab="transfer" role="tab" aria-selected="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                Yape / Plin / Transferencia
-              </button>
-              <button type="button" class="pay-tab" data-tab="card" role="tab" aria-selected="false">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                Tarjeta de crédito / débito
-              </button>
-            </div>
+            <input type="hidden" name="pay_method" value="transferencia" />
 
-            <!-- Panel: Yape / Plin / Transferencia -->
+            <!-- Panel: Transferencia interbancaria -->
             <div class="pay-panel" id="pay-panel-transfer">
-              <div class="pay-method-picker">
-                <label class="pay-method-opt selected" id="lbl-yape">
-                  <input type="radio" name="pay_method" value="yape" checked />
-                  <span class="pay-opt-icon">📱</span>
-                  <span>Yape</span>
-                </label>
-                <label class="pay-method-opt" id="lbl-plin">
-                  <input type="radio" name="pay_method" value="plin" />
-                  <span class="pay-opt-icon">📲</span>
-                  <span>Plin</span>
-                </label>
-                <label class="pay-method-opt" id="lbl-bank">
-                  <input type="radio" name="pay_method" value="transferencia" />
-                  <span class="pay-opt-icon">🏦</span>
-                  <span>Transferencia</span>
-                </label>
-                <label class="pay-method-opt hidden" id="lbl-card">
-                  <input type="radio" name="pay_method" value="tarjeta" />
-                  <span class="pay-opt-icon">💳</span>
-                  <span>Tarjeta</span>
-                </label>
-              </div>
-
-              <!-- Yape instructions -->
-              <div class="pay-instructions" id="instr-yape">
-                <div class="pay-instr-box pay-wallet-box">
-                  <div class="pay-wallet-qr" id="yape-qr-wrap">
-                    <img id="yape-qr-img" src="" alt="QR Yape" class="pay-qr-img" />
-                    <span class="pay-qr-placeholder hidden" id="yape-qr-placeholder">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h1v1h-1z M16 14h1v1h-1z M18 14h1v1h-1z M14 16h1v1h-1z M16 16h1v1h-1z M18 16h1v1h-1z M14 18h1v1h-1z M16 18h1v1h-1z M18 18h1v1h-1z"/></svg>
-                      <span>QR pendiente</span>
-                    </span>
-                  </div>
-                  <div class="pay-wallet-info">
-                    <p class="pay-wallet-label"><strong>Yapea al número:</strong></p>
-                    <p class="pay-account-num">📱 <span id="yape-number">—</span></p>
-                    <p class="pay-account-name">A nombre de: <strong>Katarzyna Legal &amp; Tributario</strong></p>
-                    <p class="pay-instr-note">Indica tu nombre y el nombre del curso en el concepto.</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Plin instructions -->
-              <div class="pay-instructions hidden" id="instr-plin">
-                <div class="pay-instr-box pay-wallet-box">
-                  <div class="pay-wallet-qr" id="plin-qr-wrap">
-                    <img id="plin-qr-img" src="" alt="QR Plin" class="pay-qr-img" />
-                    <span class="pay-qr-placeholder hidden" id="plin-qr-placeholder">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h1v1h-1z M16 14h1v1h-1z M18 14h1v1h-1z M14 16h1v1h-1z M16 16h1v1h-1z M18 16h1v1h-1z M14 18h1v1h-1z M16 18h1v1h-1z M18 18h1v1h-1z"/></svg>
-                      <span>QR pendiente</span>
-                    </span>
-                  </div>
-                  <div class="pay-wallet-info">
-                    <p class="pay-wallet-label"><strong>Plínea al número:</strong></p>
-                    <p class="pay-account-num">📲 <span id="plin-number">—</span></p>
-                    <p class="pay-account-name">A nombre de: <strong>Katarzyna Legal &amp; Tributario</strong></p>
-                    <p class="pay-instr-note">Indica tu nombre y el nombre del curso en el concepto.</p>
-                  </div>
-                </div>
-              </div>
 
               <!-- Transferencia instructions -->
-              <div class="pay-instructions hidden" id="instr-bank">
+              <div class="pay-instructions" id="instr-bank">
                 <div id="bank-accounts-list">
                   <!-- rendered by JS -->
                   <div class="pay-instr-box">
@@ -220,26 +150,11 @@
                 <p class="pay-instr-note" style="margin-top:.75rem;">Indica tu nombre y el nombre del curso en la descripción de la transferencia.</p>
               </div>
 
-              <!-- Tarjeta instructions -->
-              <div class="pay-instructions hidden" id="instr-card">
-                <div class="pay-instr-box" style="text-align:center;">
-                  <p style="margin-bottom:1rem;">Haz clic en el botón para pagar con tu tarjeta de crédito o débito de forma segura.</p>
-                  <a id="card-pay-link" href="#" target="_blank" rel="noopener" class="cta" style="display:inline-block;">Pagar con tarjeta →</a>
-                </div>
-              </div>
-
-              <!-- N° de operación (opcional) -->
-              <div class="operation-number-section">
-                <label for="operation-number" class="voucher-upload-label">N° de operación <span class="optional-tag">opcional</span></label>
-                <input type="text" id="operation-number" name="operation_number" placeholder="Ej. 12345678" class="op-num-input" autocomplete="off" />
-                <span class="field-hint small muted">Número de transacción de Yape, Plin o transferencia bancaria.</span>
-              </div>
-
-              <!-- Voucher upload (opcional) -->
+              <!-- Voucher upload (requerido) -->
               <div class="voucher-upload-section">
                 <label class="voucher-upload-label">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Adjuntar constancia de pago <span class="optional-tag">opcional</span>
+                  Adjuntar constancia de pago <span class="required-tag">*</span>
                 </label>
                 <div class="voucher-dropzone" id="voucher-dropzone">
                   <input type="file" id="voucher-file" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" />
@@ -262,14 +177,6 @@
               </div>
             </div>
 
-            <!-- Panel: Tarjeta -->
-            <div class="pay-panel hidden" id="pay-panel-card">
-              <div class="sim-notice">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                El pago con tarjeta estará disponible próximamente. Por ahora usa Yape, Plin o transferencia.
-              </div>
-              <input type="hidden" name="pay_method" value="tarjeta" id="pay-method-card-hidden" />
-            </div>
           </section>
 
           <!-- Submit -->
@@ -374,7 +281,6 @@
             </div>
             <div class="summary-divider"></div>
             <ul class="summary-features">
-              <li>✓ Acceso ilimitado de por vida</li>
               <li>✓ Certificado de participación</li>
               <li>✓ Material descargable</li>
               <li>✓ Comprobante electrónico</li>

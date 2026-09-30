@@ -73,25 +73,6 @@
     });
   });
 
-  // ── Payment method picker (Yape / Plin / Transferencia) ───────────────────
-  const instrYape = document.getElementById('instr-yape');
-  const instrPlin = document.getElementById('instr-plin');
-  const instrBank = document.getElementById('instr-bank');
-
-  document.querySelectorAll('input[name="pay_method"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      document.querySelectorAll('.pay-method-opt').forEach(el => el.classList.remove('selected'));
-      radio.closest('.pay-method-opt')?.classList.add('selected');
-
-      instrYape?.classList.add('hidden');
-      instrPlin?.classList.add('hidden');
-      instrBank?.classList.add('hidden');
-
-      if (radio.value === 'yape')         instrYape?.classList.remove('hidden');
-      else if (radio.value === 'plin')    instrPlin?.classList.remove('hidden');
-      else if (radio.value === 'transferencia') instrBank?.classList.remove('hidden');
-    });
-  });
 
   // ── Voucher upload ───────────────────────────────────────────────────────────
   const voucherFile     = document.getElementById('voucher-file');
@@ -204,34 +185,6 @@
       if (!resp.ok) return;
       paymentConfig = await resp.json();
 
-      // Yape
-      const yapeNum = paymentConfig.yape_number || '';
-      document.getElementById('yape-number').textContent = yapeNum || '—';
-      const yapeQrImg = document.getElementById('yape-qr-img');
-      const yapeQrPlaceholder = document.getElementById('yape-qr-placeholder');
-      if (paymentConfig.yape_qr_url) {
-        yapeQrImg.src = paymentConfig.yape_qr_url;
-        yapeQrImg.classList.remove('hidden');
-        yapeQrPlaceholder?.classList.add('hidden');
-      } else {
-        yapeQrImg.classList.add('hidden');
-        yapeQrPlaceholder?.classList.remove('hidden');
-      }
-
-      // Plin
-      const plinNum = paymentConfig.plin_number || '';
-      document.getElementById('plin-number').textContent = plinNum || '—';
-      const plinQrImg = document.getElementById('plin-qr-img');
-      const plinQrPlaceholder = document.getElementById('plin-qr-placeholder');
-      if (paymentConfig.plin_qr_url) {
-        plinQrImg.src = paymentConfig.plin_qr_url;
-        plinQrImg.classList.remove('hidden');
-        plinQrPlaceholder?.classList.add('hidden');
-      } else {
-        plinQrImg.classList.add('hidden');
-        plinQrPlaceholder?.classList.remove('hidden');
-      }
-
       // Bank accounts
       const bankList = document.getElementById('bank-accounts-list');
       const accounts = paymentConfig.bank_accounts || [];
@@ -257,32 +210,6 @@
       if (cardLink && paymentConfig.card_link) cardLink.href = paymentConfig.card_link;
 
       // Show/hide payment methods
-      const methods = [
-        { enabled: paymentConfig.yape_enabled, lbl: 'lbl-yape', instr: 'instr-yape', value: 'yape' },
-        { enabled: paymentConfig.plin_enabled, lbl: 'lbl-plin', instr: 'instr-plin', value: 'plin' },
-        { enabled: paymentConfig.bank_enabled, lbl: 'lbl-bank', instr: 'instr-bank', value: 'transferencia' },
-        { enabled: paymentConfig.card_enabled, lbl: 'lbl-card', instr: 'instr-card', value: 'tarjeta' },
-      ];
-      methods.forEach(m => {
-        if (!m.enabled) {
-          document.getElementById(m.lbl)?.classList.add('hidden');
-          document.getElementById(m.instr)?.classList.add('hidden');
-          const radio = document.querySelector(`input[name="pay_method"][value="${m.value}"]`);
-          if (radio) radio.disabled = true;
-        }
-      });
-      // Auto-select first available method
-      const firstEnabled = methods.find(m => m.enabled);
-      if (firstEnabled) {
-        const currentRadio = document.querySelector('input[name="pay_method"]:checked');
-        if (currentRadio && currentRadio.disabled) {
-          const nextRadio = document.querySelector(`input[name="pay_method"][value="${firstEnabled.value}"]`);
-          if (nextRadio) {
-            nextRadio.checked = true;
-            nextRadio.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }
-      }
     } catch (_) {
       // silent fail — page still works without payment config
     }
@@ -350,9 +277,10 @@
     const email2 = document.getElementById('student_email2');
     const isFact = document.querySelector('input[name="comprobante_type"]:checked')?.value === 'factura';
 
-    ['err-name','err-email','err-email2','err-taxpayer-boleta','err-ruc','err-razon']
+    ['err-name','err-email','err-email2','err-taxpayer-boleta','err-ruc','err-razon','err-voucher']
       .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
     [name, email, email2].forEach(el => el?.classList.remove('invalid'));
+    document.getElementById('voucher-dropzone')?.classList.remove('invalid');
 
     if (!name?.value.trim()) {
       setField('student_name', false, 'err-name', 'El nombre es requerido.');
@@ -390,16 +318,19 @@
       }
     }
 
+    if (!voucherUrl) {
+      const errEl = document.getElementById('err-voucher');
+      if (errEl) errEl.textContent = 'Debes adjuntar la constancia de pago.';
+      document.getElementById('voucher-dropzone')?.classList.add('invalid');
+      ok = false;
+    }
+
     return ok;
   }
 
   // ── Get active payment method ────────────────────────────────────────────────
   function getPaymentMethod() {
-    const activeTab = document.querySelector('.pay-tab.active');
-    if (activeTab?.dataset?.tab === 'card') return { method: 'tarjeta', detail: null };
-
-    const checked = document.querySelector('input[name="pay_method"]:checked');
-    return { method: checked?.value || 'yape', detail: null };
+    return { method: 'transferencia', detail: null };
   }
 
   // ── Form submit ──────────────────────────────────────────────────────────────
@@ -437,7 +368,6 @@
             taxpayer_id,
             taxpayer_name,
             payment_method,
-            operation_number:   (document.getElementById('operation-number')?.value || '').trim() || undefined,
             voucher_url:        voucherUrl || undefined,
           }),
         });

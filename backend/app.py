@@ -291,7 +291,7 @@ def _mail_config():
         "password": (os.environ.get("SMTP_PASS") or "").strip(),
         "from": base_from,
         "academia_from": academia_from,
-        "to": (os.environ.get("CONTACT_TO") or "formulario.pagina@katarzyna.pe").strip(),
+        "to": (os.environ.get("CONTACT_TO") or "akatdemy@katarzyna.pe").strip(),
         "academia_to": (os.environ.get("ACADEMIA_CONTACT_TO") or os.environ.get("CONTACT_TO") or "akatdemy@katarzyna.pe").strip(),
         "use_tls": _env_bool("SMTP_USE_TLS", True),
         "use_ssl": _env_bool("SMTP_USE_SSL", False),
@@ -2358,7 +2358,6 @@ def _send_moodle_credentials(student_email, student_name, course_title,
         "¡Tu inscripción ha sido confirmada! Ya puedes acceder a tu curso.",
         "",
         f"  Curso: {course_title}",
-        f"  Orden: {order_ref}",
         "",
         "DATOS DE ACCESO A LA PLATAFORMA:",
         f"  URL:         {moodle_url}",
@@ -2371,7 +2370,8 @@ def _send_moodle_credentials(student_email, student_name, course_title,
         "",
         "Cualquier consulta: akatdemy@katarzyna.pe",
         "",
-        "Equipo Katarzyna Academia",
+        "Gracias,",
+        "Equipo de Akatdemy",
         "https://katarzyna.pe",
     ]))
     try:
@@ -2467,7 +2467,6 @@ def _send_moodle_enrollment_notification(student_email, student_name, course_tit
         "¡Tu pago ha sido confirmado y ya hemos matriculado tu cuenta",
         f"en el curso \"{course_title}\"!",
         "",
-        f"  Orden:    {order_ref}",
         f"  Curso:    {course_title}",
         *username_line,
         "Accede directamente aquí:",
@@ -2479,7 +2478,8 @@ def _send_moodle_enrollment_notification(student_email, student_name, course_tit
         "",
         "Cualquier consulta: akatdemy@katarzyna.pe",
         "",
-        "Equipo Katarzyna Academia",
+        "Gracias,",
+        "Equipo de Akatdemy",
         "https://katarzyna.pe",
     ]))
     try:
@@ -2508,6 +2508,7 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
 
     order_ref = f"ORD-{order_id:04d}"
     comp_label = "Factura" if comprobante_type == "factura" else "Boleta de Venta"
+    taxpayer_label = "Razón social" if comprobante_type == "factura" else "Nombre y apellido"
     moodle_url = (
         f"https://cursos.katarzyna.pe/course/view.php?id={moodle_course_id}"
         if moodle_course_id else "https://cursos.katarzyna.pe"
@@ -2527,7 +2528,7 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
         f"Monto:          S/ {amount:.2f}",
         f"Comprobante:    {comp_label}",
         f"DNI/RUC:        {taxpayer_id or '—'}",
-        f"Razón social:   {taxpayer_name or '—'}",
+        f"{taxpayer_label}:   {taxpayer_name or '—'}",
         "",
         "ACCIONES REQUERIDAS:",
         "1. Confirmar el pago en el panel admin: https://katarzyna.pe/admin/?section=academia",
@@ -2551,7 +2552,7 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
         f"  N° de orden: {order_ref}",
         f"  Comprobante solicitado: {comp_label}",
         f"  DNI/RUC:               {taxpayer_id or '—'}",
-        f"  Razón social:          {taxpayer_name or '—'}",
+        f"  {taxpayer_label}:          {taxpayer_name or '—'}",
         "",
         "¿Qué sigue?",
         "  1. Nuestro equipo verificará tu pago en las próximas horas hábiles.",
@@ -2560,10 +2561,9 @@ def _send_checkout_emails(order_id, student_name, student_email, course_title, a
         f"     {moodle_url}",
         "",
         "Si tienes alguna consulta, escríbenos a akatdemy@katarzyna.pe",
-        "indicando tu número de orden: " + order_ref,
         "",
         "Gracias,",
-        "Equipo Katarzyna Legal & Tributario",
+        "Equipo de Akatdemy",
         "https://katarzyna.pe",
     ]))
 
@@ -2819,20 +2819,18 @@ def api_admin_request_voucher(order_id):
         "",
         f"Gracias por inscribirte al curso \"{course_title}\" (Orden: {order_ref}).",
         "",
-        "Para confirmar tu inscripción, necesitamos que nos envíes el comprobante o",
-        "captura de tu pago (Yape, Plin, transferencia bancaria, etc.).",
+        "Para confirmar tu inscripción, necesitamos que nos envíes el comprobante",
+        "de tu transferencia interbancaria.",
         "",
         "Por favor responde este correo adjuntando:",
         "  • Captura o foto del comprobante de pago",
-        "  • El número de operación si lo tienes disponible",
         "",
         "Una vez verificado, recibirás tus credenciales de acceso al curso.",
         "",
-        "Si ya realizaste el pago y tienes dudas, escríbenos a akatdemy@katarzyna.pe",
-        f"indicando tu número de orden: {order_ref}",
+        "Si tienes alguna consulta, escríbenos a akatdemy@katarzyna.pe",
         "",
         "Gracias,",
-        "Equipo Katarzyna Legal & Tributario",
+        "Equipo de Akatdemy",
         "https://katarzyna.pe",
     ]))
     try:
